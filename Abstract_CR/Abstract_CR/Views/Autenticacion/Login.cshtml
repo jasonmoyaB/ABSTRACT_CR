@@ -4,8 +4,24 @@
 }
 
 <h2>Iniciar Sesión</h2>
-<form method="post" action="/Account/Login">
-    <input type="text" name="username" placeholder="Usuario" required />
-    <input type="password" name="password" placeholder="Contraseña" required />
-    <button type="submit">Entrar</button>
+
+<form method="post" action="/Cuenta/Login">
+    <div class="form-group">
+        <input type="email" name="correo" class="form-control" placeholder="Correo electrónico" required />
+    </div>
+
+    <div class="form-group">
+        <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required />
+    </div>
+
+    <div class="form-group text-start mb-3">
+        <input type="checkbox" name="recordarme" id="recordarme" />
+        <label for="recordarme">Recordarme</label>
+    </div>
+
+    <button type="submit">Ingresar</button>
+
+    <div class="mt-3">
+        <a href="/Cuenta/RecuperarContrasena">¿Olvidaste tu contraseña?</a>
+    </div>
 </form>

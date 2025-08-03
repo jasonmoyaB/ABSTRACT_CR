@@ -12,6 +12,18 @@ namespace Abstract_CR.Controllers
             return View();
         }
 
-        
+        public IActionResult PasswordReset()
+        {
+            return View();
+
+
+        }
+
+        public IActionResult Registro()
+        {
+            return View();
+
+
+        }
     }
 }

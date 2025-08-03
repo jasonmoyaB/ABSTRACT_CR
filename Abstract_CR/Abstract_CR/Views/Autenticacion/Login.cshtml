@@ -19,9 +19,12 @@
         <label for="recordarme">Recordarme</label>
     </div>
 
-    <button type="submit">Ingresar</button>
+    @* <button type="submit" href="@Url.Action("Index", "Home")" >Ingresar</button> *@
+    <button type="button" onclick="window.location.href='@Url.Action("Index", "Home")'">Ingresar</button>
+    <button type="button" onclick="window.location.href='@Url.Action("Registro", "Autenticacion")'">Crear Cuenta</button>
+
 
     <div class="mt-3">
-        <a href="/Cuenta/RecuperarContrasena">¿Olvidaste tu contraseña?</a>
+        <a href="/Autenticacion/PasswordReset">¿Olvidaste tu contraseña?</a>
     </div>
 </form>

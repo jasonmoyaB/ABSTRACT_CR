@@ -12,18 +12,19 @@ namespace Abstract_CR.Controllers
             return View();
         }
 
-        public IActionResult PasswordReset()
+        public IActionResult CrearCuenta()
+        {
+            return View();
+
+
+        }
+        public IActionResult RecuperarContraseña()
         {
             return View();
 
 
         }
 
-        public IActionResult Registro()
-        {
-            return View();
 
-
-        }
     }
-}
+    }

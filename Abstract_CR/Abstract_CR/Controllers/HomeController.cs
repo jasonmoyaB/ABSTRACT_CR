@@ -43,5 +43,10 @@ namespace Abstract_CR.Controllers
             return View();
         }
 
+        public IActionResult MenuSemanal()
+        {
+            return View();
+        }
+
     }
 }

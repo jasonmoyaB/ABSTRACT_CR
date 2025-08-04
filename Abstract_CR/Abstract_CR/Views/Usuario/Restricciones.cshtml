@@ -1,0 +1,207 @@
+@model List<Abstract_CR.Models.Restriccion>
+@{
+    ViewData["Title"] = "Mis Restricciones";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="position-relative mb-5">
+                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mi Perfil">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="text-center">
+                        <h2 class="section-heading">
+                            <span class="section-heading-upper">Mis</span>
+                            <span class="section-heading-lower">Restricciones</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Mensaje"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-faded d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-ban me-2"></i>
+                            Lista de Restricciones
+                        </h5>
+                        <a href="@Url.Action("AgregarRestriccion", "Usuario")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Agregar Restricción
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Descripción</th>
+                                            <th>Tipo</th>
+                                            <th>Motivo</th>
+                                            <th>Período</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var restriccion in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <strong>@restriccion.Nombre</strong>
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(restriccion.Descripcion))
+                                                    {
+                                                        <span class="text-muted">@restriccion.Descripcion</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Sin descripción</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(restriccion.TipoRestriccion))
+                                                    {
+                                                        <span class="badge bg-@(restriccion.TipoRestriccion.ToLower() switch {
+                                                            "médica" => "danger",
+                                                            "dietética" => "warning",
+                                                            "religiosa" => "info",
+                                                            _ => "secondary"
+                                                        })">@restriccion.TipoRestriccion</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No especificado</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(restriccion.Motivo))
+                                                    {
+                                                        <span>@restriccion.Motivo</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No especificado</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (restriccion.FechaInicio.HasValue)
+                                                    {
+                                                        <span>Desde: @restriccion.FechaInicio.Value.ToString("dd/MM/yyyy")</span>
+                                                        @if (restriccion.FechaFin.HasValue)
+                                                        {
+                                                            <br />
+                                                            <span>Hasta: @restriccion.FechaFin.Value.ToString("dd/MM/yyyy")</span>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Sin fecha</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (restriccion.Activa)
+                                                    {
+                                                        <span class="badge bg-success">Activa</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Inactiva</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-ban fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No tienes restricciones registradas</h5>
+                                <p class="text-muted">Agrega tus restricciones alimentarias para que podamos adaptar mejor tus planes nutricionales.</p>
+                                <a href="@Url.Action("AgregarRestriccion", "Usuario")" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Agregar Primera Restricción
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Tipos de Restricciones
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6 class="text-danger">Médicas</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Diabetes</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Hipertensión</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Colesterol alto</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Intolerancias</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-warning">Dietéticas</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Vegetariano</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Vegano</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Sin gluten</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Baja en carbohidratos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-info">Otras</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Religiosas</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Culturales</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Preferencias personales</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Temporales</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> 

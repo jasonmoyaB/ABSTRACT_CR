@@ -1,0 +1,123 @@
+@model Abstract_CR.Models.Alergia
+@{
+    ViewData["Title"] = "Agregar Alergia";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="position-relative mb-5">
+                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mi Perfil">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="text-center">
+                        <h2 class="section-heading">
+                            <span class="section-heading-upper">Agregar</span>
+                            <span class="section-heading-lower">Nueva Alergia</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Información de la Alergia
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="AgregarAlergia" method="post">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Nombre" class="form-label"></label>
+                                    <input asp-for="Nombre" class="form-control" placeholder="Ej: Alergia a los frutos secos" />
+                                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Descripcion" class="form-label"></label>
+                                    <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Describe los síntomas o detalles de la alergia"></textarea>
+                                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NivelSeveridad" class="form-label"></label>
+                                    <select asp-for="NivelSeveridad" class="form-select">
+                                        <option value="">Seleccionar severidad</option>
+                                        <option value="Leve">Leve (síntomas menores)</option>
+                                        <option value="Moderado">Moderado (síntomas moderados)</option>
+                                        <option value="Severo">Severo (síntomas graves)</option>
+                                    </select>
+                                    <span asp-validation-for="NivelSeveridad" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="FechaDiagnostico" class="form-label"></label>
+                                    <input asp-for="FechaDiagnostico" class="form-control" type="date" />
+                                    <span asp-validation-for="FechaDiagnostico" class="text-danger"></span>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="Activa" class="form-check-input" type="checkbox" />
+                                        <label asp-for="Activa" class="form-check-label">
+                                            Esta alergia está actualmente activa
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-save me-2"></i>
+                                    Guardar Alergia
+                                </button>
+                                <a href="@Url.Action("Alergias", "Usuario")" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Información de Ayuda -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle me-2"></i>
+                            ¿Necesitas Ayuda?
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Alergias Comunes</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Frutos secos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Lácteos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Gluten</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Huevos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Mariscos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Consejos</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-info-circle text-info me-2"></i>Incluye todos los síntomas</li>
+                                    <li><i class="fas fa-info-circle text-info me-2"></i>Especifica el nivel de severidad</li>
+                                    <li><i class="fas fa-info-circle text-info me-2"></i>Actualiza cuando sea necesario</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

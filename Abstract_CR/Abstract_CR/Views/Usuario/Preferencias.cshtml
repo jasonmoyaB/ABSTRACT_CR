@@ -1,0 +1,219 @@
+@model List<Abstract_CR.Models.PreferenciaNutricional>
+@{
+    ViewData["Title"] = "Mis Preferencias";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="position-relative mb-5">
+                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mi Perfil">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="text-center">
+                        <h2 class="section-heading">
+                            <span class="section-heading-upper">Mis</span>
+                            <span class="section-heading-lower">Preferencias</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Mensaje"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-faded d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-heart me-2"></i>
+                            Preferencias Nutricionales
+                        </h5>
+                        <a href="@Url.Action("AgregarPreferencia", "Usuario")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Agregar Preferencia
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Descripción</th>
+                                            <th>Categoría</th>
+                                            <th>Valor</th>
+                                            <th>Prioridad</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var preferencia in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <strong>@preferencia.Nombre</strong>
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(preferencia.Descripcion))
+                                                    {
+                                                        <span class="text-muted">@preferencia.Descripcion</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Sin descripción</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(preferencia.Categoria))
+                                                    {
+                                                        <span class="badge bg-info">@preferencia.Categoria</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No especificada</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(preferencia.Valor))
+                                                    {
+                                                        <span>@preferencia.Valor</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No especificado</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (preferencia.Prioridad.HasValue)
+                                                    {
+                                                        <div class="d-flex align-items-center">
+                                                            @for (int i = 1; i <= 5; i++)
+                                                            {
+                                                                if (i <= preferencia.Prioridad.Value)
+                                                                {
+                                                                    <i class="fas fa-star text-warning me-1"></i>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <i class="far fa-star text-muted me-1"></i>
+                                                                }
+                                                            }
+                                                            <span class="ms-2">(@preferencia.Prioridad.Value)</span>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No especificada</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (preferencia.Activa)
+                                                    {
+                                                        <span class="badge bg-success">Activa</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Inactiva</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No tienes preferencias registradas</h5>
+                                <p class="text-muted">Agrega tus preferencias nutricionales para que podamos personalizar mejor tus planes alimenticios.</p>
+                                <a href="@Url.Action("AgregarPreferencia", "Usuario")" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Agregar Primera Preferencia
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Categorías de Preferencias
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h6 class="text-primary">Proteínas</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Carnes magras</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Pescado</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Huevos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Legumbres</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="text-success">Vegetales</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Orgánicos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>De temporada</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Crudos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Cocidos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="text-warning">Carbohidratos</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Integrales</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Sin gluten</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Baja cantidad</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Específicos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="text-info">Otros</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Método de cocción</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Condimentos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Bebidas</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Suplementos</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> 

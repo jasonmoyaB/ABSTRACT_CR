@@ -1,0 +1,223 @@
+@model List<Abstract_CR.Models.MenuPersonalizado>
+
+@{
+    ViewData["Title"] = "Menús Personalizados";
+    var plan = ViewBag.Plan as Abstract_CR.Models.PlanNutricional;
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="position-relative mb-5">
+                    <a href="@Url.Action("Index", "PlanNutricional")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mis Planes">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="text-center">
+                        <h2 class="section-heading">
+                            <span class="section-heading-upper">Menús</span>
+                            <span class="section-heading-lower">Personalizados</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (plan != null)
+        {
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-faded">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                Plan: @plan.Nombre
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Calorías Diarias</small>
+                                    <strong>@(plan.CaloriasDiarias?.ToString() ?? "N/A")</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Proteínas</small>
+                                    <strong>@(plan.Proteinas?.ToString() ?? "N/A")g</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Carbohidratos</small>
+                                    <strong>@(plan.Carbohidratos?.ToString() ?? "N/A")g</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">Grasas</small>
+                                    <strong>@(plan.Grasas?.ToString() ?? "N/A")g</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-utensils me-2"></i>
+                            Menús Generados
+                        </h5>
+                        <a href="@Url.Action("GenerarMenus", "PlanNutricional", new { planId = plan?.Id })" class="btn btn-primary">
+                            <i class="fas fa-magic me-2"></i>
+                            Generar Nuevos Menús
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Any())
+                        {
+                            <div class="row">
+                                @foreach (var menu in Model)
+                                {
+                                    <div class="col-lg-6 col-md-12 mb-4">
+                                        <div class="card h-100 border-0 shadow-sm">
+                                            <div class="card-header bg-light">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-utensils me-2"></i>
+                                                        @menu.Nombre
+                                                    </h6>
+                                                    <span class="badge bg-primary">@menu.TipoComida</span>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted d-block">Día</small>
+                                                        <strong>@menu.DiaSemana</strong>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted d-block">Dificultad</small>
+                                                        <span class="badge bg-@(menu.Dificultad == "Fácil" ? "success" : menu.Dificultad == "Medio" ? "warning" : "danger")">
+                                                            @menu.Dificultad
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row text-center mb-3">
+                                                    <div class="col-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted d-block">Calorías</small>
+                                                            <strong>@(menu.Calorias?.ToString() ?? "N/A")</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted d-block">Proteínas</small>
+                                                            <strong>@(menu.Proteinas?.ToString() ?? "N/A")g</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted d-block">Carbohidratos</small>
+                                                            <strong>@(menu.Carbohidratos?.ToString() ?? "N/A")g</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="border rounded p-2">
+                                                            <small class="text-muted d-block">Grasas</small>
+                                                            <strong>@(menu.Grasas?.ToString() ?? "N/A")g</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                @if (!string.IsNullOrEmpty(menu.Ingredientes))
+                                                {
+                                                    <div class="mb-3">
+                                                        <small class="text-muted d-block mb-1">Ingredientes:</small>
+                                                        <p class="small mb-0">@menu.Ingredientes</p>
+                                                    </div>
+                                                }
+
+                                                @if (!string.IsNullOrEmpty(menu.Instrucciones))
+                                                {
+                                                    <div class="mb-3">
+                                                        <small class="text-muted d-block mb-1">Instrucciones:</small>
+                                                        <p class="small mb-0">@menu.Instrucciones</p>
+                                                    </div>
+                                                }
+
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        @(menu.TiempoPreparacion?.ToString() ?? "N/A") min
+                                                    </small>
+                                                    @if (menu.GeneradoAutomaticamente)
+                                                    {
+                                                        <span class="badge bg-info">
+                                                            <i class="fas fa-robot me-1"></i>
+                                                            Generado IA
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No hay menús generados</h5>
+                                <p class="text-muted">Genera menús personalizados basados en tu plan nutricional.</p>
+                                <a href="@Url.Action("GenerarMenus", "PlanNutricional", new { planId = plan?.Id })" class="btn btn-primary">
+                                    <i class="fas fa-magic me-2"></i>
+                                    Generar Menús
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Consejos para tu Plan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                                    <h6>Planificación</h6>
+                                    <p class="small text-muted">Prepara tus comidas con anticipación para mantener tu plan nutricional.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-balance-scale fa-2x text-success mb-2"></i>
+                                    <h6>Balance</h6>
+                                    <p class="small text-muted">Mantén un equilibrio entre proteínas, carbohidratos y grasas saludables.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-tint fa-2x text-info mb-2"></i>
+                                    <h6>Hidratación</h6>
+                                    <p class="small text-muted">Bebe al menos 8 vasos de agua al día para complementar tu plan.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> 

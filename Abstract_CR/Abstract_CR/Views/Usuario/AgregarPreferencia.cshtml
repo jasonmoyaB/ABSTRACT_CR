@@ -1,0 +1,193 @@
+@model Abstract_CR.Models.PreferenciaNutricional
+@{
+    ViewData["Title"] = "Agregar Preferencia";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="position-relative mb-5">
+                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mi Perfil">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="text-center">
+                        <h2 class="section-heading">
+                            <span class="section-heading-upper">Agregar</span>
+                            <span class="section-heading-lower">Nueva Preferencia</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Información de la Preferencia
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="AgregarPreferencia" method="post">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Nombre" class="form-label"></label>
+                                    <input asp-for="Nombre" class="form-control" placeholder="Ej: Proteínas magras" />
+                                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Descripcion" class="form-label"></label>
+                                    <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Describe tu preferencia en detalle"></textarea>
+                                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Categoria" class="form-label"></label>
+                                    <select asp-for="Categoria" class="form-select">
+                                        <option value="">Seleccionar categoría</option>
+                                        <option value="Proteínas">Proteínas</option>
+                                        <option value="Carbohidratos">Carbohidratos</option>
+                                        <option value="Grasas">Grasas</option>
+                                        <option value="Vegetales">Vegetales</option>
+                                        <option value="Frutas">Frutas</option>
+                                        <option value="Lácteos">Lácteos</option>
+                                        <option value="Condimentos">Condimentos</option>
+                                        <option value="Bebidas">Bebidas</option>
+                                        <option value="Método de cocción">Método de cocción</option>
+                                        <option value="Otros">Otros</option>
+                                    </select>
+                                    <span asp-validation-for="Categoria" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Valor" class="form-label"></label>
+                                    <input asp-for="Valor" class="form-control" placeholder="Ej: Alto, Bajo, Orgánico, etc." />
+                                    <span asp-validation-for="Valor" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Prioridad" class="form-label"></label>
+                                    <select asp-for="Prioridad" class="form-select">
+                                        <option value="">Seleccionar prioridad</option>
+                                        <option value="1">1 - Muy baja</option>
+                                        <option value="2">2 - Baja</option>
+                                        <option value="3">3 - Media</option>
+                                        <option value="4">4 - Alta</option>
+                                        <option value="5">5 - Muy alta</option>
+                                    </select>
+                                    <span asp-validation-for="Prioridad" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Vista previa de prioridad</label>
+                                    <div class="d-flex align-items-center">
+                                        <div id="priorityPreview" class="me-2">
+                                            <i class="far fa-star text-muted me-1"></i>
+                                            <i class="far fa-star text-muted me-1"></i>
+                                            <i class="far fa-star text-muted me-1"></i>
+                                            <i class="far fa-star text-muted me-1"></i>
+                                            <i class="far fa-star text-muted me-1"></i>
+                                        </div>
+                                        <span id="priorityText" class="text-muted">Sin prioridad</span>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="Activa" class="form-check-input" type="checkbox" />
+                                        <label asp-for="Activa" class="form-check-label">
+                                            Esta preferencia está actualmente activa
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg me-3">
+                                    <i class="fas fa-save me-2"></i>
+                                    Guardar Preferencia
+                                </button>
+                                <a href="@Url.Action("Preferencias", "Usuario")" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Información de Ayuda -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle me-2"></i>
+                            ¿Necesitas Ayuda?
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Ejemplos de Preferencias</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Proteínas magras</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Vegetales orgánicos</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Cocción al vapor</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Baja en sal</li>
+                                    <li><i class="fas fa-arrow-right text-muted me-2"></i>Sin azúcar añadida</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Consejos</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-info-circle text-info me-2"></i>Especifica claramente tu preferencia</li>
+                                    <li><i class="fas fa-info-circle text-info me-2"></i>Asigna una prioridad realista</li>
+                                    <li><i class="fas fa-info-circle text-info me-2"></i>Actualiza según tus cambios</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Función para actualizar la vista previa de prioridad
+        function updatePriorityPreview() {
+            const priority = document.getElementById('Prioridad').value;
+            const preview = document.getElementById('priorityPreview');
+            const text = document.getElementById('priorityText');
+            
+            let stars = '';
+            let priorityText = '';
+            
+            for (let i = 1; i <= 5; i++) {
+                if (i <= priority) {
+                    stars += '<i class="fas fa-star text-warning me-1"></i>';
+                } else {
+                    stars += '<i class="far fa-star text-muted me-1"></i>';
+                }
+            }
+            
+            switch(priority) {
+                case '1': priorityText = 'Muy baja'; break;
+                case '2': priorityText = 'Baja'; break;
+                case '3': priorityText = 'Media'; break;
+                case '4': priorityText = 'Alta'; break;
+                case '5': priorityText = 'Muy alta'; break;
+                default: priorityText = 'Sin prioridad'; break;
+            }
+            
+            preview.innerHTML = stars;
+            text.textContent = priorityText;
+        }
+        
+        // Event listener para el cambio de prioridad
+        document.getElementById('Prioridad').addEventListener('change', updatePriorityPreview);
+        
+        // Inicializar vista previa
+        updatePriorityPreview();
+    </script>
+} 

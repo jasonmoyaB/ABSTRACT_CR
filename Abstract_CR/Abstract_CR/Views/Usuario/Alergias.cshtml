@@ -1,0 +1,180 @@
+@model List<Abstract_CR.Models.Alergia>
+@{
+    ViewData["Title"] = "Mis Alergias";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="position-relative mb-5">
+                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mi Perfil">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="text-center">
+                        <h2 class="section-heading">
+                            <span class="section-heading-upper">Mis</span>
+                            <span class="section-heading-lower">Alergias</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Mensaje"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-faded d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-allergies me-2"></i>
+                            Lista de Alergias
+                        </h5>
+                        <a href="@Url.Action("AgregarAlergia", "Usuario")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Agregar Alergia
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Descripción</th>
+                                            <th>Severidad</th>
+                                            <th>Fecha Diagnóstico</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var alergia in Model)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <strong>@alergia.Nombre</strong>
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(alergia.Descripcion))
+                                                    {
+                                                        <span class="text-muted">@alergia.Descripcion</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Sin descripción</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(alergia.NivelSeveridad))
+                                                    {
+                                                        <span class="badge bg-@(alergia.NivelSeveridad.ToLower() switch {
+                                                            "leve" => "success",
+                                                            "moderado" => "warning",
+                                                            "severo" => "danger",
+                                                            _ => "secondary"
+                                                        })">@alergia.NivelSeveridad</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No especificado</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (alergia.FechaDiagnostico.HasValue)
+                                                    {
+                                                        <span>@alergia.FechaDiagnostico.Value.ToString("dd/MM/yyyy")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No especificada</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (alergia.Activa)
+                                                    {
+                                                        <span class="badge bg-success">Activa</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Inactiva</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-allergies fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No tienes alergias registradas</h5>
+                                <p class="text-muted">Agrega tus alergias para que podamos personalizar mejor tus planes nutricionales.</p>
+                                <a href="@Url.Action("AgregarAlergia", "Usuario")" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Agregar Primera Alergia
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Información Importante
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">¿Por qué es importante registrar mis alergias?</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Personalizamos tus planes nutricionales</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Evitamos ingredientes problemáticos</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Mejoramos tu seguridad alimentaria</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Recomendaciones</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Consulta siempre con tu médico</li>
+                                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Mantén actualizada la información</li>
+                                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Incluye el nivel de severidad</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> 

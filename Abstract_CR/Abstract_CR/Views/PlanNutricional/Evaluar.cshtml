@@ -1,0 +1,262 @@
+@model Abstract_CR.Models.EvaluacionPlan
+
+@{
+    ViewData["Title"] = "Evaluar Plan Nutricional";
+    var plan = ViewBag.Plan as Abstract_CR.Models.PlanNutricional;
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="position-relative mb-5">
+                    <a href="@Url.Action("Index", "PlanNutricional")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mis Planes">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="text-center">
+                        <h2 class="section-heading">
+                            <span class="section-heading-upper">Evaluar</span>
+                            <span class="section-heading-lower">Plan Nutricional</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (plan != null)
+        {
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-faded">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                Plan: @plan.Nombre
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-0">@plan.Descripcion</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star me-2"></i>
+                            Evaluación del Plan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Evaluar" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                            <h6 class="mb-3">
+                                <i class="fas fa-star me-2"></i>
+                                Calificaciones
+                            </h6>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="CalificacionGeneral" class="form-label"></label>
+                                        <div class="rating-stars">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <input type="radio" asp-for="CalificacionGeneral" value="@i" id="general_@i" class="rating-input" />
+                                                <label for="general_@i" class="rating-star">★</label>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="CalificacionGeneral" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="CalificacionSabor" class="form-label"></label>
+                                        <div class="rating-stars">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <input type="radio" asp-for="CalificacionSabor" value="@i" id="sabor_@i" class="rating-input" />
+                                                <label for="sabor_@i" class="rating-star">★</label>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="CalificacionSabor" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label asp-for="CalificacionVariedad" class="form-label"></label>
+                                        <div class="rating-stars">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <input type="radio" asp-for="CalificacionVariedad" value="@i" id="variedad_@i" class="rating-input" />
+                                                <label for="variedad_@i" class="rating-star">★</label>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="CalificacionVariedad" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label asp-for="CalificacionFacilidad" class="form-label"></label>
+                                        <div class="rating-stars">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <input type="radio" asp-for="CalificacionFacilidad" value="@i" id="facilidad_@i" class="rating-input" />
+                                                <label for="facilidad_@i" class="rating-star">★</label>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="CalificacionFacilidad" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label asp-for="CalificacionEfectividad" class="form-label"></label>
+                                        <div class="rating-stars">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <input type="radio" asp-for="CalificacionEfectividad" value="@i" id="efectividad_@i" class="rating-input" />
+                                                <label for="efectividad_@i" class="rating-star">★</label>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="CalificacionEfectividad" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h6 class="mb-3">
+                                <i class="fas fa-comment me-2"></i>
+                                Comentarios y Sugerencias
+                            </h6>
+
+                            <div class="mb-3">
+                                <label asp-for="Comentarios" class="form-label"></label>
+                                <textarea asp-for="Comentarios" class="form-control" rows="4" placeholder="Comparte tu experiencia con este plan nutricional..."></textarea>
+                                <span asp-validation-for="Comentarios" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Sugerencias" class="form-label"></label>
+                                <textarea asp-for="Sugerencias" class="form-control" rows="4" placeholder="¿Qué mejoras sugerirías para este plan?"></textarea>
+                                <span asp-validation-for="Sugerencias" class="text-danger"></span>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Dificultades" class="form-label"></label>
+                                        <textarea asp-for="Dificultades" class="form-control" rows="3" placeholder="¿Qué dificultades encontraste al seguir este plan?"></textarea>
+                                        <span asp-validation-for="Dificultades" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label asp-for="Beneficios" class="form-label"></label>
+                                        <textarea asp-for="Beneficios" class="form-control" rows="3" placeholder="¿Qué beneficios notaste al seguir este plan?"></textarea>
+                                        <span asp-validation-for="Beneficios" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="Recomendaria" class="form-check-input" type="checkbox" id="recomendaria" />
+                                        <label class="form-check-label" for="recomendaria">
+                                            ¿Recomendarías este plan a otros?
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="Continuaria" class="form-check-input" type="checkbox" id="continuaria" />
+                                        <label class="form-check-label" for="continuaria">
+                                            ¿Continuarías con este plan?
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="@Url.Action("Index", "PlanNutricional")" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>
+                                    Enviar Evaluación
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .rating-stars {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 2px;
+    }
+
+    .rating-input {
+        display: none;
+    }
+
+    .rating-star {
+        font-size: 24px;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .rating-star:hover,
+    .rating-star:hover ~ .rating-star,
+    .rating-input:checked ~ .rating-star {
+        color: #ffc107;
+    }
+
+    .rating-input:checked ~ .rating-star {
+        color: #ffc107;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Mejorar la experiencia de calificación
+        document.querySelectorAll('.rating-stars').forEach(container => {
+            const stars = container.querySelectorAll('.rating-star');
+            const inputs = container.querySelectorAll('.rating-input');
+            
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => {
+                    const input = inputs[inputs.length - 1 - index];
+                    input.checked = true;
+                    
+                    // Actualizar visualización
+                    stars.forEach((s, i) => {
+                        if (i >= inputs.length - 1 - index) {
+                            s.style.color = '#ffc107';
+                        } else {
+                            s.style.color = '#ddd';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+} 

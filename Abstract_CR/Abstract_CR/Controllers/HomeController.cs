@@ -18,23 +18,27 @@ namespace Abstract_CR.Controllers
             return View();
         }
 
-        [HttpGet]
-        public IActionResult SobreNosotros()
-        {
-            return View();
-        }
-        [HttpGet]
         public IActionResult Productos()
         {
             return View();
         }
-        [HttpGet]
+
         public IActionResult Tienda()
         {
             return View();
         }
-        [HttpGet]
+
+        public IActionResult SobreNosotros()
+        {
+            return View();
+        }
+
         public IActionResult MiPerfil()
+        {
+            return View();
+        }
+
+        public IActionResult Ebooks()
         {
             return View();
         }

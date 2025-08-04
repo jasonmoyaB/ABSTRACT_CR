@@ -1,0 +1,282 @@
+﻿@{
+    ViewData["Title"] = "Gestión Nutricional";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid min-vh-100 bg-gradient-to-br from-green-50 to-blue-50">
+    <div class="row justify-content-center align-items-center min-vh-100 py-4">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Panel de Información Personal del Usuario -->
+                        <div class="col-md-6 bg-primary text-white d-flex flex-column justify-content-center p-5">
+                            <div class="text-center mb-4">
+                                <div class="position-relative d-inline-block mb-3">
+                                    <img src="https://via.placeholder.com/120x120/ffffff/007bff?text=@(ViewBag.UserName?.ToString().Substring(0,1).ToUpper() ?? "U")"
+                                         alt="Avatar" class="rounded-circle border border-3 border-light" width="120" height="120">
+                                    <span class="position-absolute bottom-0 end-0 translate-middle badge rounded-pill bg-success">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </div>
+                                <h3 class="fw-bold mb-1">@(ViewBag.UserName ?? "Usuario")</h3>
+                                <p class="text-light mb-3">Usuario Premium</p>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="bg-white bg-opacity-10 rounded p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-envelope me-2"></i>
+                                                <small class="text-uppercase fw-bold opacity-75">Email</small>
+                                            </div>
+                                            <p class="mb-0">@(ViewBag.UserEmail ?? "usuario@email.com")</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <div class="bg-white bg-opacity-10 rounded p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-weight me-2"></i>
+                                                <small class="text-uppercase fw-bold opacity-75">Peso</small>
+                                            </div>
+                                            <p class="mb-0 fw-bold">@(ViewBag.UserWeight ?? "70") kg</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <div class="bg-white bg-opacity-10 rounded p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-ruler-vertical me-2"></i>
+                                                <small class="text-uppercase fw-bold opacity-75">Altura</small>
+                                            </div>
+                                            <p class="mb-0 fw-bold">@(ViewBag.UserHeight ?? "170") cm</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <div class="bg-white bg-opacity-10 rounded p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-birthday-cake me-2"></i>
+                                                <small class="text-uppercase fw-bold opacity-75">Edad</small>
+                                            </div>
+                                            <p class="mb-0 fw-bold">@(ViewBag.UserAge ?? "25") años</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <div class="bg-white bg-opacity-10 rounded p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-calculator me-2"></i>
+                                                <small class="text-uppercase fw-bold opacity-75">IMC</small>
+                                            </div>
+                                            <p class="mb-0 fw-bold">@(ViewBag.UserBMI ?? "24.2")</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="bg-white bg-opacity-10 rounded p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-bullseye me-2"></i>
+                                                <small class="text-uppercase fw-bold opacity-75">Objetivo</small>
+                                            </div>
+                                            <p class="mb-0">@(ViewBag.UserGoal ?? "Mantener peso saludable")</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="bg-white bg-opacity-10 rounded p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <small class="text-uppercase fw-bold opacity-75">Último acceso</small>
+                                            </div>
+                                            <p class="mb-0">@(ViewBag.LastLogin?.ToString("dd/MM/yyyy HH:mm") ?? DateTime.Now.ToString("dd/MM/yyyy HH:mm"))</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a asp-action="EditProfile" asp-controller="Account" class="btn btn-light btn-lg">
+                                    <i class="fas fa-edit me-2"></i>Editar Perfil
+                                </a>
+                                <a asp-action="Logout" asp-controller="Account" class="btn btn-outline-light">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Carga de Plan Nutricional -->
+                        <div class="col-md-6 p-5">
+                            <div class="h-100 d-flex flex-column justify-content-center">
+                                <h3 class="text-center mb-4">
+                                    <i class="fas fa-upload text-success me-2"></i>
+                                    Cargar Plan Nutricional
+                                </h3>
+
+                                <form id="nutritionPlanForm" asp-action="UploadNutritionPlan" asp-controller="Nutrition" method="post" enctype="multipart/form-data">
+                                    <div class="mb-4">
+                                        <label for="nutritionPlanFile" class="form-label">Seleccionar archivo de plan nutricional</label>
+                                        <input type="file" class="form-control form-control-lg" id="nutritionPlanFile" name="NutritionPlanFile"
+                                               accept=".pdf,.doc,.docx,.txt" required>
+                                        <div class="form-text">
+                                            Formatos aceptados: PDF, DOC, DOCX, TXT (Máximo 5MB)
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="planDescription" class="form-label">Descripción del plan (opcional)</label>
+                                        <textarea class="form-control" id="planDescription" name="PlanDescription" rows="3"
+                                                  placeholder="Describe brevemente tu plan nutricional..."></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>Cargar Plan
+                                    </button>
+
+                                    <div id="uploadProgress" class="progress d-none mb-3" style="height: 8px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
+                                    </div>
+
+                                    <div id="uploadSuccess" class="alert alert-success d-none" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        ¡Plan nutricional cargado exitosamente! Ahora podrás recibir menús personalizados.
+                                    </div>
+
+                                    <div id="uploadError" class="alert alert-danger d-none" role="alert">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <span id="uploadErrorMessage">Error al cargar el archivo. Por favor, verifica que sea un formato válido.</span>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Manejo del formulario de login
+            const loginForm = document.getElementById('loginForm');
+            const loginError = document.getElementById('loginError');
+            const loginErrorMessage = document.getElementById('loginErrorMessage');
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Redirigir o recargar la página
+                                window.location.reload();
+                            } else {
+                                // Mostrar error de credenciales
+                                loginErrorMessage.textContent = data.message || 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
+                                loginError.classList.remove('d-none');
+
+                                // Ocultar el error después de 5 segundos
+                                setTimeout(() => {
+                                    loginError.classList.add('d-none');
+                                }, 5000);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            loginErrorMessage.textContent = 'Error de conexión. Por favor, intenta nuevamente.';
+                            loginError.classList.remove('d-none');
+                        });
+                });
+            }
+
+            // Manejo del formulario de carga de plan nutricional
+            const nutritionForm = document.getElementById('nutritionPlanForm');
+            const uploadProgress = document.getElementById('uploadProgress');
+            const uploadSuccess = document.getElementById('uploadSuccess');
+            const uploadError = document.getElementById('uploadError');
+            const uploadErrorMessage = document.getElementById('uploadErrorMessage');
+            const fileInput = document.getElementById('nutritionPlanFile');
+
+            if (nutritionForm) {
+                // Validación de archivo
+                fileInput.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (file) {
+                        // Verificar tamaño (5MB máximo)
+                        if (file.size > 5 * 1024 * 1024) {
+                            uploadErrorMessage.textContent = 'El archivo es demasiado grande. El tamaño máximo es 5MB.';
+                            uploadError.classList.remove('d-none');
+                            this.value = '';
+                            return;
+                        }
+
+                        // Verificar tipo de archivo
+                        const allowedTypes = ['.pdf', '.doc', '.docx', '.txt'];
+                        const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+                        if (!allowedTypes.includes(fileExtension)) {
+                            uploadErrorMessage.textContent = 'Formato de archivo no válido. Solo se aceptan archivos PDF, DOC, DOCX y TXT.';
+                            uploadError.classList.remove('d-none');
+                            this.value = '';
+                            return;
+                        }
+
+                        // Ocultar errores si el archivo es válido
+                        uploadError.classList.add('d-none');
+                    }
+                });
+
+                nutritionForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    // Ocultar mensajes anteriores
+                    uploadSuccess.classList.add('d-none');
+                    uploadError.classList.add('d-none');
+
+                    // Mostrar barra de progreso
+                    uploadProgress.classList.remove('d-none');
+
+                    const formData = new FormData(this);
+
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            uploadProgress.classList.add('d-none');
+
+                            if (data.success) {
+                                uploadSuccess.classList.remove('d-none');
+                                // Limpiar el formulario
+                                this.reset();
+                            } else {
+                                uploadErrorMessage.textContent = data.message || 'Error al cargar el archivo. Por favor, verifica que sea un formato válido.';
+                                uploadError.classList.remove('d-none');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            uploadProgress.classList.add('d-none');
+                            uploadErrorMessage.textContent = 'Error de conexión. Por favor, intenta nuevamente.';
+                            uploadError.classList.remove('d-none');
+                        });
+                });
+            }
+        });
+    </script>
+}

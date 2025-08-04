@@ -33,6 +33,11 @@ namespace Abstract_CR.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public IActionResult MiPerfil()
+        {
+            return View();
+        }
 
     }
 }

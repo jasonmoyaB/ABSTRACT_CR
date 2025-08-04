@@ -17,7 +17,14 @@
                         </div>
 
                         <div class="col-md-6 col-lg-7 d-flex align-items-center" style="height: 100%;">
-                            <div class="card-body p-4 p-lg-5 text-black" style="height: 100%; overflow-y: auto;">
+                            <div class="card-body p-4 p-lg-5 text-black position-relative" style="height: 100%; overflow-y: auto;">
+
+                                <!-- Botón Volver -->
+                                <div class="position-absolute" style="top: 20px; left: 20px;">
+                                    <a href="@Url.Action("Login", "Autenticacion")" class="btn" style="background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver al Login">
+                                        ←
+                                    </a>
+                                </div>
 
                                 <form method="post" action="/Account/CrearCuenta">
                                     <div class="text-center mb-4">

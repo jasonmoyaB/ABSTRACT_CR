@@ -146,7 +146,22 @@ h3, .h3 {
     font-size: 1.75rem;
   }
 }
+.social-icon {
+    margin: 0 0.5rem;
+    color: #FFCCBC;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
 
+    .social-icon:hover {
+        transform: scale(1.2);
+        color: #FFD180;
+    }
+
+    .social-icon svg {
+        width: 28px;
+        height: 28px;
+        vertical-align: middle;
+    }
 h4, .h4 {
   font-size: calc(1.275rem + 0.3vw);
 }

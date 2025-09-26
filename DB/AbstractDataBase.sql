@@ -1,6 +1,6 @@
-/* ==============================
+/* 
    TABLAS BASE
-   ============================== */
+   */
 
 IF OBJECT_ID('dbo.Roles','U') IS NULL
 BEGIN
@@ -327,7 +327,7 @@ BEGIN
 END
 GO
 
--- IMPORTANTE: NO CASCADE hacia Usuarios (como pediste)
+
 IF OBJECT_ID('dbo.Pagos','U') IS NULL
 BEGIN
     CREATE TABLE dbo.Pagos (
@@ -380,18 +380,18 @@ BEGIN
 END
 GO
 
-/* ==============================
+/* 
    SEED BÁSICO
-   ============================== */
+    */
 IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Admin')
     INSERT INTO dbo.Roles(NombreRol) VALUES (N'Admin');
 IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Cliente')
     INSERT INTO dbo.Roles(NombreRol) VALUES (N'Cliente');
 GO
 
-/* ==============================
+/* 
    NORMALIZACIÓN 
-   ============================== */
+   */
 
    -- 1) Normalización de correo: columna computada + índice único
 IF COL_LENGTH('dbo.Usuarios', 'CorreoNorm') IS NULL
@@ -404,7 +404,7 @@ BEGIN
 END
 GO
 
--- 2) Reglas de dominio con CHECK
+
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name='CK_Pedidos_EstadoPedido' AND parent_object_id=OBJECT_ID('dbo.Pedidos'))
 BEGIN
     ALTER TABLE dbo.Pedidos WITH NOCHECK
@@ -506,9 +506,9 @@ FROM dbo.Usuarios u
 LEFT JOIN dbo.PuntosUsuario p ON p.UsuarioID = u.UsuarioID;
 GO
 
-/* ==============================
+/* 
    PROCEDIMIENTOS ALMACENADOS
-   ============================== */
+   */
 
    CREATE OR ALTER PROCEDURE dbo.spUsuario_Create
     @Nombre NVARCHAR(100),
@@ -962,9 +962,9 @@ END
 GO
 
 
-/* ==============================
+/* 
    TRIGGER DE AUDITORÍA (Pedidos)
-   ============================== */
+    */
 IF OBJECT_ID('dbo.trg_Pedidos_Audit','TR') IS NOT NULL DROP TRIGGER dbo.trg_Pedidos_Audit;
 GO
 CREATE TRIGGER dbo.trg_Pedidos_Audit

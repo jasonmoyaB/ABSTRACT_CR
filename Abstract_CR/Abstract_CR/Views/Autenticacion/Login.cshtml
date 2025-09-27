@@ -3,20 +3,6 @@
 @{
     ViewData["Title"] = "Iniciar Sesión";
 }
-<<<<<<< HEAD
- <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
-<section class="vh-100">
-    <div class="container py-5 h-100">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col col-xl-10">
-                <div class="card" style="border-radius: 1rem;">
-                    <div class="row g-0">
-                        <div class="col-md-6 col-lg-5 d-none d-md-block">
-                            <img src="~/assets/img/FondoCarneMolida.jpeg"
-                                 alt="Recetas y comida saludable"
-                                 class="img-fluid"
-                                 style="border-radius: 1rem 0 0 1rem; height: 100%; object-fit: cover;" />
-=======
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -24,19 +10,18 @@
             <div class="card shadow">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
-                    
+
                     @if (TempData["Mensaje"] != null)
                     {
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             @TempData["Mensaje"]
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
->>>>>>> master
                         </div>
                     }
 
                     <form asp-action="Login" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        
+
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label"></label>
                             <input asp-for="Email" class="form-control" placeholder="tu@email.com" />
@@ -65,5 +50,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

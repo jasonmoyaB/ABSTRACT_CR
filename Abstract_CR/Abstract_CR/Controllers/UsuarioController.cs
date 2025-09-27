@@ -51,7 +51,7 @@ namespace Abstract_CR.Controllers
             if (ModelState.IsValid)
             {
                 // TODO: Guardar cambios en la base de datos
-                usuario.FechaActualizacion = DateTime.Now;
+                // Nota: FechaActualizacion no existe en el modelo actual
                 
                 TempData["Mensaje"] = "Perfil actualizado correctamente";
                 return RedirectToAction(nameof(Perfil));
@@ -154,17 +154,14 @@ namespace Abstract_CR.Controllers
         {
             return new Usuario
             {
-                Id = 1,
-                NombreCompleto = "Juan Pérez",
-                Email = "juan.perez@email.com",
-                Telefono = "+54 11 1234-5678",
-                FechaNacimiento = new DateTime(1990, 5, 15),
-                Genero = "Masculino",
-                Altura = 175,
-                Peso = 70.5m,
-                NivelActividad = "Moderado",
-                ObjetivoNutricional = "Mantener peso saludable",
-                FechaCreacion = DateTime.Now.AddDays(-30)
+                UsuarioID = 1,
+                Nombre = "Juan",
+                Apellido = "Pérez",
+                CorreoElectronico = "juan.perez@email.com",
+                ContrasenaHash = "hashedpassword",
+                FechaRegistro = DateTime.Now.AddDays(-30),
+                RolID = 2, // Cliente
+                Activo = true
             };
         }
 

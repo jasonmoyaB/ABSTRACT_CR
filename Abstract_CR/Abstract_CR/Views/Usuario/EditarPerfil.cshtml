@@ -34,76 +34,28 @@
                         <form asp-action="EditarPerfil" method="post">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="NombreCompleto" class="form-label"></label>
-                                    <input asp-for="NombreCompleto" class="form-control" />
-                                    <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+                                    <label asp-for="Nombre" class="form-label"></label>
+                                    <input asp-for="Nombre" class="form-control" />
+                                    <span asp-validation-for="Nombre" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="Email" class="form-label"></label>
-                                    <input asp-for="Email" class="form-control" type="email" />
-                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                    <label asp-for="Apellido" class="form-label"></label>
+                                    <input asp-for="Apellido" class="form-control" />
+                                    <span asp-validation-for="Apellido" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="Telefono" class="form-label"></label>
-                                    <input asp-for="Telefono" class="form-control" type="tel" />
-                                    <span asp-validation-for="Telefono" class="text-danger"></span>
+                                    <label asp-for="CorreoElectronico" class="form-label"></label>
+                                    <input asp-for="CorreoElectronico" class="form-control" type="email" />
+                                    <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="FechaNacimiento" class="form-label"></label>
-                                    <input asp-for="FechaNacimiento" class="form-control" type="date" />
-                                    <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Genero" class="form-label"></label>
-                                    <select asp-for="Genero" class="form-select">
-                                        <option value="">Seleccionar género</option>
-                                        <option value="Masculino">Masculino</option>
-                                        <option value="Femenino">Femenino</option>
-                                        <option value="No binario">No binario</option>
-                                        <option value="Prefiero no decir">Prefiero no decir</option>
-                                    </select>
-                                    <span asp-validation-for="Genero" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Altura" class="form-label"></label>
-                                    <div class="input-group">
-                                        <input asp-for="Altura" class="form-control" type="number" min="100" max="250" />
-                                        <span class="input-group-text">cm</span>
+                                    <label class="form-label">Estado de la cuenta</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" asp-for="Activo" id="activoSwitch">
+                                        <label class="form-check-label" for="activoSwitch">
+                                            @(Model.Activo ? "Activa" : "Inactiva")
+                                        </label>
                                     </div>
-                                    <span asp-validation-for="Altura" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Peso" class="form-label"></label>
-                                    <div class="input-group">
-                                        <input asp-for="Peso" class="form-control" type="number" min="30" max="300" step="0.1" />
-                                        <span class="input-group-text">kg</span>
-                                    </div>
-                                    <span asp-validation-for="Peso" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="NivelActividad" class="form-label"></label>
-                                    <select asp-for="NivelActividad" class="form-select">
-                                        <option value="">Seleccionar nivel</option>
-                                        <option value="Sedentario">Sedentario (poco o ningún ejercicio)</option>
-                                        <option value="Leve">Leve (ejercicio ligero 1-3 días/semana)</option>
-                                        <option value="Moderado">Moderado (ejercicio moderado 3-5 días/semana)</option>
-                                        <option value="Activo">Activo (ejercicio intenso 6-7 días/semana)</option>
-                                        <option value="Muy activo">Muy activo (ejercicio muy intenso, trabajo físico)</option>
-                                    </select>
-                                    <span asp-validation-for="NivelActividad" class="text-danger"></span>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label asp-for="ObjetivoNutricional" class="form-label"></label>
-                                    <select asp-for="ObjetivoNutricional" class="form-select">
-                                        <option value="">Seleccionar objetivo</option>
-                                        <option value="Perder peso">Perder peso</option>
-                                        <option value="Mantener peso saludable">Mantener peso saludable</option>
-                                        <option value="Ganar peso">Ganar peso</option>
-                                        <option value="Mejorar rendimiento deportivo">Mejorar rendimiento deportivo</option>
-                                        <option value="Mantener salud general">Mantener salud general</option>
-                                        <option value="Controlar condición médica">Controlar condición médica</option>
-                                    </select>
-                                    <span asp-validation-for="ObjetivoNutricional" class="text-danger"></span>
                                 </div>
                             </div>
 
@@ -127,4 +79,4 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-} 
+}

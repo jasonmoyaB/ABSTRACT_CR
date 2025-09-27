@@ -43,35 +43,28 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Correo Electrónico</label>
-                                <p class="form-control-plaintext">@Model.Email</p>
+                                <p class="form-control-plaintext">@Model.CorreoElectronico</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Teléfono</label>
-                                <p class="form-control-plaintext">@(Model.Telefono ?? "No especificado")</p>
+                                <label class="form-label fw-bold">Fecha de Registro</label>
+                                <p class="form-control-plaintext">@(Model.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Fecha de Nacimiento</label>
-                                <p class="form-control-plaintext">@(Model.FechaNacimiento?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
+                                <label class="form-label fw-bold">Rol</label>
+                                <p class="form-control-plaintext">@(Model.Rol?.NombreRol ?? "No especificado")</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Género</label>
-                                <p class="form-control-plaintext">@(Model.Genero ?? "No especificado")</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Altura</label>
-                                <p class="form-control-plaintext">@(Model.Altura?.ToString() ?? "No especificada") cm</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Peso</label>
-                                <p class="form-control-plaintext">@(Model.Peso?.ToString() ?? "No especificado") kg</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nivel de Actividad</label>
-                                <p class="form-control-plaintext">@(Model.NivelActividad ?? "No especificado")</p>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label class="form-label fw-bold">Objetivo Nutricional</label>
-                                <p class="form-control-plaintext">@(Model.ObjetivoNutricional ?? "No especificado")</p>
+                                <label class="form-label fw-bold">Estado</label>
+                                <p class="form-control-plaintext">
+                                    @if (Model.Activo)
+                                    {
+                                        <span class="badge bg-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    }
+                                </p>
                             </div>
                         </div>
                         <div class="text-center mt-4">
@@ -126,15 +119,8 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Miembro desde</label>
-                            <p class="form-control-plaintext">@Model.FechaCreacion.ToString("dd/MM/yyyy")</p>
+                            <p class="form-control-plaintext">@(Model.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
                         </div>
-                        @if (Model.FechaActualizacion.HasValue)
-                        {
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Última actualización</label>
-                                <p class="form-control-plaintext">@Model.FechaActualizacion.Value.ToString("dd/MM/yyyy")</p>
-                            </div>
-                        }
                     </div>
                 </div>
             </div>

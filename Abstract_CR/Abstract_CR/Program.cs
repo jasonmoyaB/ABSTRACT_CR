@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Abstract_CR.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +10,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Configurar sesiones
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 var app = builder.Build();
 
 //
 
-// CÓDIGO TEMPORAL PARA PROBAR LA CONEXIÓN
+// Cï¿½DIGO TEMPORAL PARA PROBAR LA CONEXIï¿½N
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -21,12 +31,12 @@ using (var scope = app.Services.CreateScope())
     {
         // Intenta conectar y hacer una consulta simple
         await context.Database.OpenConnectionAsync();
-        Console.WriteLine("Conexión exitosa a la base de datos de Azure!");
+        Console.WriteLine("Conexiï¿½n exitosa a la base de datos de Azure!");
         await context.Database.CloseConnectionAsync();
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error de conexión: {ex.Message}");
+        Console.WriteLine($"Error de conexiï¿½n: {ex.Message}");
     }
 }
 
@@ -44,6 +54,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Usar sesiones
+app.UseSession();
 
 app.UseAuthorization();
 

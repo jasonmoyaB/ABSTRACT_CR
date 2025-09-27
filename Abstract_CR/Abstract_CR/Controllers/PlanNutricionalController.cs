@@ -11,7 +11,7 @@ namespace Abstract_CR.Controllers
         {
             // TODO: Obtener usuario actual desde la sesión/base de datos
             var usuario = ObtenerUsuarioEjemplo();
-            var planes = ObtenerPlanesNutricionales(usuario.Id);
+            var planes = ObtenerPlanesNutricionales(usuario.UsuarioID);
             return View(planes);
         }
 
@@ -101,7 +101,7 @@ namespace Abstract_CR.Controllers
         public IActionResult Notificaciones()
         {
             var usuario = ObtenerUsuarioEjemplo();
-            var notificaciones = ObtenerNotificacionesVencimiento(usuario.Id);
+            var notificaciones = ObtenerNotificacionesVencimiento(usuario.UsuarioID);
             return View(notificaciones);
         }
 
@@ -110,9 +110,13 @@ namespace Abstract_CR.Controllers
         {
             return new Usuario
             {
-                Id = 1,
-                NombreCompleto = "Juan Pérez",
-                Email = "juan@ejemplo.com"
+                UsuarioID = 1,
+                Nombre = "Juan",
+                Apellido = "Pérez",
+                CorreoElectronico = "juan@ejemplo.com",
+                ContrasenaHash = "hashedpassword",
+                RolID = 2,
+                Activo = true
             };
         }
 

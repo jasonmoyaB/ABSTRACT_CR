@@ -1,16 +1,21 @@
-using Microsoft.AspNetCore.Mvc;
 using Abstract_CR.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Data;
 using System.Diagnostics;
+using Dapper;
 
 namespace Abstract_CR.Controllers
 {
     public class UsuarioController : Controller
     {
-        private readonly ILogger<UsuarioController> _logger;
+        private readonly ILogger<IConfiguration> _logger;
+        private readonly IConfiguration _conf;
 
-        public UsuarioController(ILogger<UsuarioController> logger)
+        public UsuarioController(ILogger<UsuarioController> logger, IConfiguration conf)
         {
-            _logger = logger;
+            //_logger = logger;
+            _conf = conf;
         }
 
         // GET: Usuario/Perfil
@@ -19,6 +24,15 @@ namespace Abstract_CR.Controllers
             // TODO: Obtener usuario actual desde la sesión/base de datos
             var usuario = ObtenerUsuarioEjemplo();
             return View(usuario);
+            //using (var connection = new SqlConnection(_conf.GetConnectionString("DefaultConnection")))
+            //{
+            //    connection.Open();
+            //    casas = connection.Query<CasasModel>(
+            //        "ConsultarCasasSistema",
+            //        commandType: CommandType.StoredProcedure
+            //    );
+            //}
+            //return View(casas);
         }
 
         // GET: Usuario/EditarPerfil

@@ -42,6 +42,7 @@
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Productos", "Home")">Productos</a></li>
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Ebooks", "Home")">Ebooks</a></li>
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("MenuSemanal", "Home")">Mi Menú</a></li>
+                   
                     
                     @if (Context.Session.GetInt32("UsuarioID") != null)
                     {
@@ -51,10 +52,11 @@
                             </a>
                         </li>
                         <li class="nav-item px-lg-4">
-                            <a class="nav-link text-uppercase" href="@Url.Action("Logout", "Autenticacion")">
+                            <a class="nav-link text-uppercase" href="@Url.Action("CerrarSesion", "Autenticacion")">
                                 <i class="fas fa-sign-out-alt"></i> Salir
                             </a>
                         </li>
+
                     }
                     else
                     {

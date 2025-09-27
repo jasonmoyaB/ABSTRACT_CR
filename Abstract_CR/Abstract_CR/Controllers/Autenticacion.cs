@@ -133,15 +133,24 @@ namespace Abstract_CR.Controllers
         {
             return View();
         }
-
-        [HttpPost]
-        public IActionResult Logout()
+        // Muestra la vista de confirmación de cierre de sesión
+        // GET: muestra la página de confirmación de cierre de sesión
+        [HttpGet]
+        public IActionResult CerrarSesion()
         {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home");
+            return View(); // devuelve la vista CerrarSesion.cshtml
         }
 
-        // Método auxiliar para hashear contraseñas (simple por ahora)
+        // POST: realiza el logout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear(); // elimina toda la sesión
+            return RedirectToAction("Index", "Home"); // redirige al inicio
+        }
+
+
         private string HashPassword(string password)
         {
             using (SHA256 sha256Hash = SHA256.Create())

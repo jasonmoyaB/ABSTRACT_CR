@@ -1,63 +1,99 @@
+using Abstract_CR.Data;
 using Abstract_CR.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
-using System.Diagnostics;
-using Dapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Abstract_CR.Controllers
 {
     public class UsuarioController : Controller
     {
-        private readonly ILogger<IConfiguration> _logger;
-        private readonly IConfiguration _conf;
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<UsuarioController> _logger;
 
-        public UsuarioController(ILogger<UsuarioController> logger, IConfiguration conf)
+        public UsuarioController(ApplicationDbContext context, ILogger<UsuarioController> logger)
         {
-            //_logger = logger;
-            _conf = conf;
+            _context = context;
+            _logger = logger;
         }
 
-        // GET: Usuario/Perfil
-        public IActionResult Perfil()
+        // GET: Perfil
+        public async Task<IActionResult> Perfil()
         {
-            // TODO: Obtener usuario actual desde la sesión/base de datos
-            var usuario = ObtenerUsuarioEjemplo();
-            return View(usuario);
-            //using (var connection = new SqlConnection(_conf.GetConnectionString("DefaultConnection")))
-            //{
-            //    connection.Open();
-            //    casas = connection.Query<CasasModel>(
-            //        "ConsultarCasasSistema",
-            //        commandType: CommandType.StoredProcedure
-            //    );
-            //}
-            //return View(casas);
-        }
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+                return RedirectToAction("Login");
 
-        // GET: Usuario/EditarPerfil
-        public IActionResult EditarPerfil()
-        {
-            // TODO: Obtener usuario actual desde la sesión/base de datos
-            var usuario = ObtenerUsuarioEjemplo();
+            var usuario = await _context.Usuarios
+                .Include(u => u.Rol)
+                .FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+
+            if (usuario == null)
+                return NotFound();
+
             return View(usuario);
         }
 
-        // POST: Usuario/EditarPerfil
+
+        // GET: EditarPerfil
+        [HttpGet]
+        public async Task<IActionResult> EditarPerfil()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+                return RedirectToAction("Login");
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+
+            if (usuario == null)
+                return NotFound();
+
+            return View(usuario);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditarPerfil(Usuario usuario)
+        public async Task<IActionResult> EditarPerfil(Usuario model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // TODO: Guardar cambios en la base de datos
-                // Nota: FechaActualizacion no existe en el modelo actual
-                
-                TempData["Mensaje"] = "Perfil actualizado correctamente";
-                return RedirectToAction(nameof(Perfil));
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Error de validación: {Error}", error.ErrorMessage);
+                }
+                return View(model);
             }
-            return View(usuario);
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == model.UsuarioID);
+            if (usuario == null)
+                return NotFound();
+
+            usuario.Nombre = model.Nombre;
+            usuario.Apellido = model.Apellido;
+            usuario.CorreoElectronico = model.CorreoElectronico;
+            usuario.Activo = model.Activo;
+
+            if (model.RolID.HasValue)
+                usuario.RolID = model.RolID.Value;
+
+            if (!string.IsNullOrWhiteSpace(model.ContrasenaHash))
+            {
+                using var sha256 = System.Security.Cryptography.SHA256.Create();
+                usuario.ContrasenaHash = Convert.ToHexString(sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.ContrasenaHash)));
+            }
+
+            _context.Entry(usuario).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
+            HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
+            TempData["Mensaje"] = "Perfil actualizado correctamente";
+
+            return RedirectToAction("Perfil");
         }
+
+
 
         // GET: Usuario/Alergias
         public IActionResult Alergias()
@@ -82,7 +118,7 @@ namespace Abstract_CR.Controllers
             {
                 // TODO: Guardar alergia en la base de datos
                 alergia.UsuarioId = 1; // TODO: Obtener ID del usuario actual
-                
+
                 TempData["Mensaje"] = "Alergia agregada correctamente";
                 return RedirectToAction(nameof(Alergias));
             }
@@ -112,7 +148,7 @@ namespace Abstract_CR.Controllers
             {
                 // TODO: Guardar restricción en la base de datos
                 restriccion.UsuarioId = 1; // TODO: Obtener ID del usuario actual
-                
+
                 TempData["Mensaje"] = "Restricción agregada correctamente";
                 return RedirectToAction(nameof(Restricciones));
             }
@@ -142,7 +178,7 @@ namespace Abstract_CR.Controllers
             {
                 // TODO: Guardar preferencia en la base de datos
                 preferencia.UsuarioId = 1; // TODO: Obtener ID del usuario actual
-                
+
                 TempData["Mensaje"] = "Preferencia agregada correctamente";
                 return RedirectToAction(nameof(Preferencias));
             }
@@ -250,4 +286,4 @@ namespace Abstract_CR.Controllers
             };
         }
     }
-} 
+}

@@ -9,43 +9,39 @@ namespace Abstract_CR.Models
 
         [Required(ErrorMessage = "El nombre es obligatorio")]
         [Display(Name = "Nombre")]
-        [StringLength(100, ErrorMessage = "El nombre no puede tener más de 100 caracteres")]
+        [StringLength(100)]
         public string Nombre { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El apellido es obligatorio")]
         [Display(Name = "Apellido")]
-        [StringLength(100, ErrorMessage = "El apellido no puede tener más de 100 caracteres")]
+        [StringLength(100)]
         public string Apellido { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El email es obligatorio")]
-        [EmailAddress(ErrorMessage = "El formato del email no es válido")]
+        [EmailAddress(ErrorMessage = "Formato inválido")]
         [Display(Name = "Correo Electrónico")]
         [StringLength(100)]
         public string CorreoElectronico { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La contraseña es obligatoria")]
         [Display(Name = "Contraseña")]
         [StringLength(255)]
         [DataType(DataType.Password)]
-        public string ContrasenaHash { get; set; } = string.Empty;
+        public string? ContrasenaHash { get; set; } // ← Ya no es obligatorio
 
         [Display(Name = "Fecha de Registro")]
         public DateTime? FechaRegistro { get; set; }
 
-        [Required]
-        public int RolID { get; set; }
+        [Display(Name = "Rol")]
+        public int? RolID { get; set; } // ← Ya no es obligatorio
 
         [Display(Name = "Activo")]
         public bool Activo { get; set; } = true;
 
-        // Propiedad calculada para correo normalizado (se maneja automáticamente en la BD)
         public string CorreoNorm { get; set; } = string.Empty;
 
-        // Propiedades de navegación
-        public virtual Rol Rol { get; set; } = null!;
+        public virtual Rol? Rol { get; set; }
 
-        // Propiedades calculadas para la vista
         [Display(Name = "Nombre Completo")]
         public string NombreCompleto => $"{Nombre} {Apellido}";
     }
-} 
+}

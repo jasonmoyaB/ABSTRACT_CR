@@ -5,6 +5,10 @@ namespace Abstract_CR.Data
 {
     public class ApplicationDbContext : DbContext
     {
+        public ApplicationDbContext()
+        {
+        }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -13,6 +17,7 @@ namespace Abstract_CR.Data
         // DbSets para las tablas principales
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
+        public DbSet<PassResetTokens> Tokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +58,14 @@ namespace Abstract_CR.Data
                 new Rol { RolID = 2, NombreRol = "Cliente" },
                 new Rol { RolID = 3, NombreRol = "Nutricionista" }
             );
+
+            modelBuilder.Entity<PassResetTokens>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UsuarioID).IsRequired();
+                entity.Property(e => e.Token).IsRequired();
+                entity.Property(e => e.FechaCreacion).IsRequired();
+            });
         }
     }
 }

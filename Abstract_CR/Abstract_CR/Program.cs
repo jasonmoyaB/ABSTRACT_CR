@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Abstract_CR.Data;
 using Microsoft.AspNetCore.Http.Features;
+using Abstract_CR.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,9 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Registrar Helpers para inyeccion de dependencias
+builder.Services.AddScoped<UserHelper>();
 
 var app = builder.Build();
 

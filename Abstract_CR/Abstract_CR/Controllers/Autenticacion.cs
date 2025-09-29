@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 using System.ComponentModel.DataAnnotations;
+using Abstract_CR.Helpers;
 
 namespace Abstract_CR.Controllers
 {
@@ -13,11 +14,13 @@ namespace Abstract_CR.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AutenticacionController> _logger;
+        private readonly UserHelper _userHelper;
 
-        public AutenticacionController(ApplicationDbContext context, ILogger<AutenticacionController> logger)
+        public AutenticacionController(ApplicationDbContext context, ILogger<AutenticacionController> logger, UserHelper userHelper)
         {
             _context = context;
             _logger = logger;
+            _userHelper = userHelper;
         }
 
         [HttpGet]
@@ -41,6 +44,8 @@ namespace Abstract_CR.Controllers
                 var usuario = await _context.Usuarios
                     .Include(u => u.Rol)
                     .FirstOrDefaultAsync(u => u.CorreoElectronico == model.Email && u.Activo);
+
+                //var usuarioExistente = _userHelper.ObtenerUsuarioPorCorreo(model.Email);
 
                 if (usuario == null)
                 {
@@ -93,6 +98,8 @@ namespace Abstract_CR.Controllers
                 // Verificar si el email ya existe
                 var usuarioExistente = await _context.Usuarios
                     .FirstOrDefaultAsync(u => u.CorreoElectronico == model.Email);
+                
+                //var usuarioExistente = _userHelper.ObtenerUsuarioPorCorreo(model.Email);
 
                 if (usuarioExistente != null)
                 {
@@ -132,6 +139,13 @@ namespace Abstract_CR.Controllers
         public IActionResult RecuperarContraseña()
         {
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult RecuperarContrasenia(string email)
+        {
+            var user = _userHelper.ObtenerUsuarioPorCorreo(email);
+            return RedirectToAction("Login");
         }
         // Muestra la vista de confirmación de cierre de sesión
         // GET: muestra la página de confirmación de cierre de sesión

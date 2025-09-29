@@ -4,6 +4,8 @@
     ViewData["Title"] = "Detalles del Plan";
 }
 
+<link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+
 <section class="page-section">
     <div class="container">
         <div class="row">
@@ -14,7 +16,7 @@
                     </a>
                     <div class="text-center">
                         <h2 class="section-heading">
-                            <span class="section-heading-upper" style="color:#e6a756 ">Detalles del</span>
+                            <span class="section-heading-upper" style="color:#e6a756">Detalles del</span>
                             <span class="section-heading-lower" style="color:#f6e1c5">Plan Nutricional</span>
                         </h2>
                     </div>
@@ -22,233 +24,271 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card shadow-sm mb-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-sm">
                     <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-clipboard-list me-2"></i>
-                            Información General
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Nombre del Plan</h6>
-                                <p class="mb-0">@Model.Nombre</p>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Tipo de Plan</h6>
-                                <span class="badge bg-primary">@Model.TipoPlan</span>
-                            </div>
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(Model.Descripcion))
-                        {
-                            <div class="mb-3">
-                                <h6 class="text-muted">Descripción</h6>
-                                <p class="mb-0">@Model.Descripcion</p>
-                            </div>
-                        }
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Fecha de Inicio</h6>
-                                <p class="mb-0">@Model.FechaInicio.ToString("dd/MM/yyyy")</p>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Fecha de Vencimiento</h6>
-                                <p class="mb-0 @(Model.FechaVencimiento <= DateTime.Now.AddDays(7) ? "text-danger" : "")">
-                                    @Model.FechaVencimiento.ToString("dd/MM/yyyy")
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Estado</h6>
-                                <span class="badge bg-@(Model.Estado == "Activo" ? "success" : "warning")">@Model.Estado</span>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Días Restantes</h6>
-                                <p class="mb-0 @(Model.FechaVencimiento <= DateTime.Now.AddDays(7) ? "text-danger" : "")">
-                                    @((Model.FechaVencimiento - DateTime.Now).Days) días
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-pie me-2"></i>
-                            Información Nutricional
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 mb-3">
-                                    <i class="fas fa-fire fa-2x text-danger mb-2"></i>
-                                    <h4 class="mb-1">@(Model.CaloriasDiarias?.ToString() ?? "N/A")</h4>
-                                    <small class="text-muted">Calorías Diarias</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 mb-3">
-                                    <i class="fas fa-drumstick-bite fa-2x text-primary mb-2"></i>
-                                    <h4 class="mb-1">@(Model.Proteinas?.ToString() ?? "N/A")g</h4>
-                                    <small class="text-muted">Proteínas</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 mb-3">
-                                    <i class="fas fa-bread-slice fa-2x text-warning mb-2"></i>
-                                    <h4 class="mb-1">@(Model.Carbohidratos?.ToString() ?? "N/A")g</h4>
-                                    <small class="text-muted">Carbohidratos</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3 mb-3">
-                                    <i class="fas fa-cheese fa-2x text-success mb-2"></i>
-                                    <h4 class="mb-1">@(Model.Grasas?.ToString() ?? "N/A")g</h4>
-                                    <small class="text-muted">Grasas</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        @if (Model.Fibra.HasValue)
-                        {
-                            <div class="row">
-                                <div class="col-md-6 offset-md-3">
-                                    <div class="border rounded p-3 text-center">
-                                        <i class="fas fa-seedling fa-2x text-success mb-2"></i>
-                                        <h4 class="mb-1">@Model.Fibra.Value.ToString()g</h4>
-                                        <small class="text-muted">Fibra</small>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                @if (!string.IsNullOrEmpty(Model.RutaArchivo))
-                {
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-faded">
-                            <h5 class="mb-0">
-                                <i class="fas fa-file me-2"></i>
-                                Archivo del Plan
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-file-pdf fa-2x text-danger me-3"></i>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Plan Nutricional</h6>
-                                    <small class="text-muted">Archivo adjunto al plan</small>
-                                </div>
-                                <a href="#" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-download me-2"></i>
-                                    Descargar
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                @Model.Nombre
+                            </h4>
+                            <div class="btn-group" role="group">
+                                @if (!string.IsNullOrEmpty(Model.DocumentoURL))
+                                {
+                                    <a href="@Model.DocumentoURL" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-download me-1"></i>
+                                        Descargar
+                                    </a>
+                                }
+                                <a href="@Url.Action("Delete", "PlanNutricional", new { id = Model.PlanID })" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash me-1"></i>
+                                    Eliminar
                                 </a>
                             </div>
                         </div>
                     </div>
-                }
-            </div>
 
-            <div class="col-lg-4">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-tasks me-2"></i>
-                            Acciones Rápidas
-                        </h5>
-                    </div>
                     <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="@Url.Action("Menus", "PlanNutricional", new { planId = Model.Id })" class="btn btn-primary">
-                                <i class="fas fa-utensils me-2"></i>
-                                Ver Menús
-                            </a>
-                            <a href="@Url.Action("GenerarMenus", "PlanNutricional", new { planId = Model.Id })" class="btn btn-outline-primary">
-                                <i class="fas fa-magic me-2"></i>
-                                Generar Menús
-                            </a>
-                            <a href="@Url.Action("Evaluar", "PlanNutricional", new { planId = Model.Id })" class="btn btn-outline-warning">
-                                <i class="fas fa-star me-2"></i>
-                                Evaluar Plan
-                            </a>
-                            <button class="btn btn-outline-secondary">
-                                <i class="fas fa-edit me-2"></i>
-                                Editar Plan
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                        <div class="row">
+                            <!-- Información General -->
+                            <div class="col-md-8">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Información General
+                                </h5>
 
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-line me-2"></i>
-                            Progreso
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>Progreso del Plan</small>
-                                <small>@((int)((DateTime.Now - Model.FechaInicio).TotalDays / (Model.FechaVencimiento - Model.FechaInicio).TotalDays * 100))%</small>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4">
+                                        <strong>Nombre del Plan:</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        @Model.Nombre
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.Descripcion))
+                                {
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4">
+                                            <strong>Descripción:</strong>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            @Model.Descripcion
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.TipoPlan))
+                                {
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4">
+                                            <strong>Tipo de Plan:</strong>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <span class="badge bg-info">@Model.TipoPlan</span>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Estado))
+                                {
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4">
+                                            <strong>Estado:</strong>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <span class="badge @(Model.Estado == "Activo" ? "bg-success" : "bg-warning")">
+                                                @Model.Estado
+                                            </span>
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Información Nutricional -->
+                                @if (Model.CaloriasDiarias.HasValue || Model.Proteinas.HasValue || Model.Carbohidratos.HasValue || Model.Grasas.HasValue || Model.Fibra.HasValue)
+                                {
+                                    <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        Información Nutricional
+                                    </h5>
+
+                                    <div class="row">
+                                        @if (Model.CaloriasDiarias.HasValue)
+                                        {
+                                            <div class="col-sm-6 col-lg-4 mb-3">
+                                                <div class="text-center p-3 border rounded">
+                                                    <i class="fas fa-fire text-danger fa-2x mb-2"></i>
+                                                    <h6 class="mb-1">Calorías</h6>
+                                                    <strong>@Model.CaloriasDiarias kcal</strong>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (Model.Proteinas.HasValue)
+                                        {
+                                            <div class="col-sm-6 col-lg-4 mb-3">
+                                                <div class="text-center p-3 border rounded">
+                                                    <i class="fas fa-dumbbell text-primary fa-2x mb-2"></i>
+                                                    <h6 class="mb-1">Proteínas</h6>
+                                                    <strong>@Model.Proteinas g</strong>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (Model.Carbohidratos.HasValue)
+                                        {
+                                            <div class="col-sm-6 col-lg-4 mb-3">
+                                                <div class="text-center p-3 border rounded">
+                                                    <i class="fas fa-bread-slice text-warning fa-2x mb-2"></i>
+                                                    <h6 class="mb-1">Carbohidratos</h6>
+                                                    <strong>@Model.Carbohidratos g</strong>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (Model.Grasas.HasValue)
+                                        {
+                                            <div class="col-sm-6 col-lg-4 mb-3">
+                                                <div class="text-center p-3 border rounded">
+                                                    <i class="fas fa-seedling text-success fa-2x mb-2"></i>
+                                                    <h6 class="mb-1">Grasas</h6>
+                                                    <strong>@Model.Grasas g</strong>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (Model.Fibra.HasValue)
+                                        {
+                                            <div class="col-sm-6 col-lg-4 mb-3">
+                                                <div class="text-center p-3 border rounded">
+                                                    <i class="fas fa-leaf text-info fa-2x mb-2"></i>
+                                                    <h6 class="mb-1">Fibra</h6>
+                                                    <strong>@Model.Fibra g</strong>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
                             </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: @((int)((DateTime.Now - Model.FechaInicio).TotalDays / (Model.FechaVencimiento - Model.FechaInicio).TotalDays * 100))%"></div>
+
+                            <!-- Panel Lateral -->
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-calendar me-2"></i>
+                                            Fechas Importantes
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <small class="text-muted d-block">Fecha de Carga</small>
+                                            <strong>@Model.FechaCarga.ToString("dd/MM/yyyy HH:mm")</strong>
+                                        </div>
+
+                                        @if (Model.FechaInicio.HasValue)
+                                        {
+                                            <div class="mb-3">
+                                                <small class="text-muted d-block">Fecha de Inicio</small>
+                                                <strong>@Model.FechaInicio.Value.ToString("dd/MM/yyyy")</strong>
+                                            </div>
+                                        }
+
+                                        @if (Model.FechaVencimiento.HasValue)
+                                        {
+                                            var isExpired = Model.FechaVencimiento < DateTime.Today;
+                                            var isExpiringSoon = Model.FechaVencimiento <= DateTime.Today.AddDays(7) && !isExpired;
+                                            var daysRemaining = (Model.FechaVencimiento.Value - DateTime.Today).Days;
+
+                                            <div class="mb-3">
+                                                <small class="text-muted d-block">Fecha de Vencimiento</small>
+                                                <strong class="@(isExpired ? "text-danger" : isExpiringSoon ? "text-warning" : "text-success")">
+                                                    @Model.FechaVencimiento.Value.ToString("dd/MM/yyyy")
+                                                </strong>
+                                                @if (isExpired)
+                                                {
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                                            Vencido
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else if (isExpiringSoon)
+                                                {
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-warning">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            Vence en @daysRemaining días
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>
+                                                            @daysRemaining días restantes
+                                                        </span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(Model.DocumentoURL))
+                                        {
+                                            <hr>
+                                            <div class="mb-3">
+                                                <small class="text-muted d-block">Documento</small>
+                                                <a href="@Model.DocumentoURL" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-file-download me-1"></i>
+                                                    Ver/Descargar
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Acciones -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-cogs me-2"></i>
+                                            Acciones
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            @if (!string.IsNullOrEmpty(Model.DocumentoURL))
+                                            {
+                                                <a href="@Model.DocumentoURL" target="_blank" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-download me-2"></i>
+                                                    Descargar Plan
+                                                </a>
+                                            }
+
+                                            <a href="@Url.Action("Index", "MenuSemanal")" class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-utensils me-2"></i>
+                                                Ver Menús
+                                            </a>
+
+                                            <hr>
+
+                                            <a href="@Url.Action("Delete", "PlanNutricional", new { id = Model.PlanID })"
+                                               class="btn btn-outline-danger btn-sm"
+                                               onclick="return confirm('¿Estás seguro de que deseas eliminar este plan?')">
+                                                <i class="fas fa-trash me-2"></i>
+                                                Eliminar Plan
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <h6 class="mb-1">@((DateTime.Now - Model.FechaInicio).Days)</h6>
-                                <small class="text-muted">Días Completados</small>
-                            </div>
-                            <div class="col-6">
-                                <h6 class="mb-1">@((Model.FechaVencimiento - DateTime.Now).Days)</h6>
-                                <small class="text-muted">Días Restantes</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            Consejos
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-2">
-                                <i class="fas fa-check text-success me-2"></i>
-                                Mantén un registro de tu progreso
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-check text-success me-2"></i>
-                                Sigue las porciones recomendadas
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-check text-success me-2"></i>
-                                Bebe suficiente agua
-                            </li>
-                            <li class="mb-0">
-                                <i class="fas fa-check text-success me-2"></i>
-                                Realiza actividad física regular
-                            </li>
-                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section> 
+</section>

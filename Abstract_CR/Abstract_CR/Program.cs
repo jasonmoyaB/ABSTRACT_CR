@@ -1,7 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Abstract_CR.Data;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar límites de archivo
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+});
 
 // Se agrega el DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -23,7 +30,7 @@ var app = builder.Build();
 
 //
 
-// C�DIGO TEMPORAL PARA PROBAR LA CONEXI�N
+// C�DIGO TEMPORAL PARA PROBAR LA CONEXION
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

@@ -1,23 +1,47 @@
 ﻿@{
     ViewData["Title"] = "Cerrar Sesión";
-    
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
 
-<div class="container mt-5 text-center">
-    <div class="card shadow-lg p-4" style="max-width: 500px; margin:auto;">
-        <h2 class="mb-4">¿Deseas cerrar sesión?</h2>
+<div class="container vh-100 d-flex align-items-center justify-content-center">
+    <div class="card shadow-lg p-4" style="max-width: 450px; width: 100%; border-radius: 1rem;">
+        <h2 class="mb-3 text-center">¿Deseas cerrar sesión?</h2>
+        <p class="text-muted mb-4 text-center">Esta acción cerrará tu sesión actual y te llevará a la página de inicio.</p>
 
-        <div class="d-flex justify-content-center gap-3">
+        <div class="d-flex flex-column gap-2">
+            <!-- Botón Cerrar Sesión -->
             <form asp-action="Logout" asp-controller="Autenticacion" method="post">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-danger btn-lg">
+                <button type="submit"
+                        class="btn w-100"
+                        style="background-color: #ff9f43; color: #fff; border:none; border-radius:0.5rem; transition: 0.3s;">
                     <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
                 </button>
             </form>
 
-            <a href="@Url.Action("Perfil", "Usuario")" class="btn btn-secondary btn-lg">
+            <!-- Botón Cancelar -->
+            <a href="@Url.Action("Perfil", "Usuario")"
+               class="btn w-100"
+               style="background-color: #f0f0f0; color: #333; border: 1px solid #ccc; border-radius:0.5rem; transition: 0.3s;">
                 <i class="fas fa-arrow-left me-2"></i> Cancelar
             </a>
         </div>
     </div>
 </div>
+
+<script>
+    // Hover efecto suave
+    const logoutBtn = document.querySelector('form button');
+    logoutBtn.addEventListener('mouseenter', () => logoutBtn.style.backgroundColor = '#e08e2f');
+    logoutBtn.addEventListener('mouseleave', () => logoutBtn.style.backgroundColor = '#ff9f43');
+
+    const cancelBtn = document.querySelector('a.btn');
+    cancelBtn.addEventListener('mouseenter', () => {
+        cancelBtn.style.backgroundColor = '#e0e0e0';
+        cancelBtn.style.color = '#111';
+    });
+    cancelBtn.addEventListener('mouseleave', () => {
+        cancelBtn.style.backgroundColor = '#f0f0f0';
+        cancelBtn.style.color = '#333';
+    });
+</script>

@@ -30,6 +30,12 @@ namespace Abstract_CR.Controllers
         // GET: PlanNutricional/CargarPlan
         public IActionResult CargarPlan()
         {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                TempData["Error"] = "Debes iniciar sesión para cargar un plan nutricional.";
+                return RedirectToAction("Login", "Autenticacion");
+            }
             return View();
         }
 
@@ -40,6 +46,14 @@ namespace Abstract_CR.Controllers
         {
             try
             {
+                // Verificar autenticación
+                var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+                if (usuarioId == null)
+                {
+                    TempData["Error"] = "Debes iniciar sesión para cargar un plan nutricional.";
+                    return RedirectToAction("Login", "Autenticacion");
+                }
+
                 // Validar modelo
                 if (!ModelState.IsValid)
                 {
@@ -61,11 +75,8 @@ namespace Abstract_CR.Controllers
                     archivoUrl = await GuardarArchivo(archivo);
                 }
 
-                // Obtener ID del usuario actual
-                var usuarioId = ObtenerUsuarioIdActual();
-
                 // Guardar en base de datos
-                var planId = await GuardarPlanEnBaseDatos(plan, usuarioId, archivoUrl);
+                var planId = await GuardarPlanEnBaseDatos(plan, usuarioId.Value, archivoUrl);
 
                 TempData["Success"] = "Plan nutricional cargado exitosamente.";
                 return RedirectToAction(nameof(Index));
@@ -120,11 +131,14 @@ namespace Abstract_CR.Controllers
         // Métodos privados auxiliares
         private int ObtenerUsuarioIdActual()
         {
-            // TODO: Implementar lógica de sesión real cuando tengas autenticación
-            // Por ahora devuelvo un usuario de ejemplo para desarrollo
-            // En producción, obtendrías esto del claim del usuario autenticado:
-            // return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            return 1;
+            // Obtener UsuarioID de la sesión
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null || usuarioId <= 0)
+            {
+                // Si no hay sesión, redirigir al login
+                throw new UnauthorizedAccessException("Usuario no autenticado");
+            }
+            return usuarioId.Value;
         }
 
         private async Task<int> GuardarPlanEnBaseDatos(PlanNutricional plan, int usuarioId, string? archivoUrl)

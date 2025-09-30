@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Abstract_CR.Data;
 using Microsoft.AspNetCore.Http.Features;
 using Abstract_CR.Helpers;
+using Abstract_CR.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,9 @@ builder.Services.AddSession(options =>
 
 // Registrar Helpers para inyeccion de dependencias
 builder.Services.AddScoped<UserHelper>();
+
+// Configurar servicios de email
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 

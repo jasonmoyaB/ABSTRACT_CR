@@ -40,6 +40,14 @@
                                         </div>
                                     }
 
+                                    @if (TempData["Error"] != null)
+                                    {
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            @TempData["Error"]
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    }
+
                                     <form asp-action="Login" method="post">
                                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -65,7 +73,7 @@
                                             ¿No tienes cuenta? <a asp-action="CrearCuenta" class="text-decoration-none">Crear cuenta</a>
                                         </p>
                                         <p class="mt-2">
-                                            <a asp-action="RecuperarContraseña" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
+                                            <a asp-action="RequestReset" asp-controller="PasswordReset" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
                                         </p>
                                     </div>
 

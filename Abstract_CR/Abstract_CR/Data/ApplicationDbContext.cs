@@ -65,6 +65,12 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.UsuarioID).IsRequired();
                 entity.Property(e => e.Token).IsRequired();
                 entity.Property(e => e.FechaCreacion).IsRequired();
+                
+                // Relación con Usuario
+                entity.HasOne(e => e.Usuario)
+                      .WithMany()
+                      .HasForeignKey(e => e.UsuarioID)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

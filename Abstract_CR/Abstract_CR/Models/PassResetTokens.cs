@@ -11,9 +11,12 @@ namespace Abstract_CR.Models
         public int UsuarioID { get; set; }
 
         [Required]
-        public string Token { get; set; }
+        public string Token { get; set; } = string.Empty;
 
         [Required]
-        public DateTime FechaCreacion { get; set; }
+        public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+
+        // Propiedad de navegación
+        public virtual Usuario? Usuario { get; set; }
     }
 }

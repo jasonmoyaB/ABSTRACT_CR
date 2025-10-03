@@ -40,12 +40,13 @@
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Index", "Home")">Inicio</a></li>
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("SobreNosotros", "Home")">Sobre Nosotros</a></li>
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Productos", "Home")">Productos</a></li>
-                    <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Ebooks", "Home")">Ebooks</a></li>
-                    <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("MenuSemanal", "Home")">Mi Menú</a></li>
+                    
                    
                     
                     @if (Context.Session.GetInt32("UsuarioID") != null)
                     {
+                        <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Ebooks", "Home")">Ebooks</a></li>
+                        <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("MenuSemanal", "Home")">Mi Menú</a></li>
                         <li class="nav-item px-lg-4">
                             <a class="nav-link text-uppercase" href="@Url.Action("Perfil", "Usuario")">
                                 <i class="fas fa-user"></i> @Context.Session.GetString("NombreUsuario")
@@ -85,9 +86,22 @@
                             <span class="section-heading-upper">Nutrición Personalizada</span>
                             <span class="section-heading-lower">Para una Vida Saludable</span>
                         </h2>
-                        <p class="mb-3">Cada plan alimenticio está diseñado por profesionales de la salud, enfocado en tus metas y preferencias. Gestioná tus dietas, accedé a recetarios exclusivos y viví una experiencia integral hacia una mejor calidad de vida. ¡Tu salud, tu ritmo!</p>
+                        <p class="mb-3">
+                            Cada plan alimenticio está diseñado por profesionales de la salud, enfocado en tus metas y preferencias.
+                            Gestioná tus dietas, accedé a recetarios exclusivos y viví una experiencia integral hacia una mejor calidad de vida.
+                            ¡Tu salud, tu ritmo!
+                        </p>
                         <div class="intro-button mx-auto">
-                            <a class="btn btn-primary btn-xl" href="@Url.Action("Login", "Autenticacion")">Comenzá Hoy</a>
+                            @if (Context.Session.GetInt32("UsuarioID") == null)
+                            {
+                                <!-- Botón para usuarios NO logueados -->
+                                <a class="btn btn-primary btn-xl" href="@Url.Action("Login", "Autenticacion")">Comenzá Hoy</a>
+                            }
+                            else
+                            {
+                                <!-- Botón para usuarios logueados -->
+                                <a class="btn btn-primary btn-xl" href="@Url.Action("Perfil", "Usuario")">Comenzá Hoy</a>
+                            }
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,7 @@
-@model List<object>
+@using Abstract_CR.Models
+@model List<Notificacion>
+
+
 
 @{
     ViewData["Title"] = "Notificaciones";
@@ -6,10 +9,11 @@
 
 <section class="page-section">
     <div class="container">
+        <!-- Encabezado -->
         <div class="row">
             <div class="col-lg-12">
                 <div class="position-relative mb-5">
-                    <a href="@Url.Action("Index", "PlanNutricional")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mis Planes">
+                    <a href="@Url.Action("Index", "Home")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mis Planes">
                         <i class="fas fa-arrow-left"></i>
                     </a>
                     <div class="text-center">
@@ -22,6 +26,7 @@
             </div>
         </div>
 
+        <!-- Notificaciones -->
         <div class="row">
             <div class="col-lg-12">
                 <div class="card shadow-sm">
@@ -45,18 +50,12 @@
                                                 </div>
                                             </div>
                                             <div class="flex-grow-1 ms-3">
-                                                <h6 class="mb-1">@notificacion.GetType().GetProperty("Tipo")?.GetValue(notificacion)</h6>
-                                                <p class="mb-1">@notificacion.GetType().GetProperty("Mensaje")?.GetValue(notificacion)</p>
+                                                <h6 class="mb-1">@notificacion.Tipo</h6>
+                                                <p class="mb-1">@notificacion.Mensaje</p>
                                                 <small class="text-muted">
                                                     <i class="fas fa-calendar me-1"></i>
-                                                    @(((DateTime)notificacion.GetType().GetProperty("Fecha")?.GetValue(notificacion)).ToString("dd/MM/yyyy"))
+                                                    @notificacion.FechaEnvio.ToString("dd/MM/yyyy")
                                                 </small>
-                                            </div>
-                                            <div class="flex-shrink-0">
-                                                <a href="@Url.Action("Detalles", "PlanNutricional", new { id = notificacion.GetType().GetProperty("PlanId")?.GetValue(notificacion) })" class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-eye me-1"></i>
-                                                    Ver Plan
-                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -76,6 +75,7 @@
             </div>
         </div>
 
+        <!-- Configuración de notificaciones -->
         <div class="row mt-4">
             <div class="col-lg-12">
                 <div class="card shadow-sm">
@@ -91,48 +91,34 @@
                                 <h6 class="mb-3">Recordatorios de Vencimiento</h6>
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" id="notif7dias" checked>
-                                    <label class="form-check-label" for="notif7dias">
-                                        7 días antes del vencimiento
-                                    </label>
+                                    <label class="form-check-label" for="notif7dias">7 días antes del vencimiento</label>
                                 </div>
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" id="notif3dias" checked>
-                                    <label class="form-check-label" for="notif3dias">
-                                        3 días antes del vencimiento
-                                    </label>
+                                    <label class="form-check-label" for="notif3dias">3 días antes del vencimiento</label>
                                 </div>
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" id="notif1dia" checked>
-                                    <label class="form-check-label" for="notif1dia">
-                                        1 día antes del vencimiento
-                                    </label>
+                                    <label class="form-check-label" for="notif1dia">1 día antes del vencimiento</label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="notifVencido">
-                                    <label class="form-check-label" for="notifVencido">
-                                        El día del vencimiento
-                                    </label>
+                                    <label class="form-check-label" for="notifVencido">El día del vencimiento</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <h6 class="mb-3">Otros Recordatorios</h6>
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" id="notifEvaluacion" checked>
-                                    <label class="form-check-label" for="notifEvaluacion">
-                                        Recordatorio para evaluar el plan
-                                    </label>
+                                    <label class="form-check-label" for="notifEvaluacion">Recordatorio para evaluar el plan</label>
                                 </div>
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" id="notifMenus" checked>
-                                    <label class="form-check-label" for="notifMenus">
-                                        Nuevos menús disponibles
-                                    </label>
+                                    <label class="form-check-label" for="notifMenus">Nuevos menús disponibles</label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="notifConsejos">
-                                    <label class="form-check-label" for="notifConsejos">
-                                        Consejos nutricionales semanales
-                                    </label>
+                                    <label class="form-check-label" for="notifConsejos">Consejos nutricionales semanales</label>
                                 </div>
                             </div>
                         </div>
@@ -148,6 +134,7 @@
             </div>
         </div>
 
+        <!-- Resumen de actividad -->
         <div class="row mt-4">
             <div class="col-lg-12">
                 <div class="card shadow-sm">
@@ -192,15 +179,14 @@
                 </div>
             </div>
         </div>
+
     </div>
 </section>
 
 @section Scripts {
     <script>
-        // Guardar configuración de notificaciones
-        document.querySelector('button[type="button"]').addEventListener('click', function() {
-            // TODO: Implementar lógica para guardar configuración
+        document.querySelector('button[type="button"]').addEventListener('click', function () {
             alert('Configuración guardada exitosamente.');
         });
     </script>
-} 
+}

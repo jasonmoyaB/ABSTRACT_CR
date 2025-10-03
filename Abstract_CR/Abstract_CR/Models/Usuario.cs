@@ -43,5 +43,9 @@ namespace Abstract_CR.Models
 
         [Display(Name = "Nombre Completo")]
         public string NombreCompleto => $"{Nombre} {Apellido}";
+
+        public virtual ICollection<PlanNutricional> PlanesNutricionales { get; set; } = new List<PlanNutricional>();
+        public virtual ICollection<Notificacion> Notificaciones { get; set; } = new List<Notificacion>();
+
     }
 }

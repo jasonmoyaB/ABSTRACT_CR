@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Abstract_CR.Models;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
@@ -46,7 +47,6 @@ namespace Abstract_CR.Controllers
         {
             try
             {
-                // Verificar autenticación
                 var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
                 if (usuarioId == null)
                 {
@@ -54,13 +54,9 @@ namespace Abstract_CR.Controllers
                     return RedirectToAction("Login", "Autenticacion");
                 }
 
-                // Validar modelo
                 if (!ModelState.IsValid)
-                {
                     return View(plan);
-                }
 
-                // Validar archivo si se proporciona
                 string? archivoUrl = null;
                 if (archivo != null)
                 {
@@ -71,11 +67,9 @@ namespace Abstract_CR.Controllers
                         return View(plan);
                     }
 
-                    // Guardar archivo
                     archivoUrl = await GuardarArchivo(archivo);
                 }
 
-                // Guardar en base de datos
                 var planId = await GuardarPlanEnBaseDatos(plan, usuarioId.Value, archivoUrl);
 
                 TempData["Success"] = "Plan nutricional cargado exitosamente.";
@@ -93,9 +87,8 @@ namespace Abstract_CR.Controllers
         {
             var plan = ObtenerPlanPorId(id);
             if (plan == null)
-            {
                 return NotFound();
-            }
+
             return View("Detalles", plan);
         }
 
@@ -104,9 +97,8 @@ namespace Abstract_CR.Controllers
         {
             var plan = ObtenerPlanPorId(id);
             if (plan == null)
-            {
                 return NotFound();
-            }
+
             return View(plan);
         }
 
@@ -128,16 +120,13 @@ namespace Abstract_CR.Controllers
             }
         }
 
-        // Métodos privados auxiliares
+        // MÉTODOS PRIVADOS AUXILIARES
         private int ObtenerUsuarioIdActual()
         {
-            // Obtener UsuarioID de la sesión
             var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
             if (usuarioId == null || usuarioId <= 0)
-            {
-                // Si no hay sesión, redirigir al login
                 throw new UnauthorizedAccessException("Usuario no autenticado");
-            }
+
             return usuarioId.Value;
         }
 
@@ -146,10 +135,9 @@ namespace Abstract_CR.Controllers
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var sql = @"
-                EXEC dbo.spPlan_Create 
-                    @UsuarioID, @NombrePlan, @Descripcion, 
-                    @FechaVencimiento, @DocumentoURL";
+            var sql = @"EXEC dbo.spPlan_Create 
+                        @UsuarioID, @NombrePlan, @Descripcion, 
+                        @FechaVencimiento, @DocumentoURL";
 
             using var command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@UsuarioID", usuarioId);
@@ -169,12 +157,11 @@ namespace Abstract_CR.Controllers
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
 
-            var sql = @"
-                SELECT PlanID, UsuarioID, NombrePlan, Descripcion, FechaCarga, 
-                       FechaVencimiento, DocumentoURL, 'Activo' as Estado
-                FROM dbo.PlanesNutricionales 
-                WHERE UsuarioID = @UsuarioID 
-                ORDER BY FechaCarga DESC";
+            var sql = @"SELECT PlanID, UsuarioID, NombrePlan, Descripcion, FechaCarga, 
+                               FechaVencimiento, DocumentoURL, 'Activo' as Estado
+                        FROM dbo.PlanesNutricionales 
+                        WHERE UsuarioID = @UsuarioID 
+                        ORDER BY FechaCarga DESC";
 
             using var command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@UsuarioID", usuarioId);
@@ -192,7 +179,7 @@ namespace Abstract_CR.Controllers
                     FechaVencimiento = reader.IsDBNull("FechaVencimiento") ? null : reader.GetDateTime("FechaVencimiento"),
                     DocumentoURL = reader.IsDBNull("DocumentoURL") ? null : reader.GetString("DocumentoURL"),
                     Estado = reader.GetString("Estado"),
-                    TipoPlan = "PDF" // Valor por defecto
+                    TipoPlan = "PDF"
                 });
             }
 
@@ -204,11 +191,10 @@ namespace Abstract_CR.Controllers
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
 
-            var sql = @"
-                SELECT PlanID, UsuarioID, NombrePlan, Descripcion, FechaCarga, 
-                       FechaVencimiento, DocumentoURL, 'Activo' as Estado
-                FROM dbo.PlanesNutricionales 
-                WHERE PlanID = @PlanID";
+            var sql = @"SELECT PlanID, UsuarioID, NombrePlan, Descripcion, FechaCarga, 
+                               FechaVencimiento, DocumentoURL, 'Activo' as Estado
+                        FROM dbo.PlanesNutricionales 
+                        WHERE PlanID = @PlanID";
 
             using var command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@PlanID", id);
@@ -239,49 +225,77 @@ namespace Abstract_CR.Controllers
             connection.Open();
 
             var sql = "DELETE FROM dbo.PlanesNutricionales WHERE PlanID = @PlanID";
-
             using var command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@PlanID", planId);
-
             command.ExecuteNonQuery();
         }
 
         private (bool esValido, string mensaje) ValidarArchivo(IFormFile archivo)
         {
-            // Validar tamaño (10MB máximo)
             if (archivo.Length > 10 * 1024 * 1024)
-            {
                 return (false, "El archivo es demasiado grande. El tamaño máximo es 10MB.");
-            }
 
-            // Validar extensiones permitidas
             var extensionesPermitidas = new[] { ".pdf", ".jpg", ".jpeg", ".png", ".gif" };
             var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
 
             if (!extensionesPermitidas.Contains(extension))
-            {
                 return (false, "Formato de archivo no válido. Solo se permiten archivos PDF, JPG, JPEG, PNG y GIF.");
-            }
 
             return (true, string.Empty);
         }
 
         private async Task<string> GuardarArchivo(IFormFile archivo)
         {
-            // Crear directorio si no existe
             var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "planes");
             Directory.CreateDirectory(uploadsPath);
 
-            // Generar nombre único para el archivo
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(archivo.FileName);
             var filePath = Path.Combine(uploadsPath, fileName);
 
-            // Guardar archivo
             using var fileStream = new FileStream(filePath, FileMode.Create);
             await archivo.CopyToAsync(fileStream);
 
-            // Devolver URL relativa
             return $"/uploads/planes/{fileName}";
+        }
+
+        [HttpGet]
+        public IActionResult Notificaciones()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                TempData["Error"] = "Debes iniciar sesión para ver tus notificaciones.";
+                return RedirectToAction("Login", "Autenticacion");
+            }
+
+            var notificaciones = new List<Notificacion>();
+
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+
+            var sql = @"
+        SELECT NotificacionID, UsuarioID, Mensaje, Tipo, FechaEnvio
+        FROM dbo.Notificaciones
+        WHERE UsuarioID = @UsuarioID
+        ORDER BY FechaEnvio DESC";
+
+            using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                notificaciones.Add(new Notificacion
+                {
+                    NotificacionID = reader.GetInt32("NotificacionID"),
+                    UsuarioID = reader.GetInt32("UsuarioID"),
+                    Mensaje = reader.GetString("Mensaje"),
+                    Tipo = reader.GetString("Tipo"),
+                    FechaEnvio = reader.GetDateTime("FechaEnvio")
+                });
+            }
+
+            return View(notificaciones);
         }
     }
 }

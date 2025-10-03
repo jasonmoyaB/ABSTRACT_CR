@@ -1,70 +1,93 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Abstract_CR.Models
 {
     public class PlanNutricional
     {
-        public int Id { get; set; }
+        public int PlanID { get; set; }
 
-        [Required(ErrorMessage = "El nombre del plan es obligatorio")]
+        public int UsuarioID { get; set; }
+
+        [Required(ErrorMessage = "El nombre del plan es requerido")]
+        [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
         [Display(Name = "Nombre del Plan")]
-        [StringLength(100, ErrorMessage = "El nombre no puede tener más de 100 caracteres")]
-        public string Nombre { get; set; } = string.Empty;
+        public string Nombre { get; set; }
 
         [Display(Name = "Descripción")]
-        [StringLength(500, ErrorMessage = "La descripción no puede tener más de 500 caracteres")]
+        [StringLength(1000, ErrorMessage = "La descripción no puede exceder 1000 caracteres")]
         public string? Descripcion { get; set; }
 
-        [Display(Name = "Tipo de Plan")]
-        public string TipoPlan { get; set; } = string.Empty; // "PDF", "Imagen", "Formulario"
-
-        [Display(Name = "Archivo del Plan")]
-        public string? RutaArchivo { get; set; }
+        [Display(Name = "Fecha de Carga")]
+        public DateTime FechaCarga { get; set; } = DateTime.Now;
 
         [Display(Name = "Fecha de Inicio")]
         [DataType(DataType.Date)]
-        public DateTime FechaInicio { get; set; } = DateTime.Now;
+        public DateTime? FechaInicio { get; set; }
 
         [Display(Name = "Fecha de Vencimiento")]
         [DataType(DataType.Date)]
-        public DateTime FechaVencimiento { get; set; }
+        public DateTime? FechaVencimiento { get; set; }
+
+        [Display(Name = "URL del Documento")]
+        [StringLength(255)]
+        public string? DocumentoURL { get; set; }
+
+        [Display(Name = "Tipo de Plan")]
+        [Required(ErrorMessage = "El tipo de plan es requerido")]
+        public string TipoPlan { get; set; }
 
         [Display(Name = "Calorías Diarias")]
         [Range(800, 5000, ErrorMessage = "Las calorías deben estar entre 800 y 5000")]
         public int? CaloriasDiarias { get; set; }
 
         [Display(Name = "Proteínas (g)")]
-        [Range(0, 500, ErrorMessage = "Las proteínas deben estar entre 0 y 500g")]
+        [Range(0, 999, ErrorMessage = "Las proteínas deben ser un valor positivo")]
         public decimal? Proteinas { get; set; }
 
         [Display(Name = "Carbohidratos (g)")]
-        [Range(0, 1000, ErrorMessage = "Los carbohidratos deben estar entre 0 y 1000g")]
+        [Range(0, 999, ErrorMessage = "Los carbohidratos deben ser un valor positivo")]
         public decimal? Carbohidratos { get; set; }
 
         [Display(Name = "Grasas (g)")]
-        [Range(0, 200, ErrorMessage = "Las grasas deben estar entre 0 y 200g")]
+        [Range(0, 999, ErrorMessage = "Las grasas deben ser un valor positivo")]
         public decimal? Grasas { get; set; }
 
         [Display(Name = "Fibra (g)")]
-        [Range(0, 100, ErrorMessage = "La fibra debe estar entre 0 y 100g")]
+        [Range(0, 100, ErrorMessage = "La fibra debe ser un valor positivo")]
         public decimal? Fibra { get; set; }
 
-        [Display(Name = "Estado del Plan")]
-        public string Estado { get; set; } = "Activo"; // "Activo", "Vencido", "Pausado"
-
-        [Display(Name = "Activo")]
-        public bool Activo { get; set; } = true;
-
-        // Relación con Usuario
-        public int UsuarioId { get; set; }
-        public virtual Usuario Usuario { get; set; } = null!;
+        [Display(Name = "Estado")]
+        [Required(ErrorMessage = "El estado es requerido")]
+        public string Estado { get; set; } = "Activo";
 
         // Propiedades de navegación
-        public virtual ICollection<MenuPersonalizado> MenusPersonalizados { get; set; } = new List<MenuPersonalizado>();
-        public virtual ICollection<EvaluacionPlan> Evaluaciones { get; set; } = new List<EvaluacionPlan>();
+        public virtual Usuario? Usuario { get; set; }
 
-        // Propiedades de auditoría
-        public DateTime FechaCreacion { get; set; } = DateTime.Now;
-        public DateTime? FechaActualizacion { get; set; }
+        // Propiedad no mapeada para el archivo
+        [NotMapped]
+        [Display(Name = "Archivo del Plan")]
+        public IFormFile? Archivo { get; set; }
+
+        // Validación personalizada
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (FechaVencimiento.HasValue && FechaInicio.HasValue)
+            {
+                if (FechaVencimiento <= FechaInicio)
+                {
+                    yield return new ValidationResult(
+                        "La fecha de vencimiento debe ser posterior a la fecha de inicio.",
+                        new[] { nameof(FechaVencimiento) });
+                }
+            }
+
+            if (FechaInicio.HasValue && FechaInicio < DateTime.Today)
+            {
+                yield return new ValidationResult(
+                    "La fecha de inicio no puede ser anterior al día de hoy.",
+                    new[] { nameof(FechaInicio) });
+            }
+        }
     }
-} 
+}

@@ -21,7 +21,7 @@
     <header>
         <h1 class="site-heading text-center text-faded d-none d-lg-block">
             <span class="site-heading-upper text-primary mb-3">ABSTRACT</span>
-            <span class="site-heading-lower">HEALTHY FOOD.</span>
+            <span class="site-heading-lower">HEALTHY FOOD</span>
             
         </h1>
     </header>
@@ -42,9 +42,27 @@
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Productos", "Home")">Productos</a></li>
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Ebooks", "Home")">Ebooks</a></li>
                     <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("MenuSemanal", "Home")">Mi Menú</a></li>
-                    @* <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Index", "PlanNutricional")">Mis Planes</a></li> *@
-                    <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Login", "Autenticacion")">Log-in</a></li>
-                    <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Perfil", "Usuario")">Mi Perfil</a></li>
+                   
+                    
+                    @if (Context.Session.GetInt32("UsuarioID") != null)
+                    {
+                        <li class="nav-item px-lg-4">
+                            <a class="nav-link text-uppercase" href="@Url.Action("Perfil", "Usuario")">
+                                <i class="fas fa-user"></i> @Context.Session.GetString("NombreUsuario")
+                            </a>
+                        </li>
+                        <li class="nav-item px-lg-4">
+                            <a class="nav-link text-uppercase" href="@Url.Action("CerrarSesion", "Autenticacion")">
+                                <i class="fas fa-sign-out-alt"></i> Salir
+                            </a>
+                        </li>
+
+                    }
+                    else
+                    {
+                        <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Login", "Autenticacion")">Iniciar Sesión</a></li>
+                        @* <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("CrearCuenta", "Autenticacion")">Crear Cuenta</a></li> *@
+                    }
                 </ul>
             </div>
         </div>

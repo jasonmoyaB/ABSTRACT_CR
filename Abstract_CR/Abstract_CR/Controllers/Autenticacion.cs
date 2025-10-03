@@ -26,6 +26,7 @@ namespace Abstract_CR.Controllers
             _emailService = emailService;
         }
 
+
         [HttpGet]
         public IActionResult Login()
         {

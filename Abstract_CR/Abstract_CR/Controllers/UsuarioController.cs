@@ -17,6 +17,7 @@ namespace Abstract_CR.Controllers
             _logger = logger;
         }
 
+
         // GET: Perfil
         public async Task<IActionResult> Perfil()
         {
@@ -80,7 +81,8 @@ namespace Abstract_CR.Controllers
             if (!string.IsNullOrWhiteSpace(model.ContrasenaHash))
             {
                 using var sha256 = System.Security.Cryptography.SHA256.Create();
-                usuario.ContrasenaHash = Convert.ToHexString(sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.ContrasenaHash)));
+                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.ContrasenaHash));
+                usuario.ContrasenaHash = Convert.ToBase64String(bytes); // <-- igual que HashPassword
             }
 
             _context.Entry(usuario).State = EntityState.Modified;

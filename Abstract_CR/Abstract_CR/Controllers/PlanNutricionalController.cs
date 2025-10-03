@@ -273,29 +273,75 @@ namespace Abstract_CR.Controllers
             using var connection = new SqlConnection(_connectionString);
             connection.Open();
 
-            var sql = @"
-        SELECT NotificacionID, UsuarioID, Mensaje, Tipo, FechaEnvio
-        FROM dbo.Notificaciones
+            var sqlPlanes = @"
+        SELECT PlanID, UsuarioID, Descripcion, FechaVencimiento
+        FROM dbo.PlanesNutricionales
         WHERE UsuarioID = @UsuarioID
-        ORDER BY FechaEnvio DESC";
+          AND DATEDIFF(DAY, GETDATE(), FechaVencimiento) BETWEEN 0 AND 7
+    ";
 
-            using var command = new SqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+            var planes = new List<(int PlanID, string Descripcion, DateTime FechaVencimiento)>();
 
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
+            // Leemos los planes primero para cerrar el reader
+            using (var commandPlanes = new SqlCommand(sqlPlanes, connection))
             {
-                notificaciones.Add(new Notificacion
+                commandPlanes.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+                using var reader = commandPlanes.ExecuteReader();
+                while (reader.Read())
                 {
-                    NotificacionID = reader.GetInt32("NotificacionID"),
-                    UsuarioID = reader.GetInt32("UsuarioID"),
-                    Mensaje = reader.GetString("Mensaje"),
-                    Tipo = reader.GetString("Tipo"),
-                    FechaEnvio = reader.GetDateTime("FechaEnvio")
-                });
+                    planes.Add((
+                        PlanID: reader.GetInt32(reader.GetOrdinal("PlanID")),
+                        Descripcion: reader["Descripcion"].ToString(),
+                        FechaVencimiento: reader.GetDateTime(reader.GetOrdinal("FechaVencimiento"))
+                    ));
+                }
             }
+
+            foreach (var plan in planes)
+            {
+                var diasRestantes = (plan.FechaVencimiento - DateTime.Now.Date).Days;
+                string mensaje = diasRestantes switch
+                {
+                    7 => $"⚠️ 7 días antes del vencimiento: Te avisamos que tu plan \"{plan.Descripcion}\" expirará en una semana.",
+                    3 => $"⚠️ 3 días antes del vencimiento: Un recordatorio cercano para que no olvides tu plan \"{plan.Descripcion}\".",
+                    1 => $"⚠️ 1 día antes del vencimiento: Último aviso para que tomes acción sobre tu plan \"{plan.Descripcion}\" antes de que caduque.",
+                    0 => $"⚠️ El día del vencimiento: Tu plan \"{plan.Descripcion}\" ha llegado a su fecha final.",
+                    _ => null
+                };
+
+                if (mensaje != null)
+                {
+                    // Guardar en lista para la vista
+                    notificaciones.Add(new Notificacion
+                    {
+                        UsuarioID = usuarioId.Value,
+                        Mensaje = mensaje,
+                        Tipo = "Vencimiento",
+                        FechaEnvio = DateTime.Now
+                    });
+
+                    // Guardar notificación en la base de datos
+                    var sqlInsert = @"
+                INSERT INTO dbo.Notificaciones (UsuarioID, Mensaje, Tipo, FechaEnvio)
+                VALUES (@UsuarioID, @Mensaje, @Tipo, @FechaEnvio)
+            ";
+
+                    using var commandInsert = new SqlCommand(sqlInsert, connection);
+                    commandInsert.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+                    commandInsert.Parameters.AddWithValue("@Mensaje", mensaje);
+                    commandInsert.Parameters.AddWithValue("@Tipo", "Vencimiento");
+                    commandInsert.Parameters.AddWithValue("@FechaEnvio", DateTime.Now);
+
+                    commandInsert.ExecuteNonQuery();
+                }
+            }
+
+            // Ordenar por fecha de envío
+            notificaciones = notificaciones.OrderBy(n => n.FechaEnvio).ToList();
 
             return View(notificaciones);
         }
+
+
     }
 }

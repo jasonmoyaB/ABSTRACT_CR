@@ -1,19 +1,16 @@
 @using Abstract_CR.Models
 @model List<Notificacion>
 
-
-
 @{
     ViewData["Title"] = "Notificaciones";
 }
 
 <section class="page-section">
     <div class="container">
-        <!-- Encabezado -->
         <div class="row">
             <div class="col-lg-12">
                 <div class="position-relative mb-5">
-                    <a href="@Url.Action("Index", "Home")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mis Planes">
+                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mis Planes">
                         <i class="fas fa-arrow-left"></i>
                     </a>
                     <div class="text-center">
@@ -24,7 +21,6 @@
                     </div>
                 </div>
             </div>
-        </div>
 
         <!-- Notificaciones -->
         <div class="row">
@@ -37,7 +33,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        @if (Model.Any())
+                        @if (Model != null && Model.Any())
                         {
                             <div class="list-group list-group-flush">
                                 @foreach (var notificacion in Model)
@@ -75,110 +71,60 @@
             </div>
         </div>
 
-        <!-- Configuración de notificaciones -->
+        <!-- Configuración de notificaciones (informativa) -->
         <div class="row mt-4">
             <div class="col-lg-12">
                 <div class="card shadow-sm">
                     <div class="card-header bg-faded">
                         <h5 class="mb-0">
-                            <i class="fas fa-cog me-2"></i>
+                            <i class="fas fa-info-circle me-2"></i>
                             Configuración de Notificaciones
                         </h5>
                     </div>
                     <div class="card-body">
+                        <p>
+                            Aquí puedes ver cómo funcionan tus notificaciones en Abstract.
+                            Las notificaciones te ayudan a mantenerte al día con tus planes nutricionales
+                            y otros recordatorios importantes relacionados con tu dieta y hábitos saludables.
+                        </p>
                         <div class="row">
                             <div class="col-md-6">
                                 <h6 class="mb-3">Recordatorios de Vencimiento</h6>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="notif7dias" checked>
-                                    <label class="form-check-label" for="notif7dias">7 días antes del vencimiento</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="notif3dias" checked>
-                                    <label class="form-check-label" for="notif3dias">3 días antes del vencimiento</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="notif1dia" checked>
-                                    <label class="form-check-label" for="notif1dia">1 día antes del vencimiento</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="notifVencido">
-                                    <label class="form-check-label" for="notifVencido">El día del vencimiento</label>
-                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>7 días antes del vencimiento:</strong> Te avisamos una semana antes de que tu plan expire para que puedas renovarlo o revisarlo a tiempo.
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>3 días antes del vencimiento:</strong> Un recordatorio cercano para que no olvides tu plan.
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>1 día antes del vencimiento:</strong> Último aviso para que tomes acción antes de que el plan caduque.
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>El día del vencimiento:</strong> Te notificamos si tu plan ha llegado a su fecha final.
+                                    </li>
+                                </ul>
                             </div>
                             <div class="col-md-6">
                                 <h6 class="mb-3">Otros Recordatorios</h6>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="notifEvaluacion" checked>
-                                    <label class="form-check-label" for="notifEvaluacion">Recordatorio para evaluar el plan</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="notifMenus" checked>
-                                    <label class="form-check-label" for="notifMenus">Nuevos menús disponibles</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="notifConsejos">
-                                    <label class="form-check-label" for="notifConsejos">Consejos nutricionales semanales</label>
-                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>Evaluar el plan:</strong> Te recordamos que puedes dejar tu evaluación sobre cómo funcionó tu plan.
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Nuevos menús disponibles:</strong> Te avisamos cuando se agregan nuevos menús para que tengas más opciones saludables.
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Consejos nutricionales semanales:</strong> Recibirás recomendaciones y consejos de nutrición para mantener hábitos saludables.
+                                    </li>
+                                </ul>
                             </div>
-                        </div>
-                        <hr class="my-3">
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>
-                                Guardar Configuración
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Resumen de actividad -->
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-line me-2"></i>
-                            Resumen de Actividad
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-3">
-                                <div class="border rounded p-3">
-                                    <i class="fas fa-clipboard-list fa-2x text-primary mb-2"></i>
-                                    <h4 class="mb-1">2</h4>
-                                    <small class="text-muted">Planes Activos</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3">
-                                    <i class="fas fa-utensils fa-2x text-success mb-2"></i>
-                                    <h4 class="mb-1">14</h4>
-                                    <small class="text-muted">Menús Generados</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3">
-                                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
-                                    <h4 class="mb-1">1</h4>
-                                    <small class="text-muted">Evaluaciones</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="border rounded p-3">
-                                    <i class="fas fa-calendar-check fa-2x text-info mb-2"></i>
-                                    <h4 class="mb-1">30</h4>
-                                    <small class="text-muted">Días Seguidos</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     </div>
 </section>

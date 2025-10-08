@@ -33,6 +33,7 @@ builder.Services.AddScoped<UserHelper>();
 
 // Configurar servicios de email
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHostedService<VencimientosNotifier>(); // <-- agrega esto
 
 var app = builder.Build();
 

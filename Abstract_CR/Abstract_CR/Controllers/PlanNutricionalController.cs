@@ -5,20 +5,27 @@ using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using Abstract_CR.Services;
+
 
 namespace Abstract_CR.Controllers
 {
-    // [Authorize] // Comentado temporalmente - descomentar cuando tengas autenticación
     public class PlanNutricionalController : Controller
     {
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
 
-        public PlanNutricionalController(IConfiguration configuration)
+        
+        private readonly IEmailService _emailService;
+
+        
+        public PlanNutricionalController(IConfiguration configuration, IEmailService emailService)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("DefaultConnection");
+            _emailService = emailService;
         }
+
 
         // GET: PlanNutricional/Index
         public IActionResult Index()
@@ -257,9 +264,8 @@ namespace Abstract_CR.Controllers
 
             return $"/uploads/planes/{fileName}";
         }
-
         [HttpGet]
-        public IActionResult Notificaciones()
+        public async Task<IActionResult> Notificaciones()
         {
             var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
             if (usuarioId == null)
@@ -268,6 +274,7 @@ namespace Abstract_CR.Controllers
                 return RedirectToAction("Login", "Autenticacion");
             }
 
+            bool run = string.Equals(Request.Query["run"], "1", StringComparison.Ordinal);
             var notificaciones = new List<Notificacion>();
 
             using var connection = new SqlConnection(_connectionString);
@@ -277,12 +284,12 @@ namespace Abstract_CR.Controllers
         SELECT PlanID, UsuarioID, Descripcion, FechaVencimiento
         FROM dbo.PlanesNutricionales
         WHERE UsuarioID = @UsuarioID
+          AND FechaVencimiento IS NOT NULL
           AND DATEDIFF(DAY, GETDATE(), FechaVencimiento) BETWEEN 0 AND 7
     ";
 
             var planes = new List<(int PlanID, string Descripcion, DateTime FechaVencimiento)>();
 
-            // Leemos los planes primero para cerrar el reader
             using (var commandPlanes = new SqlCommand(sqlPlanes, connection))
             {
                 commandPlanes.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
@@ -291,55 +298,121 @@ namespace Abstract_CR.Controllers
                 {
                     planes.Add((
                         PlanID: reader.GetInt32(reader.GetOrdinal("PlanID")),
-                        Descripcion: reader["Descripcion"].ToString(),
+                        Descripcion: reader["Descripcion"]?.ToString() ?? "",
                         FechaVencimiento: reader.GetDateTime(reader.GetOrdinal("FechaVencimiento"))
                     ));
                 }
             }
 
+            var emailUsuario = ObtenerEmailUsuario(usuarioId.Value);
+
             foreach (var plan in planes)
             {
-                var diasRestantes = (plan.FechaVencimiento - DateTime.Now.Date).Days;
-                string mensaje = diasRestantes switch
-                {
-                    7 => $"⚠️ 7 días antes del vencimiento: Te avisamos que tu plan \"{plan.Descripcion}\" expirará en una semana.",
-                    3 => $"⚠️ 3 días antes del vencimiento: Un recordatorio cercano para que no olvides tu plan \"{plan.Descripcion}\".",
-                    1 => $"⚠️ 1 día antes del vencimiento: Último aviso para que tomes acción sobre tu plan \"{plan.Descripcion}\" antes de que caduque.",
-                    0 => $"⚠️ El día del vencimiento: Tu plan \"{plan.Descripcion}\" ha llegado a su fecha final.",
-                    _ => null
-                };
+                var diasRestantes = (plan.FechaVencimiento.Date - DateTime.Now.Date).Days;
 
-                if (mensaje != null)
+                if (diasRestantes is 7 or 3 or 1 or 0)
                 {
-                    // Guardar en lista para la vista
+                    var token = $"[PID={plan.PlanID};UMBRAL={diasRestantes}]";
+
+                    string? mensajeLimpio = diasRestantes switch
+                    {
+                        7 => $"⚠️ 7 días antes del vencimiento: Te avisamos que tu plan \"{plan.Descripcion}\" expirará en una semana.",
+                        3 => $"⚠️ 3 días antes del vencimiento: Un recordatorio cercano para que no olvides tu plan \"{plan.Descripcion}\".",
+                        1 => $"⚠️ 1 día antes del vencimiento: Último aviso para que tomes acción sobre tu plan \"{plan.Descripcion}\" antes de que caduque.",
+                        0 => $"⚠️ El día del vencimiento: Tu plan \"{plan.Descripcion}\" ha llegado a su fecha final.",
+                        _ => null
+                    };
+                    if (mensajeLimpio == null) continue;
+
+                    // 👇 En la vista mostramos SOLO el mensaje limpio (sin token)
                     notificaciones.Add(new Notificacion
                     {
                         UsuarioID = usuarioId.Value,
-                        Mensaje = mensaje,
+                        Mensaje = mensajeLimpio,
                         Tipo = "Vencimiento",
                         FechaEnvio = DateTime.Now
                     });
 
-                    // Guardar notificación en la base de datos
+                    // Si no es ejecución, no persiste ni envía
+                    if (!run) continue;
+
+                    // Dedupe por Plan+Umbral usando token (no se reenvía si ya existe)
+                    if (YaSeEnvioVencimiento(connection, usuarioId.Value, token))
+                        continue;
+
+                    // En BD guardamos mensaje con token para control
+                    var mensajeConToken = $"{token} {mensajeLimpio}";
+
                     var sqlInsert = @"
                 INSERT INTO dbo.Notificaciones (UsuarioID, Mensaje, Tipo, FechaEnvio)
                 VALUES (@UsuarioID, @Mensaje, @Tipo, @FechaEnvio)
             ";
+                    using (var commandInsert = new SqlCommand(sqlInsert, connection))
+                    {
+                        commandInsert.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+                        commandInsert.Parameters.AddWithValue("@Mensaje", mensajeConToken);
+                        commandInsert.Parameters.AddWithValue("@Tipo", "Vencimiento");
+                        commandInsert.Parameters.AddWithValue("@FechaEnvio", DateTime.Now);
+                        commandInsert.ExecuteNonQuery();
+                    }
 
-                    using var commandInsert = new SqlCommand(sqlInsert, connection);
-                    commandInsert.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
-                    commandInsert.Parameters.AddWithValue("@Mensaje", mensaje);
-                    commandInsert.Parameters.AddWithValue("@Tipo", "Vencimiento");
-                    commandInsert.Parameters.AddWithValue("@FechaEnvio", DateTime.Now);
-
-                    commandInsert.ExecuteNonQuery();
+                    // Envío de email con mensaje limpio (sin token)
+                    if (!string.IsNullOrWhiteSpace(emailUsuario))
+                    {
+                        var subject = $"Recordatorio de vencimiento – {plan.Descripcion}";
+                        var htmlDescripcion = System.Net.WebUtility.HtmlEncode(plan.Descripcion);
+                        var body = $@"
+                <html>
+                  <body style='font-family:Arial,Helvetica,sans-serif; line-height:1.5;'>
+                    <h2>Recordatorio de tu plan</h2>
+                    <p>{mensajeLimpio}</p>
+                    <p><strong>Plan:</strong> {htmlDescripcion}</p>
+                    <p><strong>Fecha de vencimiento:</strong> {plan.FechaVencimiento:dd/MM/yyyy}</p>
+                    <hr/>
+                    <p style='font-size:12px;color:#666'>Si ya renovaste, puedes ignorar este mensaje.</p>
+                  </body>
+                </html>";
+                        try { await _emailService.SendEmailAsync(emailUsuario, subject, body); } catch { }
+                    }
                 }
             }
 
-            // Ordenar por fecha de envío
             notificaciones = notificaciones.OrderBy(n => n.FechaEnvio).ToList();
-
             return View(notificaciones);
+        }
+
+        private bool YaSeEnvioVencimiento(SqlConnection connection, int usuarioId, string token)
+        {
+            var sql = @"
+        SELECT COUNT(1)
+        FROM dbo.Notificaciones
+        WHERE UsuarioID = @UsuarioID
+          AND Tipo = 'Vencimiento'
+          AND Mensaje LIKE @Token
+    ";
+            using var cmd = new SqlCommand(sql, connection);
+            cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
+            cmd.Parameters.AddWithValue("@Token", $"%{token}%");
+            var count = (int)cmd.ExecuteScalar();
+            return count > 0;
+        }
+
+
+        private string? ObtenerEmailUsuario(int usuarioId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+
+            const string sql = @"
+        SELECT TOP 1 CorreoElectronico
+        FROM dbo.Usuarios
+        WHERE UsuarioID = @UsuarioID";
+
+            using var cmd = new SqlCommand(sql, connection);
+            cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
+
+            var result = cmd.ExecuteScalar();
+            return result == null || result == DBNull.Value ? null : Convert.ToString(result);
         }
 
 

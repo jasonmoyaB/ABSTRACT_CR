@@ -39,7 +39,7 @@ var app = builder.Build();
 
 //
 
-// C�DIGO TEMPORAL PARA PROBAR LA CONEXION
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

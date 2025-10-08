@@ -274,7 +274,9 @@ namespace Abstract_CR.Controllers
                 return RedirectToAction("Login", "Autenticacion");
             }
 
+            // Solo ejecuta INSERT/EMAIL si vienes con ?run=1
             bool run = string.Equals(Request.Query["run"], "1", StringComparison.Ordinal);
+
             var notificaciones = new List<Notificacion>();
 
             using var connection = new SqlConnection(_connectionString);
@@ -324,7 +326,7 @@ namespace Abstract_CR.Controllers
                     };
                     if (mensajeLimpio == null) continue;
 
-                    // 👇 En la vista mostramos SOLO el mensaje limpio (sin token)
+                    // Para la vista mostramos SOLO el mensaje limpio (sin token)
                     notificaciones.Add(new Notificacion
                     {
                         UsuarioID = usuarioId.Value,
@@ -333,14 +335,14 @@ namespace Abstract_CR.Controllers
                         FechaEnvio = DateTime.Now
                     });
 
-                    // Si no es ejecución, no persiste ni envía
+                    // Si no es ejecución, no persistimos ni enviamos
                     if (!run) continue;
 
                     // Dedupe por Plan+Umbral usando token (no se reenvía si ya existe)
                     if (YaSeEnvioVencimiento(connection, usuarioId.Value, token))
                         continue;
 
-                    // En BD guardamos mensaje con token para control
+                    // Guardamos en BD el mensaje con token para control
                     var mensajeConToken = $"{token} {mensajeLimpio}";
 
                     var sqlInsert = @"
@@ -381,6 +383,7 @@ namespace Abstract_CR.Controllers
             return View(notificaciones);
         }
 
+        // Dedupe permanente por Plan+Umbral, sin problemas con corchetes
         private bool YaSeEnvioVencimiento(SqlConnection connection, int usuarioId, string token)
         {
             var sql = @"
@@ -388,15 +391,14 @@ namespace Abstract_CR.Controllers
         FROM dbo.Notificaciones
         WHERE UsuarioID = @UsuarioID
           AND Tipo = 'Vencimiento'
-          AND Mensaje LIKE @Token
+          AND CHARINDEX(@Token, Mensaje) > 0
     ";
             using var cmd = new SqlCommand(sql, connection);
             cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
-            cmd.Parameters.AddWithValue("@Token", $"%{token}%");
+            cmd.Parameters.AddWithValue("@Token", token); // ← sin % y literal
             var count = (int)cmd.ExecuteScalar();
             return count > 0;
         }
-
 
         private string? ObtenerEmailUsuario(int usuarioId)
         {

@@ -95,6 +95,66 @@ namespace Abstract_CR.Controllers
             return RedirectToAction("Perfil");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditarPerfilAdmin()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+                return RedirectToAction("Login", "Autenticacion"); // <- opcional, más explícito
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+
+            if (usuario == null)
+                return NotFound();
+
+            return View(usuario);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditarPerfilAdmin(Usuario model)
+        {
+            if (!ModelState.IsValid)
+            {
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Error de validación: {Error}", error.ErrorMessage);
+                }
+                return View(model);
+            }
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == model.UsuarioID);
+            if (usuario == null)
+                return NotFound();
+
+            usuario.Nombre = model.Nombre;
+            usuario.Apellido = model.Apellido;
+            usuario.CorreoElectronico = model.CorreoElectronico;
+            usuario.Activo = model.Activo;
+
+            if (model.RolID.HasValue)
+                usuario.RolID = model.RolID.Value;
+
+            if (!string.IsNullOrWhiteSpace(model.ContrasenaHash))
+            {
+                using var sha256 = System.Security.Cryptography.SHA256.Create();
+                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.ContrasenaHash));
+                usuario.ContrasenaHash = Convert.ToBase64String(bytes);
+            }
+
+            _context.Entry(usuario).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
+            HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
+            TempData["Mensaje"] = "Perfil actualizado correctamente";
+
+            // 👇 Redirige al Panel de Administración
+            return RedirectToAction("PanelAdministracion", "Administracion");
+        }
+
+
 
 
         // GET: Usuario/Alergias

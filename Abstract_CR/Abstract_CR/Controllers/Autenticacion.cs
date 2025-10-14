@@ -37,19 +37,13 @@ namespace Abstract_CR.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             try
             {
-                // Buscar usuario por email
                 var usuario = await _context.Usuarios
                     .Include(u => u.Rol)
                     .FirstOrDefaultAsync(u => u.CorreoElectronico == model.Email && u.Activo);
-
-                //var usuarioExistente = _userHelper.ObtenerUsuarioPorCorreo(model.Email);
 
                 if (usuario == null)
                 {
@@ -57,14 +51,13 @@ namespace Abstract_CR.Controllers
                     return View(model);
                 }
 
-                // Verificar contraseña (por ahora simple, después implementaremos hash)
                 if (usuario.ContrasenaHash != HashPassword(model.Password))
                 {
                     ModelState.AddModelError(string.Empty, "Credenciales inválidas");
                     return View(model);
                 }
 
-                // Configurar sesión
+                // Sesión
                 HttpContext.Session.SetInt32("UsuarioID", usuario.UsuarioID);
                 HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
                 HttpContext.Session.SetString("Rol", usuario.Rol?.NombreRol ?? "Cliente");
@@ -72,6 +65,13 @@ namespace Abstract_CR.Controllers
 
                 _logger.LogInformation($"Usuario {usuario.CorreoElectronico} inició sesión");
 
+                // 🔀 Redirección según rol
+                if (string.Equals(usuario.Rol?.NombreRol, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return RedirectToAction("PanelAdministracion", "Administracion");
+                }
+
+                // Usuario no admin → a Home (o donde prefieras)
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)

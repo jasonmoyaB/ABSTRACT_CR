@@ -46,6 +46,11 @@
                         <i class="fa-solid fa-chart-line me-2"></i> Reportes
                     </a>
 
+                    <!-- 🔥 NUEVO: acceso directo al editor de eBook -->
+                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "EbookEdicion")'>
+                        <i class="fa-solid fa-book-open me-2"></i> Editar eBook
+                    </a>
+
                     <hr class="border-secondary my-3" />
 
                     <a class="nav-link text-light text-start" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>
@@ -107,6 +112,10 @@
                             </a>
                             <a class="nav-link text-light" href='@Url.Action("Index", "Reportes")'>
                                 <i class="fa-solid fa-chart-line me-2"></i> Reportes
+                            </a>
+                            <!-- Ya lo tenías en móvil -->
+                            <a class="nav-link text-light text-start" href='@Url.Action("Index", "EbookEdicion")'>
+                                <i class="fa-solid fa-book-open me-2"></i> Editar eBook
                             </a>
                             <hr class="border-secondary my-2" />
                             <a class="nav-link text-light" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>

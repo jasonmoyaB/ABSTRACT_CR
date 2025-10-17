@@ -1,5 +1,12 @@
+@model IEnumerable<Abstract_CR.Models.EbookEdicion>
+
 @{
     ViewData["Title"] = "Ebooks - Abstract";
+
+    // Mapear lo que agregaste en Admin a cada tarjeta (por número de Escenario)
+    var esc1 = Model?.FirstOrDefault(x => x.Escenario == 1);
+    var esc2 = Model?.FirstOrDefault(x => x.Escenario == 2);
+    var esc3 = Model?.FirstOrDefault(x => x.Escenario == 3);
 }
 
 <!-- Hero Section -->
@@ -88,7 +95,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Call to Action -->
             <div class="col-lg-6 mb-4">
                 <div class="text-center">
@@ -115,59 +122,104 @@
                 </div>
             </div>
         </div>
-        
-                 <div class="row">
-             <!-- E-book 1 -->
-             <div class="col-lg-4 mb-4">
-                 <div class="card h-100 border-0 shadow-sm">
-                     <div class="card-body text-center p-4 d-flex flex-column">
-                         <div class="mb-3">
-                             <img src="~/assets/img/FondoCarneMolida.jpeg" alt="Meal Prep" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover; width: 100%;" />
-                         </div>
-                                                   <h5 class="card-title flex-grow-1">MEAL PREP<br>Cocina una vez, come toda la semana</h5>
-                          <p class="text-muted small">por Reydel Diaz</p>
-                         <div class="mb-3">
-                             <span class="h4 text-primary">$15.99</span>
-                         </div>
-                         <a href="#" class="btn btn-outline-primary w-100 mt-auto">Adquirir</a>
-                     </div>
-                 </div>
-             </div>
-             
-             <!-- E-book 2 -->
-             <div class="col-lg-4 mb-4">
-                 <div class="card h-100 border-0 shadow-sm">
-                     <div class="card-body text-center p-4 d-flex flex-column">
-                         <div class="mb-3">
-                             <img src="~/assets/img/FondoAlbondigas.jpeg" alt="Recetario Básico" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover; width: 100%;" />
-                         </div>
-                         <h5 class="card-title flex-grow-1">Meal Prep: Recetario Básico</h5>
-                         <p class="text-muted small">por Reydel Diaz</p>
-                         <div class="mb-3">
-                             <span class="h4 text-primary">$9</span>
-                         </div>
-                         <a href="#" class="btn btn-outline-primary w-100 mt-auto">Adquirir</a>
-                     </div>
-                 </div>
-             </div>
-             
-             <!-- E-book 3 -->
-             <div class="col-lg-4 mb-4">
-                 <div class="card h-100 border-0 shadow-sm">
-                     <div class="card-body text-center p-4 d-flex flex-column">
-                         <div class="mb-3">
-                             <img src="~/assets/img/fondoReceta.jpeg" alt="Ocasiones Especiales" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover; width: 100%;" />
-                         </div>
-                         <h5 class="card-title flex-grow-1">RECETARIO PARA OCASIONES ESPECIALES</h5>
-                         <p class="text-muted small">por Reydel Diaz</p>
-                         <div class="mb-3">
-                             <span class="h4 text-primary">$6.99</span>
-                         </div>
-                         <a href="#" class="btn btn-outline-primary w-100 mt-auto">Adquirir</a>
-                     </div>
-                 </div>
-             </div>
-         </div>
+
+        <div class="row">
+            <!-- E-book 1 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <img src="~/assets/img/FondoCarneMolida.jpeg" alt="Meal Prep" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover; width: 100%;" />
+                        </div>
+                        <h5 class="card-title flex-grow-1">MEAL PREP<br />Cocina una vez, come toda la semana</h5>
+                        <p class="text-muted small">por Reydel Diaz</p>
+                        <div class="mb-3">
+                            <span class="h4 text-primary">$15.99</span>
+                        </div>
+
+                        @* 🔗 Inyectar lo que agregaste/editarte/eliminas en Admin: Escenario 1 *@
+                        @if (esc1 != null)
+                        {
+                            <div class="text-start mt-3 small">
+                                <div class="fw-bold mb-1">Escenario @esc1.Escenario</div>
+                                <ul class="list-unstyled mb-2">
+                                    <li><strong>Criterio:</strong> @esc1.CriterioAceptacion</li>
+                                    <li><strong>Contexto:</strong> @esc1.Contexto</li>
+                                    <li><strong>Evento:</strong> @esc1.Evento</li>
+                                    <li><strong>Resultado:</strong> @esc1.Resultado</li>
+                                </ul>
+                            </div>
+                        }
+
+                        <a href="#" class="btn btn-outline-primary w-100 mt-auto">Adquirir</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E-book 2 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <img src="~/assets/img/FondoAlbondigas.jpeg" alt="Recetario Básico" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover; width: 100%;" />
+                        </div>
+                        <h5 class="card-title flex-grow-1">Meal Prep: Recetario Básico</h5>
+                        <p class="text-muted small">por Reydel Diaz</p>
+                        <div class="mb-3">
+                            <span class="h4 text-primary">$9</span>
+                        </div>
+
+                        @* 🔗 Escenario 2 *@
+                        @if (esc2 != null)
+                        {
+                            <div class="text-start mt-3 small">
+                                <div class="fw-bold mb-1">Escenario @esc2.Escenario</div>
+                                <ul class="list-unstyled mb-2">
+                                    <li><strong>Criterio:</strong> @esc2.CriterioAceptacion</li>
+                                    <li><strong>Contexto:</strong> @esc2.Contexto</li>
+                                    <li><strong>Evento:</strong> @esc2.Evento</li>
+                                    <li><strong>Resultado:</strong> @esc2.Resultado</li>
+                                </ul>
+                            </div>
+                        }
+
+                        <a href="#" class="btn btn-outline-primary w-100 mt-auto">Adquirir</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E-book 3 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <img src="~/assets/img/fondoReceta.jpeg" alt="Ocasiones Especiales" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover; width: 100%;" />
+                        </div>
+                        <h5 class="card-title flex-grow-1">RECETARIO PARA OCASIONES ESPECIALES</h5>
+                        <p class="text-muted small">por Reydel Diaz</p>
+                        <div class="mb-3">
+                            <span class="h4 text-primary">$6.99</span>
+                        </div>
+
+                        @* 🔗 Escenario 3 *@
+                        @if (esc3 != null)
+                        {
+                            <div class="text-start mt-3 small">
+                                <div class="fw-bold mb-1">Escenario @esc3.Escenario</div>
+                                <ul class="list-unstyled mb-2">
+                                    <li><strong>Criterio:</strong> @esc3.CriterioAceptacion</li>
+                                    <li><strong>Contexto:</strong> @esc3.Contexto</li>
+                                    <li><strong>Evento:</strong> @esc3.Evento</li>
+                                    <li><strong>Resultado:</strong> @esc3.Resultado</li>
+                                </ul>
+                            </div>
+                        }
+
+                        <a href="#" class="btn btn-outline-primary w-100 mt-auto">Adquirir</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -191,23 +243,21 @@
     </div>
 </section>
 
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+        }
 
- <style>
- .card {
-     transition: transform 0.3s ease, box-shadow 0.3s ease;
- }
- 
- .card:hover {
-     transform: translateY(-5px);
-     box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
- }
- 
- .btn {
-     transition: all 0.3s ease;
- }
- 
- .btn:hover {
-     transform: translateY(-2px);
- }
- </style> 
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+</style>

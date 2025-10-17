@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Abstract_CR.Models;
+using Microsoft.EntityFrameworkCore;
 using Abstract_CR.Models;
 
 namespace Abstract_CR.Data
@@ -18,6 +19,8 @@ namespace Abstract_CR.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<PassResetTokens> Tokens { get; set; }
+        public DbSet<EbookEdicion> EbookEdicion { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

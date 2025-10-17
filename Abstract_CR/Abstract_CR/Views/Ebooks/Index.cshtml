@@ -1,8 +1,9 @@
-@model IEnumerable<Abstract_CR.Models.EbookEdicion>
-
+﻿@model IEnumerable<Abstract_CR.Models.EbookEdicion>
 @{
     ViewData["Title"] = "Ebooks - Abstract";
-    // helper para elegir imagen según Escenario (opcional)
+    // si tenés un layout público, usalo. Si no, podés dejarlo en null o al _Layout principal.
+    // Layout = "~/Views/Shared/_Layout.cshtml";
+
     Func<int, string> ImgFor = esc => esc switch
     {
         1 => Url.Content("~/assets/img/FondoCarneMolida.jpeg"),
@@ -12,7 +13,6 @@
     };
 }
 
-<!-- Hero Section -->
 <section class="page-section clearfix" style="background: linear-gradient(135deg, rgba(230, 167, 86, 0.1) 0%, rgba(47, 23, 15, 0.05) 100%);">
     <div class="container">
         <div class="row align-items-center">
@@ -35,7 +35,6 @@
     </div>
 </section>
 
-<!-- Beneficios Section -->
 <section class="page-section cta" id="beneficios">
     <div class="container">
         <div class="row">
@@ -74,11 +73,9 @@
     </div>
 </section>
 
-<!-- Pack Especial Section -->
 <section class="page-section" id="productos">
     <div class="container">
         <div class="row align-items-center">
-            <!-- Pack Especial -->
             <div class="col-lg-6 mb-4">
                 <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #e6a756 0%, #d4944a 100%); color: white;">
                     <div class="card-body p-5">
@@ -98,8 +95,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Call to Action -->
             <div class="col-lg-6 mb-4">
                 <div class="text-center">
                     <h4 class="mb-4" style="color: #f6e1c5;">Accede al Pack aquí</h4>
@@ -112,7 +107,6 @@
     </div>
 </section>
 
-<!-- E-books Individuales Section -->
 <section class="page-section">
     <div class="container">
         <div class="row">
@@ -120,13 +114,12 @@
                 <div class="text-center mb-5">
                     <h2 class="section-heading">
                         <span class="section-heading-upper" style="color:#e6a756">E-books</span>
-                        <span class="section-heading-lower" style="color:#f6e1c5">por separado </span>
+                        <span class="section-heading-lower" style="color:#f6e1c5">por separado</span>
                     </h2>
                 </div>
             </div>
         </div>
 
-        <!-- Render dinámico de TODOS los e-books activos -->
         <div class="row">
             @if (Model == null || !Model.Any())
             {
@@ -162,8 +155,8 @@
                                     </ul>
                                 </div>
 
-                                <a href="#" class="btn w-100 mt-auto adquirir-btn">
-                                    <i class="fa-solid fa-book-open me-2"></i> Adquirir
+                                <a href="#" class="btn btn-outline-primary w-100 mt-auto" style="color: black;">
+                                    Adquirir
                                 </a>
                             </div>
                         </div>
@@ -171,21 +164,9 @@
                 }
             }
         </div>
-
-        <style>
-            .adquirir-btn {
-                background-color: white;
-                color: black !important;
-                border: 2px solid black !important;
-                font-weight: 600;
-                transition: none !important;
-            }
-        </style>
-
     </div>
 </section>
 
-<!-- Contacto Section -->
 <section class="page-section cta">
     <div class="container">
         <div class="row">

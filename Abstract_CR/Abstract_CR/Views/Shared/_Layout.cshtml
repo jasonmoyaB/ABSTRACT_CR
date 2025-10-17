@@ -45,7 +45,9 @@
                     
                     @if (Context.Session.GetInt32("UsuarioID") != null)
                     {
-                        <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("Ebooks", "Home")">Ebooks</a></li>
+                        <li class="nav-item px-lg-4">
+                            <a class="nav-link text-uppercase" href='@Url.Action("Index", "Ebooks")'>Ebooks</a>
+                        </li>
                         <li class="nav-item px-lg-4"><a class="nav-link text-uppercase" href="@Url.Action("MenuSemanal", "Home")">Mi Menú</a></li>
                         <li class="nav-item px-lg-4">
                             <a class="nav-link text-uppercase" href="@Url.Action("Perfil", "Usuario")">

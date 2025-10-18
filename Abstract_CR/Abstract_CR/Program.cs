@@ -30,6 +30,8 @@ builder.Services.AddSession(options =>
 
 // Registrar Helpers para inyeccion de dependencias
 builder.Services.AddScoped<UserHelper>();
+builder.Services.AddScoped<EbooksHelper>();
+builder.Services.AddScoped<SuscripcionesHelper>();
 
 // Configurar servicios de email
 builder.Services.AddScoped<IEmailService, EmailService>();

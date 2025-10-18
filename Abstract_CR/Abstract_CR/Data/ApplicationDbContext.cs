@@ -20,6 +20,7 @@ namespace Abstract_CR.Data
         public DbSet<Rol> Roles { get; set; }
         public DbSet<PassResetTokens> Tokens { get; set; }
         public DbSet<EbookEdicion> EbookEdicion { get; set; }
+        public DbSet<Suscripcion> Suscripciones { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -39,5 +39,6 @@ namespace Abstract_CR.Models
 
         [Display(Name = "Fecha de Registro")]
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
+        public string? Documento { get; set; }
     }
 }

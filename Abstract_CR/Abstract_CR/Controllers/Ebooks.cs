@@ -1,5 +1,7 @@
 ﻿// Controllers/EbooksController.cs
 using Abstract_CR.Data;
+using Abstract_CR.Helpers;
+using Abstract_CR.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -9,19 +11,22 @@ namespace Abstract_CR.Controllers
     public class EbooksController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly EbooksHelper _ebooksHelper;
+        private readonly SuscripcionesHelper _suscripcionesHelper;
 
-        public EbooksController(ApplicationDbContext context)
+        public EbooksController(ApplicationDbContext context, EbooksHelper ebooksHelper, SuscripcionesHelper suscripcionesHelper)
         {
             _context = context;
+            _ebooksHelper = ebooksHelper;
+            _suscripcionesHelper = suscripcionesHelper;
         }
 
         public IActionResult Index()
         {
-            var ediciones = _context.EbookEdicion
-                .Where(e => e.Estado)
-                .OrderBy(e => e.Escenario)
-                .AsNoTracking()
-                .ToList();
+            int usuarioID = (int)HttpContext.Session.GetInt32("UsuarioID");
+            ViewBag.subscripcion = _suscripcionesHelper.GetSuscripcion(usuarioID);
+
+            var ediciones = _ebooksHelper.GetEbooks();
 
             ViewBag.Count = ediciones.Count; // debug visual en la vista si querés
             return View(ediciones);

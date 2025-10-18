@@ -155,9 +155,26 @@
                                     </ul>
                                 </div>
 
-                                <a href="#" class="btn btn-outline-primary w-100 mt-auto" style="color: black;">
-                                    Adquirir
-                                </a>
+                                @if (ViewBag.subscripcion.SuscripcionID != 0 && ViewBag.subscripcion.Estado == "Activa")
+                                {
+                                    @if (e.Documento != null)
+                                    {
+                                        <a href="@e.Documento" download class="btn btn-outline-primary w-100 mt-auto" style="color: black;">
+                                            Adquirir
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-outline-secondary w-100 mt-auto" disabled>
+                                            Documento no disponible
+                                        </button>
+                                    }
+                                }else
+                                {
+                                    <span class="w-100 mt-auto" disabled>
+                                        No estás suscripto para poder descargar el eBook
+                                    </span>
+                                }
                             </div>
                         </div>
                     </div>

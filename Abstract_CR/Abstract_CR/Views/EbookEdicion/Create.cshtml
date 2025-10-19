@@ -1,0 +1,71 @@
+﻿@model Abstract_CR.Models.EbookEdicion
+@{
+    ViewData["Title"] = "Nuevo Escenario";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="fa-solid fa-plus text-success me-2"></i>
+        Nuevo Escenario del eBook
+    </h2>
+
+    <form asp-action="Create" method="post">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="TituloHU" class="form-label"></label>
+                <input asp-for="TituloHU" class="form-control" />
+                <span asp-validation-for="TituloHU" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label asp-for="Escenario" class="form-label"></label>
+                <input asp-for="Escenario" class="form-control" type="number" min="1" />
+                <span asp-validation-for="Escenario" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CriterioAceptacion" class="form-label"></label>
+            <input asp-for="CriterioAceptacion" class="form-control" />
+            <span asp-validation-for="CriterioAceptacion" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Contexto" class="form-label"></label>
+            <textarea asp-for="Contexto" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="Contexto" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Evento" class="form-label"></label>
+            <textarea asp-for="Evento" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="Evento" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Resultado" class="form-label"></label>
+            <textarea asp-for="Resultado" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="Resultado" class="text-danger"></span>
+        </div>
+
+        <!-- ✅ Campo Estado con toggle -->
+        <div class="form-check form-switch mb-4">
+            <input asp-for="Estado" class="form-check-input" type="checkbox" id="EstadoSwitch" checked />
+            <label class="form-check-label" for="EstadoSwitch">Activo</label>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Crear
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa-solid fa-rotate-left"></i> Volver
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

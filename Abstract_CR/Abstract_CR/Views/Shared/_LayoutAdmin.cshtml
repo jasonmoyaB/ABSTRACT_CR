@@ -1,0 +1,151 @@
+﻿@{
+    Layout = null;
+    var usuario = Context.Session.GetString("NombreUsuario") ?? "Administrador";
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · Admin</title>
+
+    <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+
+    <!-- Google fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600,700|Lora:400,400i,700" rel="stylesheet" />
+
+    <!-- Bootstrap + Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body class="bg-light">
+    <div class="container-fluid p-0">
+        <div class="row min-vh-100 g-0">
+            <!-- Sidebar (lg+) -->
+            <aside class="col-lg-3 col-xl-2 d-none d-lg-flex flex-column bg-dark text-light p-3">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <img src="~/assets/img/LOGO01.jfif" alt="logo" class="rounded" width="28" height="28" />
+                    <strong>Abstract · Admin</strong>
+                </div>
+
+                <nav class="nav nav-pills flex-column">
+                    <a class="nav-link text-start @(ViewContext.RouteData.Values["action"]?.ToString() == "PanelAdministracion" ? "active" : "text-light")"
+                       href='@Url.Action("PanelAdministracion", "Administracion")'>
+                        <i class="fa-solid fa-gauge me-2"></i> Panel
+                    </a>
+                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Usuarios")'>
+                        <i class="fa-solid fa-users me-2"></i> Usuarios
+                    </a>
+                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Planes")'>
+                        <i class="fa-solid fa-clipboard-list me-2"></i> Planes
+                    </a>
+                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Notificaciones")'>
+                        <i class="fa-regular fa-bell me-2"></i> Notificaciones
+                    </a>
+                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Reportes")'>
+                        <i class="fa-solid fa-chart-line me-2"></i> Reportes
+                    </a>
+
+                    <!-- 🔥 NUEVO: acceso directo al editor de eBook -->
+                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "EbookEdicion")'>
+                        <i class="fa-solid fa-book-open me-2"></i> Editar eBook
+                    </a>
+
+                    <hr class="border-secondary my-3" />
+
+                    <a class="nav-link text-light text-start" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>
+                        <i class="fa-regular fa-user me-2"></i> Mi Perfil
+                    </a>
+                    <a class="nav-link text-light text-start" href='@Url.Action("CerrarSesion", "Autenticacion")'>
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Salir
+                    </a>
+                </nav>
+
+                <div class="mt-auto small text-center opacity-75">
+                    © @DateTime.Now.Year
+                </div>
+            </aside>
+
+            <!-- Content -->
+            <div class="col-lg-9 col-xl-10 d-flex flex-column">
+                <!-- Topbar -->
+                <nav class="navbar bg-white border-bottom">
+                    <div class="container-fluid">
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Botón hamburguesa abre/cierra el collapse (no offcanvas) -->
+                            <button class="btn btn-outline-secondary d-lg-none"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#adminMobileMenu"
+                                    aria-controls="adminMobileMenu"
+                                    aria-expanded="false"
+                                    aria-label="Menú">
+                                <i class="fa-solid fa-bars"></i>
+                            </button>
+                            <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small d-none d-md-inline">Bienvenido,</span>
+                            <a class="btn btn-sm btn-outline-primary" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>
+                                <i class="fa-regular fa-user"></i> @usuario
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- MENÚ MÓVIL (collapse debajo de la topbar) -->
+                <div class="collapse d-lg-none" id="adminMobileMenu">
+                    <div class="bg-dark">
+                        <nav class="nav nav-pills flex-column p-2">
+                            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "PanelAdministracion" ? "active" : "text-light")"
+                               href='@Url.Action("PanelAdministracion", "Administracion")'>
+                                <i class="fa-solid fa-gauge me-2"></i> Panel
+                            </a>
+                            <a class="nav-link text-light" href='@Url.Action("Index", "Usuarios")'>
+                                <i class="fa-solid fa-users me-2"></i> Usuarios
+                            </a>
+                            <a class="nav-link text-light" href='@Url.Action("Index", "Planes")'>
+                                <i class="fa-solid fa-clipboard-list me-2"></i> Planes
+                            </a>
+                            <a class="nav-link text-light" href='@Url.Action("Index", "Notificaciones")'>
+                                <i class="fa-regular fa-bell me-2"></i> Notificaciones
+                            </a>
+                            <a class="nav-link text-light" href='@Url.Action("Index", "Reportes")'>
+                                <i class="fa-solid fa-chart-line me-2"></i> Reportes
+                            </a>
+                            <!-- Ya lo tenías en móvil -->
+                            <a class="nav-link text-light text-start" href='@Url.Action("Index", "EbookEdicion")'>
+                                <i class="fa-solid fa-book-open me-2"></i> Editar eBook
+                            </a>
+                            <hr class="border-secondary my-2" />
+                            <a class="nav-link text-light" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>
+                                <i class="fa-regular fa-user me-2"></i> Mi Perfil
+                            </a>
+                            <a class="nav-link text-light" href='@Url.Action("CerrarSesion", "Autenticacion")'>
+                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Salir
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+                <!-- /MENÚ MÓVIL -->
+                <!-- Main -->
+                <main class="flex-fill p-3">
+                    @RenderBody()
+                </main>
+
+                <!-- Footer -->
+                <footer class="bg-white border-top py-3">
+                    <div class="container-fluid text-center">
+                        <small>Panel de Administración · Abstract</small>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

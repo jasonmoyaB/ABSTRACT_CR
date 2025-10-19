@@ -5,6 +5,7 @@ namespace Abstract_CR.Models
 {
     public class PlanNutricional
     {
+        [Key] // <-- Indica a EF Core que esta es la clave primaria
         public int PlanID { get; set; }
 
         public int UsuarioID { get; set; }

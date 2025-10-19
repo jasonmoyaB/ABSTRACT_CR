@@ -1,0 +1,86 @@
+@model Abstract_CR.Models.Usuario
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Editar Perfil (Admin)";
+}
+
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <a href="@Url.Action("PanelAdministracion", "Administracion")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Volver al Panel
+        </a>
+
+        <h1 class="h3 text-center flex-grow-1 mb-0">Editar Perfil del Administrador</h1>
+
+        <div class="invisible">
+            <a class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i></a>
+        </div>
+    </div>
+
+    <!-- Card principal -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Información Personal</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="EditarPerfilAdmin" asp-controller="Usuario" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="UsuarioID" type="hidden" />
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="Nombre" class="form-control" placeholder="Nombre" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Apellido" class="form-label fw-semibold">Apellido</label>
+                        <input asp-for="Apellido" class="form-control" placeholder="Apellido" />
+                        <span asp-validation-for="Apellido" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CorreoElectronico" class="form-label fw-semibold">Correo electrónico</label>
+                        <input asp-for="CorreoElectronico" type="email" class="form-control" placeholder="correo@ejemplo.com" />
+                        <span asp-validation-for="CorreoElectronico" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ContrasenaHash" class="form-label fw-semibold">Nueva contraseña (opcional)</label>
+                        <input asp-for="ContrasenaHash" type="password" class="form-control" placeholder="••••••••" />
+                        <span asp-validation-for="ContrasenaHash" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Estado de la cuenta</label>
+                        <div class="form-check form-switch">
+                            <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch" />
+                            <label class="form-check-label" for="activoSwitch">
+                                @(Model.Activo ? "Activa" : "Inactiva")
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Guardar Cambios
+                    </button>
+                    <a href="@Url.Action("PanelAdministracion", "Administracion")" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

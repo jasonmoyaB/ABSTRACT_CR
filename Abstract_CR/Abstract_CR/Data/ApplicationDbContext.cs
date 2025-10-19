@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Abstract_CR.Models;
+using Microsoft.EntityFrameworkCore;
 using Abstract_CR.Models;
 
 namespace Abstract_CR.Data
@@ -18,6 +19,10 @@ namespace Abstract_CR.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<PassResetTokens> Tokens { get; set; }
+        public DbSet<EbookEdicion> EbookEdicion { get; set; }
+        public DbSet<Suscripcion> Suscripciones { get; set; }
+        public DbSet<ComentarioReceta> ComentarioRecetas { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -71,6 +76,16 @@ namespace Abstract_CR.Data
                       .WithMany()
                       .HasForeignKey(e => e.UsuarioID)
                       .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ComentarioReceta>(entity =>
+            {
+                entity.ToTable("ComentariosRecetas");
+                entity.HasKey(e => e.ComentarioID);
+                entity.Property(e => e.UsuarioID).IsRequired();
+                entity.Property(e => e.RecetaID).IsRequired();
+                entity.Property(e => e.ComentarioID).IsRequired();
+                entity.Property(e => e.FechaComentario).IsRequired();
             });
         }
     }

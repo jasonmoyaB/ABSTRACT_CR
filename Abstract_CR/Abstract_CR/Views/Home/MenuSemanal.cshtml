@@ -56,24 +56,26 @@
         <div class="row">
             <!-- Lunes -->
             <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm menu-card" data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Lunes">
-                    <div class="card-header bg-primary text-white text-center">
-                        <h5 class="mb-0">Lunes</h5>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <img src="~/assets/img/FondoCarneMolida.jpeg" alt="Pollo a la plancha" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
-                        <h6 class="card-title">Pollo a la plancha con vegetales</h6>
-                        <div class="mb-3">
-                            <span class="badge bg-success me-1">Sin gluten</span>
-                            <span class="badge bg-info me-1">Alto en proteína</span>
+                <div class="card h-100 border-0 shadow-sm menu-card">
+                    <div data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Lunes">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h5 class="mb-0">Lunes</h5>
                         </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('lunes', 5);">
-                                <i class="fas fa-thumbs-up"></i> Me gustó
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('lunes');">
-                                <i class="fas fa-star"></i> Favorito
-                            </button>
+                        <div class="card-body text-center p-4">
+                            <img src="~/assets/img/FondoCarneMolida.jpeg" alt="Pollo a la plancha" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
+                            <h6 class="card-title">Pollo a la plancha con vegetales</h6>
+                            <div class="mb-3">
+                                <span class="badge bg-success me-1">Sin gluten</span>
+                                <span class="badge bg-info me-1">Alto en proteína</span>
+                            </div>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('lunes', 5);">
+                                    <i class="fas fa-thumbs-up"></i> Me gustó
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('lunes');">
+                                    <i class="fas fa-star"></i> Favorito
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -223,16 +225,58 @@
                     <div class="col-md-6">
                         <h6 id="nombrePlato"></h6>
                         <div id="etiquetasPlato" class="mb-3"></div>
-                        
+
                         <h6>Ingredientes principales:</h6>
                         <ul id="ingredientesLista" class="list-unstyled">
                             <!-- Se llenará dinámicamente -->
                         </ul>
-                        
+
                         <div class="alert alert-info">
                             <i class="fas fa-lightbulb me-2"></i>
                             <strong>Tip del Chef:</strong>
                             <p id="tipChef" class="mb-0 mt-2"></p>
+                        </div>
+                        <div class="mt-3 text-start">
+                            <h6>Comentarios:</h6>
+                            <div id="listaComentariosReceta">
+                                @if (ViewBag.ComentariosReceta.Count > 0)
+                                {
+                                    <ul class="list-unstyled">
+                                        @foreach (var item in ViewBag.ComentariosReceta)
+                                        {
+                                            <li class="d-flex justify-content-between align-items-center mb-2">
+                                                <span>
+                                                    <i class="fas fa-comment-dots text-secondary me-2"></i>@item.Comentario
+                                                </span>
+                                                <button class="btn btn-sm btn-danger btn-eliminar-comentario"
+                                                        data-comentario-id="@item.ComentarioID"
+                                                        onclick="event.stopPropagation(); eliminarComentario(@item.ComentarioID);">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <span>Sin comentarios</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light" onclick="event.stopPropagation();">
+                            <div class="input-group input-group-sm">
+                                <input type="text"
+                                       class="form-control"
+                                       id="nuevoComentarioReceta"
+                                       name="nuevoComentarioReceta"
+                                       placeholder="Agregar comentario..."
+                                       onclick="event.stopPropagation();"
+                                       onkeydown="event.stopPropagation();">
+                                <button class="btn btn-primary" type="button"
+                                        onclick="event.stopPropagation(); agregarComentario();">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -379,120 +423,204 @@
 </div>
 
 <style>
-.menu-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-}
+    .menu-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
 
-.menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
-}
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+        }
 
-.btn {
-    transition: all 0.3s ease;
-}
+    .btn {
+        transition: all 0.3s ease;
+    }
 
-.btn:hover {
-    transform: translateY(-2px);
-}
+        .btn:hover {
+            transform: translateY(-2px);
+        }
 
-.card-header {
-    border-bottom: none;
-}
+    .card-header {
+        border-bottom: none;
+    }
 
-.badge {
-    font-size: 0.75rem;
-}
+    .badge {
+        font-size: 0.75rem;
+    }
 </style>
 
 <script>
-// Datos de los platos
-const platosData = {
-    'Lunes': {
-        nombre: 'Pollo a la plancha con vegetales',
-        imagen: '/assets/img/FondoCarneMolida.jpeg',
-        etiquetas: ['Sin gluten', 'Alto en proteína'],
-        ingredientes: ['Pechuga de pollo', 'Brócoli', 'Zanahoria', 'Arroz integral'],
-        tipChef: 'Cocina el pollo a fuego medio para mantenerlo jugoso y tierno.'
-    },
-    'Martes': {
-        nombre: 'Salmón al horno con quinoa',
-        imagen: '/assets/img/FondoAlbondigas.jpeg',
-        etiquetas: ['Sin gluten', 'Omega-3'],
-        ingredientes: ['Salmón fresco', 'Quinoa', 'Espárragos', 'Limón'],
-        tipChef: 'El salmón debe estar rosado por dentro, no completamente cocido.'
-    },
-    'Miércoles': {
-        nombre: 'Ensalada mediterránea con atún',
-        imagen: '/assets/img/fondoReceta.jpeg',
-        etiquetas: ['Sin gluten', 'Vegetariano'],
-        ingredientes: ['Lechuga', 'Tomate', 'Pepino', 'Atún', 'Aceite de oliva'],
-        tipChef: 'Agrega un toque de limón fresco justo antes de servir.'
-    },
-    'Jueves': {
-        nombre: 'Pasta integral con vegetales',
-        imagen: '/assets/img/FondoRecipientes.jpeg',
-        etiquetas: ['Integral', 'Bajo en grasa'],
-        ingredientes: ['Pasta integral', 'Calabacín', 'Champiñones', 'Salsa de tomate'],
-        tipChef: 'Cocina la pasta al dente para mejor textura y digestión.'
-    },
-    'Viernes': {
-        nombre: 'Carne magra con puré de papa',
-        imagen: '/assets/img/FondoCarneMolida.jpeg',
-        etiquetas: ['Sin gluten', 'Alto en hierro'],
-        ingredientes: ['Carne de res magra', 'Papa', 'Leche', 'Mantequilla'],
-        tipChef: 'Deja reposar la carne 5 minutos antes de cortarla.'
-    },
-    'Sábado': {
-        nombre: 'Sopa de vegetales con pollo',
-        imagen: '/assets/img/fondoReceta.jpeg',
-        etiquetas: ['Sin gluten', 'Bajo en calorías'],
-        ingredientes: ['Pollo', 'Zanahoria', 'Apio', 'Cebolla', 'Caldo de pollo'],
-        tipChef: 'Cocina a fuego lento para extraer todos los sabores.'
-    }
-};
+    // Datos de los platos
+    const platosData = {
+        'Lunes': {
+            nombre: 'Pollo a la plancha con vegetales',
+            imagen: '/assets/img/FondoCarneMolida.jpeg',
+            etiquetas: ['Sin gluten', 'Alto en proteína'],
+            ingredientes: ['Pechuga de pollo', 'Brócoli', 'Zanahoria', 'Arroz integral'],
+            tipChef: 'Cocina el pollo a fuego medio para mantenerlo jugoso y tierno.'
+        },
+        'Martes': {
+            nombre: 'Salmón al horno con quinoa',
+            imagen: '/assets/img/FondoAlbondigas.jpeg',
+            etiquetas: ['Sin gluten', 'Omega-3'],
+            ingredientes: ['Salmón fresco', 'Quinoa', 'Espárragos', 'Limón'],
+            tipChef: 'El salmón debe estar rosado por dentro, no completamente cocido.'
+        },
+        'Miércoles': {
+            nombre: 'Ensalada mediterránea con atún',
+            imagen: '/assets/img/fondoReceta.jpeg',
+            etiquetas: ['Sin gluten', 'Vegetariano'],
+            ingredientes: ['Lechuga', 'Tomate', 'Pepino', 'Atún', 'Aceite de oliva'],
+            tipChef: 'Agrega un toque de limón fresco justo antes de servir.'
+        },
+        'Jueves': {
+            nombre: 'Pasta integral con vegetales',
+            imagen: '/assets/img/FondoRecipientes.jpeg',
+            etiquetas: ['Integral', 'Bajo en grasa'],
+            ingredientes: ['Pasta integral', 'Calabacín', 'Champiñones', 'Salsa de tomate'],
+            tipChef: 'Cocina la pasta al dente para mejor textura y digestión.'
+        },
+        'Viernes': {
+            nombre: 'Carne magra con puré de papa',
+            imagen: '/assets/img/FondoCarneMolida.jpeg',
+            etiquetas: ['Sin gluten', 'Alto en hierro'],
+            ingredientes: ['Carne de res magra', 'Papa', 'Leche', 'Mantequilla'],
+            tipChef: 'Deja reposar la carne 5 minutos antes de cortarla.'
+        },
+        'Sábado': {
+            nombre: 'Sopa de vegetales con pollo',
+            imagen: '/assets/img/fondoReceta.jpeg',
+            etiquetas: ['Sin gluten', 'Bajo en calorías'],
+            ingredientes: ['Pollo', 'Zanahoria', 'Apio', 'Cebolla', 'Caldo de pollo'],
+            tipChef: 'Cocina a fuego lento para extraer todos los sabores.'
+        }
+    };
 
-// Función para mostrar detalles del día
-document.addEventListener('DOMContentLoaded', function() {
-    const detalleModal = document.getElementById('detalleModal');
-    detalleModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const dia = button.getAttribute('data-dia');
-        const plato = platosData[dia];
-        
-        document.getElementById('diaSeleccionado').textContent = dia;
-        document.getElementById('nombrePlato').textContent = plato.nombre;
-        document.getElementById('imagenPlato').src = plato.imagen;
-        
-        // Mostrar etiquetas
-        const etiquetasHtml = plato.etiquetas.map(etiqueta => 
-            `<span class="badge bg-success me-1">${etiqueta}</span>`
-        ).join('');
-        document.getElementById('etiquetasPlato').innerHTML = etiquetasHtml;
-        
-        // Mostrar ingredientes
-        const ingredientesHtml = plato.ingredientes.map(ingrediente => 
-            `<li><i class="fas fa-check text-success me-2"></i>${ingrediente}</li>`
-        ).join('');
-        document.getElementById('ingredientesLista').innerHTML = ingredientesHtml;
-        
-        // Mostrar tip del chef
-        document.getElementById('tipChef').textContent = plato.tipChef;
+    // Función para mostrar detalles del día
+    document.addEventListener('DOMContentLoaded', function () {
+        const detalleModal = document.getElementById('detalleModal');
+        detalleModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const dia = button.getAttribute('data-dia');
+            const plato = platosData[dia];
+
+            document.getElementById('diaSeleccionado').textContent = dia;
+            document.getElementById('nombrePlato').textContent = plato.nombre;
+            document.getElementById('imagenPlato').src = plato.imagen;
+
+            // Mostrar etiquetas
+            const etiquetasHtml = plato.etiquetas.map(etiqueta =>
+                `<span class="badge bg-success me-1">${etiqueta}</span>`
+            ).join('');
+            document.getElementById('etiquetasPlato').innerHTML = etiquetasHtml;
+
+            // Mostrar ingredientes
+            const ingredientesHtml = plato.ingredientes.map(ingrediente =>
+                `<li><i class="fas fa-check text-success me-2"></i>${ingrediente}</li>`
+            ).join('');
+            document.getElementById('ingredientesLista').innerHTML = ingredientesHtml;
+
+            // Mostrar tip del chef
+            document.getElementById('tipChef').textContent = plato.tipChef;
+        });
     });
-});
 
-// Función para calificar plato
-function calificarPlato(dia, calificacion) {
-    console.log(`Plato de ${dia} calificado con ${calificacion} estrellas`);
-    // Aquí se implementaría la lógica para guardar la calificación
-    alert(`¡Gracias por calificar el plato del ${dia}!`);
-}
+    // Función para calificar plato
+    function calificarPlato(dia, calificacion) {
+        console.log(`Plato de ${dia} calificado con ${calificacion} estrellas`);
+        // Aquí se implementaría la lógica para guardar la calificación
+        alert(`¡Gracias por calificar el plato del ${dia}!`);
+    }
 
-// Función para marcar como favorito
-function toggleFavorito(dia) {
-    console.log(`Plato de ${dia} marcado como favorito`);
-    // Aquí se implementaría la lógica para marcar como favorito
-    alert(`Plato del ${dia} agregado a favoritos`);
-}
+    // Función para marcar como favorito
+    function toggleFavorito(dia) {
+        console.log(`Plato de ${dia} marcado como favorito`);
+        // Aquí se implementaría la lógica para marcar como favorito
+        alert(`Plato del ${dia} agregado a favoritos`);
+    }
+
+    function agregarComentario() {
+        var comentario = $('#nuevoComentarioReceta').val().trim();
+
+        var recetaId = 1;
+
+        $.ajax({
+            url: '@Url.Action("AgregarComentarioReceta", "Recetas")',
+            type: 'POST',
+            data: {
+                recetaId: recetaId,
+                comentario: comentario
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Actualizar la lista de comentarios
+                    $('#listaComentariosReceta').html(response.html);
+
+                    // Limpiar el input
+                    $('#nuevoComentarioReceta').val('');
+                } else {
+                    mostrarMensajeError('Error al agregar el comentario: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('Error al procesar la solicitud');
+                console.error(error);
+            }
+        });
+    }
+
+    function eliminarComentario(comentarioId) {
+        // Obtener el ID de la receta
+        var recetaId = 1;
+
+        $.ajax({
+            url: '@Url.Action("EliminarComentarioReceta", "Recetas")',
+            type: 'POST',
+            data: {
+                comentarioId: comentarioId,
+                recetaId: recetaId
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Actualizar la lista de comentarios
+                    $('#listaComentariosReceta').html(response.html);
+                } else {
+                    alert('Error al eliminar el comentario: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                mostrarMensajeError('Error al procesar la solicitud');
+                console.error(error);
+            }
+        });
+    }
+
+    function mostrarMensajeError(mensaje) {
+        var alertHtml = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>¡Ups!</strong>
+                <p class="mb-0 mt-2">${mensaje}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+
+        $('#listaComentariosReceta').prepend(alertHtml);
+
+        setTimeout(function () {
+            $('.alert-danger').fadeOut('slow', function () {
+                $(this).remove();
+            });
+        }, 5000);
+    }
+
+    $(document).ready(function () {
+        $('#nuevoComentarioReceta').keypress(function (e) {
+            if (e.which === 13) { // Enter key
+                e.preventDefault();
+                agregarComentario();
+            }
+        });
+    });
 </script> 

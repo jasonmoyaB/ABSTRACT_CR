@@ -30,15 +30,19 @@ builder.Services.AddSession(options =>
 
 // Registrar Helpers para inyeccion de dependencias
 builder.Services.AddScoped<UserHelper>();
+builder.Services.AddScoped<EbooksHelper>();
+builder.Services.AddScoped<SuscripcionesHelper>();
+builder.Services.AddScoped<CometarioRecetaHelper>();
 
 // Configurar servicios de email
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHostedService<VencimientosNotifier>(); // <-- agrega esto
 
 var app = builder.Build();
 
 //
 
-// C�DIGO TEMPORAL PARA PROBAR LA CONEXION
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

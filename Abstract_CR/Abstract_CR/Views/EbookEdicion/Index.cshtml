@@ -1,0 +1,100 @@
+﻿@model IEnumerable<Abstract_CR.Models.EbookEdicion>
+@{
+    ViewData["Title"] = "Editar eBook";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="fa-solid fa-book-open text-primary me-2"></i> Contenido del eBook
+    </h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="mb-3 text-end">
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fa-solid fa-plus"></i> Nuevo Escenario
+        </a>
+    </div>
+
+    <table class="table table-hover table-bordered align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Escenario</th>
+                <th>Criterio de Aceptación</th>
+                <th>Contexto</th>
+                <th>Evento</th>
+                <th>Resultado</th>
+                <th>Estado</th>
+                <th style="width:240px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-center text-muted">No hay registros aún.</td></tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Escenario</td>
+                        <td>@item.CriterioAceptacion</td>
+                        <td>@item.Contexto</td>
+                        <td>@item.Evento</td>
+                        <td>@item.Resultado</td>
+                        <td>
+                            @if (item.Estado)
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Edit" asp-route-id="@item.EbookEdicionID" class="btn btn-sm btn-primary">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+
+                                <form asp-action="ToggleEstado" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@item.EbookEdicionID" />
+                                    <button type="submit" class="btn btn-sm @(item.Estado ? "btn-warning" : "btn-success")">
+                                        <i class="fa-solid @(item.Estado ? "fa-ban" : "fa-check")"></i>
+                                        @(item.Estado ? "Inactivar" : "Activar")
+                                    </button>
+                                </form>
+
+                                <form asp-action="Delete" method="post" class="d-inline"
+                                      onsubmit="return confirm('¿Seguro que deseas eliminar este escenario? Esta acción no se puede deshacer.');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.EbookEdicionID" />
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

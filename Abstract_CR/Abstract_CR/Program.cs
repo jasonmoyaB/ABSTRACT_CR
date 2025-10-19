@@ -19,6 +19,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<IPedidoService, PedidoService>();
+
 // Configurar sesiones
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

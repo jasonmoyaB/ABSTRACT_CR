@@ -150,7 +150,7 @@ namespace Abstract_CR.Controllers
             HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
             TempData["Mensaje"] = "Perfil actualizado correctamente";
 
-            // 👇 Redirige al Panel de Administración
+            // Redirige al Panel de Administración
             return RedirectToAction("PanelAdministracion", "Administracion");
         }
 

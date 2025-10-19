@@ -68,6 +68,50 @@ BEGIN
 END
 GO
 
+-- Tabla para controlar ebooks y su disponibilidad de descarga
+IF OBJECT_ID('dbo.EbookEdicion','U') IS NULL
+BEGIN
+    CREATE TABLE dbo.EbookEdicion (
+        EbookEdicionID INT IDENTITY(1,1) CONSTRAINT PK_EbookEdicion PRIMARY KEY,
+        TituloHU NVARCHAR(255) NOT NULL,
+        Escenario INT NOT NULL,
+        CriterioAceptacion NVARCHAR(255) NOT NULL,
+        Contexto NVARCHAR(500) NOT NULL,
+        Evento NVARCHAR(500) NOT NULL,
+        Resultado NVARCHAR(500) NOT NULL,
+        Estado BIT NOT NULL CONSTRAINT DF_EbookEdicion_Estado DEFAULT (1),
+        FechaRegistro DATETIME2 DEFAULT SYSUTCDATETIME(),
+        Documento NVARCHAR(500) NULL,
+        PermitirDescarga BIT NOT NULL CONSTRAINT DF_EbookEdicion_PermitirDescarga DEFAULT (1),
+        NombreArchivo NVARCHAR(255) NULL,
+        RutaArchivo NVARCHAR(500) NULL,
+        TamaÃ±oArchivo BIGINT NULL,
+        TipoMime NVARCHAR(100) NULL,
+        FechaSubida DATETIME2 NULL
+    );
+END
+GO
+
+-- Agregar columna PermitirDescarga si la tabla ya existe
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.EbookEdicion') AND name = 'PermitirDescarga')
+BEGIN
+    ALTER TABLE dbo.EbookEdicion 
+    ADD PermitirDescarga BIT NOT NULL CONSTRAINT DF_EbookEdicion_PermitirDescarga_New DEFAULT (1);
+END
+GO
+
+-- Agregar columnas adicionales para manejo de archivos si no existen
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.EbookEdicion') AND name = 'NombreArchivo')
+BEGIN
+    ALTER TABLE dbo.EbookEdicion 
+    ADD NombreArchivo NVARCHAR(255) NULL,
+        RutaArchivo NVARCHAR(500) NULL,
+        TamaÃ±oArchivo BIGINT NULL,
+        TipoMime NVARCHAR(100) NULL,
+        FechaSubida DATETIME2 NULL;
+END
+GO
+
 IF OBJECT_ID('dbo.Recetas','U') IS NULL
 BEGIN
     CREATE TABLE dbo.Recetas (
@@ -381,7 +425,7 @@ END
 GO
 
 /* 
-   SEED BÁSICO
+   SEED Bï¿½SICO
     */
 IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Admin')
     INSERT INTO dbo.Roles(NombreRol) VALUES (N'Admin');
@@ -390,10 +434,10 @@ IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Cliente')
 GO
 
 /* 
-   NORMALIZACIÓN 
+   NORMALIZACIï¿½N 
    */
 
-   -- 1) Normalización de correo: columna computada + índice único
+   -- 1) Normalizaciï¿½n de correo: columna computada + ï¿½ndice ï¿½nico
 IF COL_LENGTH('dbo.Usuarios', 'CorreoNorm') IS NULL
 BEGIN
     ALTER TABLE dbo.Usuarios
@@ -436,7 +480,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name='CK_MenusPorPlan_D
 BEGIN
     ALTER TABLE dbo.MenusPorPlan WITH NOCHECK
     ADD CONSTRAINT CK_MenusPorPlan_DiaSemana
-    CHECK (DiaSemana IN (N'Lunes',N'Martes',N'Miércoles',N'Jueves',N'Viernes',N'Sábado',N'Domingo'));
+    CHECK (DiaSemana IN (N'Lunes',N'Martes',N'Miï¿½rcoles',N'Jueves',N'Viernes',N'Sï¿½bado',N'Domingo'));
     ALTER TABLE dbo.MenusPorPlan CHECK CONSTRAINT CK_MenusPorPlan_DiaSemana;
 END
 GO
@@ -450,7 +494,7 @@ BEGIN
 END
 GO
 
--- 3) Único método Predeterminado por Usuario
+-- 3) ï¿½nico mï¿½todo Predeterminado por Usuario
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='UX_MetodosPago_DefaultPorUsuario' AND object_id=OBJECT_ID('dbo.MetodosPago'))
 BEGIN
     CREATE UNIQUE INDEX UX_MetodosPago_DefaultPorUsuario
@@ -459,7 +503,7 @@ BEGIN
 END
 GO
 
--- 4) Índices de soporte adicionales
+-- 4) ï¿½ndices de soporte adicionales
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_Pedidos_Fecha' AND object_id=OBJECT_ID('dbo.Pedidos'))
     CREATE INDEX IX_Pedidos_Fecha ON dbo.Pedidos(FechaPedido);
 GO
@@ -963,7 +1007,7 @@ GO
 
 
 /* 
-   TRIGGER DE AUDITORÍA (Pedidos)
+   TRIGGER DE AUDITORï¿½A (Pedidos)
     */
 IF OBJECT_ID('dbo.trg_Pedidos_Audit','TR') IS NOT NULL DROP TRIGGER dbo.trg_Pedidos_Audit;
 GO

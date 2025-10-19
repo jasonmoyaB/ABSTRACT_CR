@@ -1,0 +1,258 @@
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Gestión de Usuarios</h1>
+                <div class="text-muted">
+                    <i class="fas fa-users me-2"></i>
+                    Administración del Sistema
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.Usuarios as List<Usuario>)?.Count ?? 0)</h4>
+                            <p class="card-text">Total Usuarios</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.Usuarios as List<Usuario>)?.Count(u => u.Activo) ?? 0)</h4>
+                            <p class="card-text">Usuarios Activos</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.Usuarios as List<Usuario>)?.Count(u => !u.Activo) ?? 0)</h4>
+                            <p class="card-text">Usuarios Inactivos</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-times fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.EbookActual as EbookEdicion)?.PermitirDescarga == true ? "Habilitado" : "Deshabilitado")</h4>
+                            <p class="card-text">Estado del Ebook</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Lista de Usuarios -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Usuarios Registrados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                    <th class="text-center">Permitir Descarga</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.Usuarios != null && (ViewBag.Usuarios as List<Usuario>).Any())
+                                {
+                                    @foreach (var usuario in ViewBag.Usuarios as List<Usuario>)
+                                    {
+                                        <tr>
+                                            <td><strong>@usuario.Nombre @usuario.Apellido</strong></td>
+                                            <td>@usuario.CorreoElectronico</td>
+                                            <td><span class="badge bg-primary">@(usuario.Rol?.NombreRol ?? "Sin rol")</span></td>
+                                            <td>@(usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                            <td>
+                                                @if (usuario.Activo)
+                                                {
+                                                    <span class="badge bg-success">Activo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Inactivo</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="verDetallesUsuario(@usuario.UsuarioID)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="form-check form-switch d-inline-block">
+                                                    <input class="form-check-input toggle-usuario-descarga" 
+                                                           type="checkbox" 
+                                                           data-usuario-id="@usuario.UsuarioID"
+                                                           @(usuario.PermitirDescargaEbook ? "checked" : "")>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">No hay usuarios registrados</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado, configurando toggles...');
+            
+            // Manejar los toggles individuales de cada usuario
+            const toggles = document.querySelectorAll('.toggle-usuario-descarga');
+            console.log(`Encontrados ${toggles.length} toggles`);
+            
+            toggles.forEach(function(toggle) {
+                toggle.addEventListener('change', function() {
+                    console.log('Toggle cambiado:', this);
+                    const checkbox = this;
+                    const usuarioId = checkbox.getAttribute('data-usuario-id');
+                    const permitirDescarga = checkbox.checked;
+                    
+                    console.log(`UsuarioID: ${usuarioId}, PermitirDescarga: ${permitirDescarga}`);
+                    
+                    // Deshabilitar el toggle mientras se procesa
+                    checkbox.disabled = true;
+                    
+                    // Obtener el token anti-forgery
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    console.log('Token anti-forgery:', token ? 'Encontrado' : 'No encontrado');
+                    
+                    // Crear FormData
+                    const formData = new FormData();
+                    formData.append('usuarioId', usuarioId);
+                    formData.append('permitirDescarga', permitirDescarga);
+                    formData.append('__RequestVerificationToken', token);
+                    
+                    fetch('@Url.Action("ToggleUsuarioDescarga", "Usuarios")', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Respuesta recibida:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Datos recibidos:', data);
+                        if (data.success) {
+                            mostrarMensaje('success', data.message);
+                        } else {
+                            mostrarMensaje('error', data.message);
+                            // Revertir el toggle si hay error
+                            checkbox.checked = !permitirDescarga;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error en la petición:', error);
+                        mostrarMensaje('error', 'Error al actualizar la configuración del usuario');
+                        // Revertir el toggle si hay error
+                        checkbox.checked = !permitirDescarga;
+                    })
+                    .finally(() => {
+                        // Rehabilitar el toggle
+                        checkbox.disabled = false;
+                    });
+                });
+            });
+        });
+
+        function verDetallesUsuario(usuarioId) {
+            // Implementar vista de detalles del usuario
+            mostrarMensaje('info', 'Funcionalidad de detalles de usuario en desarrollo');
+        }
+
+        function mostrarMensaje(tipo, mensaje) {
+            console.log(`Mostrando mensaje ${tipo}:`, mensaje);
+            
+            const alertClass = tipo === 'success' ? 'alert-success' : 
+                             tipo === 'error' ? 'alert-danger' : 'alert-info';
+            const icon = tipo === 'success' ? 'fa-check-circle' : 
+                        tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas ${icon} me-2"></i>
+                    ${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Insertar al inicio del contenido
+            const container = document.querySelector('.container-fluid');
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Auto-remover después de 5 segundos
+            setTimeout(function() {
+                const alert = container.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+}

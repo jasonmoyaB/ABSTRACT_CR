@@ -17,7 +17,9 @@ namespace Abstract_CR.Helpers
             var suscripcion = _context.Suscripciones
                 .FirstOrDefault(s => s.UsuarioID == usuarioId);
 
-            return suscripcion ?? new Suscripcion();
+            // Si no hay suscripción, devolver null en lugar de una instancia vacía
+            // Esto permite que el controlador detecte correctamente si el usuario tiene suscripción
+            return suscripcion;
         }
     }
 }

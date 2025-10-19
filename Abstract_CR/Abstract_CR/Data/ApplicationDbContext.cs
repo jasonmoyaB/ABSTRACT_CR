@@ -1,6 +1,5 @@
 ﻿using Abstract_CR.Models;
 using Microsoft.EntityFrameworkCore;
-using Abstract_CR.Models;
 
 namespace Abstract_CR.Data
 {

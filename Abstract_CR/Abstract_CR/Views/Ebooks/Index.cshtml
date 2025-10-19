@@ -13,6 +13,28 @@
     };
 }
 
+@if (TempData["Error"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+}
+
 <section class="page-section clearfix" style="background: linear-gradient(135deg, rgba(230, 167, 86, 0.1) 0%, rgba(47, 23, 15, 0.05) 100%);">
     <div class="container">
         <div class="row align-items-center">
@@ -98,9 +120,46 @@
             <div class="col-lg-6 mb-4">
                 <div class="text-center">
                     <h4 class="mb-4" style="color: #f6e1c5;">Accede al Pack aquí</h4>
-                    <a href="#" class="btn btn-primary btn-lg px-5 py-3" style="background: linear-gradient(135deg, #e6a756 0%, #d4944a 100%); border: none; font-size: 1.2rem;">
-                        <i class="fas fa-shopping-cart me-2"></i>Obtener
-                    </a>
+                    @if (ViewBag.subscripcion.SuscripcionID != 0 && ViewBag.subscripcion.Estado == "Activa")
+                    {
+                        var usuarioActual = ViewBag.UsuarioActual as Usuario;
+                        var ebookActual = ViewBag.EbookActual as EbookEdicion;
+                        var puedeDescargarPack = ebookActual?.PermitirDescarga == true && (usuarioActual?.PermitirDescargaEbook ?? false);
+                        
+                        @if (puedeDescargarPack && !string.IsNullOrEmpty(ebookActual?.RutaArchivo))
+                        {
+                            <a href="@Url.Action("Descargar", "Ebooks", new { id = ebookActual.EbookEdicionID })" class="btn btn-primary btn-lg px-5 py-3" style="background: linear-gradient(135deg, #e6a756 0%, #d4944a 100%); border: none; font-size: 1.2rem;">
+                                <i class="fas fa-download me-2"></i>Descargar Pack
+                            </a>
+                        }
+                        else if (ebookActual != null && !ebookActual.PermitirDescarga)
+                        {
+                            <button class="btn btn-warning btn-lg px-5 py-3" style="font-size: 1.2rem;" disabled>
+                                <i class="fas fa-lock me-2"></i>Descarga Deshabilitada
+                            </button>
+                            <div class="text-warning mt-2 d-block fw-bold" style="font-size: 1rem;">El administrador ha deshabilitado las descargas temporalmente</div>
+                        }
+                        else if (usuarioActual != null && !usuarioActual.PermitirDescargaEbook)
+                        {
+                            <button class="btn btn-danger btn-lg px-5 py-3" style="font-size: 1.2rem;" disabled>
+                                <i class="fas fa-credit-card me-2"></i>Requiere Pago Extra
+                            </button>
+                            <div class="text-danger mt-2 d-block fw-bold" style="font-size: 1rem;">Este ebook es un producto adicional que requiere pago extra. Contacta al administrador.</div>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-secondary btn-lg px-5 py-3" style="font-size: 1.2rem;" disabled>
+                                <i class="fas fa-file-alt me-2"></i>Documento no disponible
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <button class="btn btn-danger btn-lg px-5 py-3" style="font-size: 1.2rem;" disabled>
+                            <i class="fas fa-info-circle me-2"></i>Requiere Suscripción
+                        </button>
+                        <div class="text-danger mt-2 d-block fw-bold" style="font-size: 1rem;">Debes tener una suscripción activa para descargar el pack</div>
+                    }
                 </div>
             </div>
         </div>
@@ -157,23 +216,47 @@
 
                                 @if (ViewBag.subscripcion.SuscripcionID != 0 && ViewBag.subscripcion.Estado == "Activa")
                                 {
-                                    @if (e.Documento != null)
+                                    var usuarioActual = ViewBag.UsuarioActual as Usuario;
+                                    var puedeDescargar = e.PermitirDescarga && (usuarioActual?.PermitirDescargaEbook ?? false);
+                                    
+                                    @if (puedeDescargar && !string.IsNullOrEmpty(e.RutaArchivo))
                                     {
-                                        <a href="@e.Documento" download class="btn btn-outline-primary w-100 mt-auto" style="color: black;">
-                                            Adquirir
+                                        <a href="@Url.Action("Descargar", "Ebooks", new { id = e.EbookEdicionID })" class="btn btn-success w-100 mt-auto">
+                                            <i class="fas fa-download me-2"></i>Descargar
                                         </a>
+                                    }
+                                    else if (!e.PermitirDescarga)
+                                    {
+                                        <button class="btn btn-warning w-100 mt-auto" disabled>
+                                            <i class="fas fa-lock me-2"></i>Descarga Deshabilitada
+                                        </button>
+                                        <div class="text-warning mt-2 d-block fw-bold" style="font-size: 0.9rem;">El administrador ha deshabilitado las descargas temporalmente</div>
+                                    }
+                                    else if (usuarioActual != null && !usuarioActual.PermitirDescargaEbook)
+                                    {
+                                        <button class="btn btn-danger w-100 mt-auto" disabled>
+                                            <i class="fas fa-credit-card me-2"></i>Requiere Pago Extra
+                                        </button>
+                                        <div class="text-danger mt-2 d-block fw-bold" style="font-size: 0.9rem;">Producto adicional - Contacta al admin</div>
                                     }
                                     else
                                     {
                                         <button class="btn btn-outline-secondary w-100 mt-auto" disabled>
-                                            Documento no disponible
+                                            <i class="fas fa-file-alt me-2"></i>Documento no disponible
                                         </button>
                                     }
-                                }else
+                                }
+                                else
                                 {
-                                    <span class="w-100 mt-auto" disabled>
-                                        No estás suscripto para poder descargar el eBook
-                                    </span>
+                                    <div class="w-100 mt-auto text-center">
+                                        <button class="btn btn-danger w-100" disabled>
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Requiere Suscripción
+                                        </button>
+                                        <div class="text-danger mt-2 d-block fw-bold" style="font-size: 1rem;">
+                                            No estás suscripto para poder descargar el eBook
+                                        </div>
+                                    </div>
                                 }
                             </div>
                         </div>

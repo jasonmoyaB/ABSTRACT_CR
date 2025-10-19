@@ -37,6 +37,9 @@ namespace Abstract_CR.Models
         [Display(Name = "Activo")]
         public bool Activo { get; set; } = true;
 
+        [Display(Name = "Permitir Descarga de Ebook")]
+        public bool PermitirDescargaEbook { get; set; } = false;
+
         public string CorreoNorm { get; set; } = string.Empty;
 
         public virtual Rol? Rol { get; set; }
@@ -46,6 +49,7 @@ namespace Abstract_CR.Models
 
         public virtual ICollection<PlanNutricional> PlanesNutricionales { get; set; } = new List<PlanNutricional>();
         public virtual ICollection<Notificacion> Notificaciones { get; set; } = new List<Notificacion>();
+        public virtual ICollection<Suscripcion> Suscripciones { get; set; } = new List<Suscripcion>();
 
     }
 }

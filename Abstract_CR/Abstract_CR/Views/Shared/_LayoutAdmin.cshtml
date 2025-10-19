@@ -33,8 +33,11 @@
                        href='@Url.Action("PanelAdministracion", "Administracion")'>
                         <i class="fa-solid fa-gauge me-2"></i> Panel
                     </a>
-                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Usuarios")'>
+                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")" href='@Url.Action("Index", "Usuarios")'>
                         <i class="fa-solid fa-users me-2"></i> Usuarios
+                    </a>
+                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["controller"]?.ToString() == "Suscripciones" ? "active" : "")" href='@Url.Action("Index", "Suscripciones")'>
+                        <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
                     </a>
                     <a class="nav-link text-light text-start" href='@Url.Action("Index", "Planes")'>
                         <i class="fa-solid fa-clipboard-list me-2"></i> Planes
@@ -49,6 +52,9 @@
                     <!-- 🔥 NUEVO: acceso directo al editor de eBook -->
                     <a class="nav-link text-light text-start" href='@Url.Action("Index", "EbookEdicion")'>
                         <i class="fa-solid fa-book-open me-2"></i> Editar eBook
+                    </a>
+                    <a class="nav-link text-light text-start" href='@Url.Action("SubirArchivo", "Ebooks")'>
+                        <i class="fa-solid fa-upload me-2"></i> Subir PDF
                     </a>
 
                     <hr class="border-secondary my-3" />
@@ -101,7 +107,7 @@
                                href='@Url.Action("PanelAdministracion", "Administracion")'>
                                 <i class="fa-solid fa-gauge me-2"></i> Panel
                             </a>
-                            <a class="nav-link text-light" href='@Url.Action("Index", "Usuarios")'>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "text-light")" href='@Url.Action("Index", "Usuarios")'>
                                 <i class="fa-solid fa-users me-2"></i> Usuarios
                             </a>
                             <a class="nav-link text-light" href='@Url.Action("Index", "Planes")'>

@@ -3,6 +3,7 @@ using Abstract_CR.Data;
 using Microsoft.AspNetCore.Http.Features;
 using Abstract_CR.Helpers;
 using Abstract_CR.Services;
+using Abstract_CR.Services.Pedidos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ builder.Services.AddScoped<UserHelper>();
 
 // Configurar servicios de email
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Servicios de pedidos
+builder.Services.AddScoped<IPedidoService, PedidoService>();
 
 var app = builder.Build();
 

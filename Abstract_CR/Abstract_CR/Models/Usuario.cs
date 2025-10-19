@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Abstract_CR.Models
@@ -40,6 +41,8 @@ namespace Abstract_CR.Models
         public string CorreoNorm { get; set; } = string.Empty;
 
         public virtual Rol? Rol { get; set; }
+
+        public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
 
         [Display(Name = "Nombre Completo")]
         public string NombreCompleto => $"{Nombre} {Apellido}";

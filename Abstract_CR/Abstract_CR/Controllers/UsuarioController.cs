@@ -82,7 +82,7 @@ namespace Abstract_CR.Controllers
             {
                 using var sha256 = System.Security.Cryptography.SHA256.Create();
                 byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.ContrasenaHash));
-                usuario.ContrasenaHash = Convert.ToBase64String(bytes); // <-- igual que HashPassword
+                usuario.ContrasenaHash = Convert.ToBase64String(bytes); 
             }
 
             _context.Entry(usuario).State = EntityState.Modified;

@@ -10,6 +10,8 @@ namespace Abstract_CR.Services.Pedidos
 
         Task<IReadOnlyList<PedidoDto>> ObtenerPedidosPorUsuarioAsync(int usuarioId, CancellationToken cancellationToken = default);
 
+        Task<PedidoDto?> ObtenerPedidoPorIdAsync(int pedidoId, int usuarioId, CancellationToken cancellationToken = default);
+
         Task<bool> ActualizarEstadoAsync(ActualizarEstadoPedidoDto pedidoEstado, CancellationToken cancellationToken = default);
     }
 }

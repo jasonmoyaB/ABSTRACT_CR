@@ -95,6 +95,16 @@ namespace Abstract_CR.Services.Pedidos
             return pedidos.Select(MapToDto).ToList();
         }
 
+        public async Task<PedidoDto?> ObtenerPedidoPorIdAsync(int pedidoId, int usuarioId, CancellationToken cancellationToken = default)
+        {
+            var pedido = await _dbContext.Pedidos
+                .AsNoTracking()
+                .Include(p => p.Detalles)
+                .FirstOrDefaultAsync(p => p.PedidoID == pedidoId && p.UsuarioID == usuarioId, cancellationToken);
+
+            return pedido is null ? null : MapToDto(pedido);
+        }
+
         public async Task<bool> ActualizarEstadoAsync(ActualizarEstadoPedidoDto pedidoEstado, CancellationToken cancellationToken = default)
         {
             if (pedidoEstado is null)

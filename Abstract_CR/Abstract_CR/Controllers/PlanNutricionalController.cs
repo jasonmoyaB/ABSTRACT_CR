@@ -15,10 +15,10 @@ namespace Abstract_CR.Controllers
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
 
-        
+
         private readonly IEmailService _emailService;
 
-        
+
         public PlanNutricionalController(IConfiguration configuration, IEmailService emailService)
         {
             _configuration = configuration;
@@ -110,20 +110,19 @@ namespace Abstract_CR.Controllers
         }
 
         // POST: PlanNutricional/Delete/{id}
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        [HttpPost]
         public IActionResult DeleteConfirmed(int id)
         {
             try
             {
                 EliminarPlan(id);
                 TempData["Success"] = "Plan nutricional eliminado exitosamente.";
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "PlanNutricional") });
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Error al eliminar el plan: " + ex.Message;
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "PlanNutricional") });
             }
         }
 

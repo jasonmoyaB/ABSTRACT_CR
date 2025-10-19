@@ -32,6 +32,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<UserHelper>();
 builder.Services.AddScoped<EbooksHelper>();
 builder.Services.AddScoped<SuscripcionesHelper>();
+builder.Services.AddScoped<CometarioRecetaHelper>();
 
 // Configurar servicios de email
 builder.Services.AddScoped<IEmailService, EmailService>();

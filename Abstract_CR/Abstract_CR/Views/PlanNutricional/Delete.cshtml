@@ -130,8 +130,8 @@
                     </div>
 
                     <div class="card-footer bg-light">
-                        <form asp-action="Delete" method="post" class="d-inline">
-                            <input type="hidden" asp-for="PlanID" />
+                        <form asp-action="DeleteConfirmed" method="post" class="d-inline">
+                            <input type="hidden" asp-for="PlanID" id="planID"/>
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -172,6 +172,26 @@
             // Cambiar texto del botón para mostrar que se está procesando
             this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Eliminando...';
             this.disabled = true;
+            let planId = $('#planID').val().trim();
+            $.ajax({
+                url: '@Url.Action("DeleteConfirmed", "PlanNutricional")',
+                type: 'POST',
+                data: {
+                    id: planId,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        //Agrgar logica de cuando funciona el eliminar
+                        window.location.href = response.redirectUrl;
+                    } else {
+                        alert('Error al eliminar el comentario: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alter('Error al procesar la solicitud');
+                    console.error(error);
+                }
+            });
 
             return true;
         });

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Abstract_CR.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Abstract_CR.Helpers;
 using Abstract_CR.Services;
@@ -24,9 +25,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromHours(1);
+    options.Cookie.Name = ".AbstractCR.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // Registrar Helpers para inyeccion de dependencias

@@ -184,31 +184,28 @@ BEGIN
         PedidoID INT IDENTITY(1,1) CONSTRAINT PK_Pedidos PRIMARY KEY,
         UsuarioID INT NOT NULL,
         FechaPedido DATETIME2 DEFAULT SYSUTCDATETIME(),
-        DireccionEntrega NVARCHAR(255) NOT NULL,
-        EstadoPedido NVARCHAR(50) NOT NULL, -- Creado, Pagado, EnPreparacion, Enviado, Entregado, Cancelado
-        MontoTotal DECIMAL(10, 2) NOT NULL CONSTRAINT DF_Pedidos_Total DEFAULT (0),
-        SuscripcionPausada BIT NOT NULL CONSTRAINT DF_Pedidos_SusP DEFAULT (0),
-        RowVer ROWVERSION,
+        Total DECIMAL(10, 2) NOT NULL CONSTRAINT DF_Pedidos_Total DEFAULT (0),
+        Estado NVARCHAR(20) NOT NULL CONSTRAINT DF_Pedidos_Estado DEFAULT (N'Pendiente'),
+        MetodoPago NVARCHAR(30) NOT NULL CONSTRAINT DF_Pedidos_MetodoPago DEFAULT (N'TarjetaCredito'),
+        DireccionEnvio NVARCHAR(250) NULL,
         CONSTRAINT FK_Pedidos_Usuarios FOREIGN KEY (UsuarioID) REFERENCES dbo.Usuarios(UsuarioID)
     );
     CREATE INDEX IX_Pedidos_UsuarioID ON dbo.Pedidos(UsuarioID);
-    CREATE INDEX IX_Pedidos_Estado ON dbo.Pedidos(EstadoPedido);
+    CREATE INDEX IX_Pedidos_Estado ON dbo.Pedidos(Estado);
 END
 GO
 
-IF OBJECT_ID('dbo.DetallePedido','U') IS NULL
+IF OBJECT_ID('dbo.PedidoDetalles','U') IS NULL
 BEGIN
-    CREATE TABLE dbo.DetallePedido (
-        DetalleID INT IDENTITY(1,1) CONSTRAINT PK_DetallePedido PRIMARY KEY,
+    CREATE TABLE dbo.PedidoDetalles (
+        PedidoDetalleID INT IDENTITY(1,1) CONSTRAINT PK_PedidoDetalles PRIMARY KEY,
         PedidoID INT NOT NULL,
-        MenuSemanalID INT NOT NULL,
+        Descripcion NVARCHAR(200) NOT NULL,
         Cantidad INT NOT NULL,
         PrecioUnitario DECIMAL(10, 2) NOT NULL,
-        CONSTRAINT FK_Detalle_Pedido FOREIGN KEY (PedidoID) REFERENCES dbo.Pedidos(PedidoID) ON DELETE CASCADE,
-        CONSTRAINT FK_Detalle_Menu FOREIGN KEY (MenuSemanalID) REFERENCES dbo.MenusSemanales(MenuSemanalID)
+        CONSTRAINT FK_PedidoDetalles_Pedido FOREIGN KEY (PedidoID) REFERENCES dbo.Pedidos(PedidoID) ON DELETE CASCADE
     );
-    CREATE INDEX IX_Detalle_PedidoID ON dbo.DetallePedido(PedidoID);
-    CREATE INDEX IX_Detalle_MenuID ON dbo.DetallePedido(MenuSemanalID);
+    CREATE INDEX IX_PedidoDetalles_PedidoID ON dbo.PedidoDetalles(PedidoID);
 END
 GO
 
@@ -381,19 +378,19 @@ END
 GO
 
 /* 
-   SEED BÁSICO
-    */
-IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Admin')
-    INSERT INTO dbo.Roles(NombreRol) VALUES (N'Admin');
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name='CK_Pedidos_Estado' AND parent_object_id=OBJECT_ID('dbo.Pedidos'))
+    ADD CONSTRAINT CK_Pedidos_Estado
+    CHECK (Estado IN (N'Pendiente',N'Procesando',N'Enviado',N'Entregado',N'Cancelado'));
+    ALTER TABLE dbo.Pedidos CHECK CONSTRAINT CK_Pedidos_Estado;
 IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Cliente')
     INSERT INTO dbo.Roles(NombreRol) VALUES (N'Cliente');
 GO
 
 /* 
-   NORMALIZACIÓN 
+   NORMALIZACIÃ“N 
    */
 
-   -- 1) Normalización de correo: columna computada + índice único
+   -- 1) NormalizaciÃ³n de correo: columna computada + Ã­ndice Ãºnico
 IF COL_LENGTH('dbo.Usuarios', 'CorreoNorm') IS NULL
 BEGIN
     ALTER TABLE dbo.Usuarios
@@ -436,7 +433,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name='CK_MenusPorPlan_D
 BEGIN
     ALTER TABLE dbo.MenusPorPlan WITH NOCHECK
     ADD CONSTRAINT CK_MenusPorPlan_DiaSemana
-    CHECK (DiaSemana IN (N'Lunes',N'Martes',N'Miércoles',N'Jueves',N'Viernes',N'Sábado',N'Domingo'));
+    CHECK (DiaSemana IN (N'Lunes',N'Martes',N'MiÃ©rcoles',N'Jueves',N'Viernes',N'SÃ¡bado',N'Domingo'));
     ALTER TABLE dbo.MenusPorPlan CHECK CONSTRAINT CK_MenusPorPlan_DiaSemana;
 END
 GO
@@ -450,7 +447,7 @@ BEGIN
 END
 GO
 
--- 3) Único método Predeterminado por Usuario
+-- 3) Ãšnico mÃ©todo Predeterminado por Usuario
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='UX_MetodosPago_DefaultPorUsuario' AND object_id=OBJECT_ID('dbo.MetodosPago'))
 BEGIN
     CREATE UNIQUE INDEX UX_MetodosPago_DefaultPorUsuario
@@ -459,8 +456,8 @@ BEGIN
 END
 GO
 
--- 4) Índices de soporte adicionales
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_Pedidos_Fecha' AND object_id=OBJECT_ID('dbo.Pedidos'))
+SELECT Estado, COUNT(*) AS Cantidad, SUM(Total) AS TotalCRC
+GROUP BY Estado;
     CREATE INDEX IX_Pedidos_Fecha ON dbo.Pedidos(FechaPedido);
 GO
 
@@ -704,28 +701,30 @@ GO
 
 CREATE OR ALTER PROCEDURE dbo.spPedido_Create
     @UsuarioID INT,
-    @DireccionEntrega NVARCHAR(255),
-    @EstadoPedido NVARCHAR(50) = N'Creado'
+    @DireccionEnvio NVARCHAR(250) = NULL,
+    @MetodoPago NVARCHAR(30) = N'TarjetaCredito',
+    @Estado NVARCHAR(20) = N'Pendiente'
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT INTO dbo.Pedidos(UsuarioID, DireccionEntrega, EstadoPedido) VALUES (@UsuarioID, @DireccionEntrega, @EstadoPedido);
+    INSERT INTO dbo.Pedidos(UsuarioID, DireccionEnvio, MetodoPago, Estado)
+    VALUES (@UsuarioID, @DireccionEnvio, @MetodoPago, @Estado);
     DECLARE @PedidoID INT = SCOPE_IDENTITY();
-    INSERT INTO dbo.HistorialPedidos(PedidoID, Estado) VALUES (@PedidoID, @EstadoPedido);
+    INSERT INTO dbo.HistorialPedidos(PedidoID, Estado) VALUES (@PedidoID, @Estado);
     SELECT @PedidoID AS PedidoID;
 END
 GO
 
 CREATE OR ALTER PROCEDURE dbo.spPedido_AddDetalle
     @PedidoID INT,
-    @MenuSemanalID INT,
+    @Descripcion NVARCHAR(200),
     @Cantidad INT,
     @PrecioUnitario DECIMAL(10,2)
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT INTO dbo.DetallePedido(PedidoID, MenuSemanalID, Cantidad, PrecioUnitario)
-    VALUES (@PedidoID, @MenuSemanalID, @Cantidad, @PrecioUnitario);
+    INSERT INTO dbo.PedidoDetalles(PedidoID, Descripcion, Cantidad, PrecioUnitario)
+    VALUES (@PedidoID, @Descripcion, @Cantidad, @PrecioUnitario);
     EXEC dbo.spPedido_RecalcularTotal @PedidoID=@PedidoID;
 END
 GO
@@ -737,11 +736,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
     UPDATE p
-    SET MontoTotal = d.SumImporte
+    SET Total = ISNULL(d.SumImporte, 0)
     FROM dbo.Pedidos p
-    CROSS APPLY (
+    OUTER APPLY (
         SELECT SUM(CAST(Cantidad AS DECIMAL(10,2)) * PrecioUnitario) AS SumImporte
-        FROM dbo.DetallePedido
+        FROM dbo.PedidoDetalles
         WHERE PedidoID = p.PedidoID
     ) d
     WHERE p.PedidoID = @PedidoID;
@@ -752,11 +751,11 @@ GO
 
 CREATE OR ALTER PROCEDURE dbo.spPedido_CambiarEstado
     @PedidoID INT,
-    @NuevoEstado NVARCHAR(50)
+    @NuevoEstado NVARCHAR(20)
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE dbo.Pedidos SET EstadoPedido = @NuevoEstado WHERE PedidoID = @PedidoID;
+    UPDATE dbo.Pedidos SET Estado = @NuevoEstado WHERE PedidoID = @PedidoID;
     INSERT INTO dbo.HistorialPedidos(PedidoID, Estado) VALUES (@PedidoID, @NuevoEstado);
 END
 GO
@@ -828,7 +827,7 @@ CREATE OR ALTER PROCEDURE dbo.spPedido_Pagar
 AS
 BEGIN
     SET NOCOUNT ON;
-    DECLARE @Monto DECIMAL(10,2) = (SELECT MontoTotal FROM dbo.Pedidos WHERE PedidoID=@PedidoID);
+    DECLARE @Monto DECIMAL(10,2) = (SELECT Total FROM dbo.Pedidos WHERE PedidoID=@PedidoID);
     IF @Monto IS NULL
     BEGIN
         RAISERROR(N'Pedido no existe',16,1);
@@ -963,10 +962,11 @@ GO
 
 
 /* 
-   TRIGGER DE AUDITORÍA (Pedidos)
-    */
-IF OBJECT_ID('dbo.trg_Pedidos_Audit','TR') IS NOT NULL DROP TRIGGER dbo.trg_Pedidos_Audit;
-GO
+           CONCAT('Estado=', i.Estado, '; Total=', i.Total, '; MetodoPago=', i.MetodoPago)
+           CONCAT('EstadoOld=', d.Estado, ' -> EstadoNew=', i.Estado,
+                  '; TotalOld=', d.Total, ' -> TotalNew=', i.Total,
+                  '; MetodoPagoOld=', d.MetodoPago, ' -> MetodoPagoNew=', i.MetodoPago)
+           CONCAT('Estado=', d.Estado, '; Total=', d.Total, '; MetodoPago=', d.MetodoPago)
 CREATE TRIGGER dbo.trg_Pedidos_Audit
 ON dbo.Pedidos
 AFTER INSERT, UPDATE, DELETE

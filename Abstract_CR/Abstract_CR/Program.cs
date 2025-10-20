@@ -45,20 +45,31 @@ var app = builder.Build();
 
 //
 
-// C�DIGO TEMPORAL PARA PROBAR LA CONEXION
+// CÓDIGO TEMPORAL PARA PROBAR LA CONEXION
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        // Intenta conectar y hacer una consulta simple
+        await context.Database.MigrateAsync();
+        Console.WriteLine("Migraciones de base de datos aplicadas correctamente.");
         await context.Database.OpenConnectionAsync();
-        Console.WriteLine("Conexi�n exitosa a la base de datos de Azure!");
+        Console.WriteLine("Conexión exitosa a la base de datos de Azure!");
         await context.Database.CloseConnectionAsync();
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error de conexi�n: {ex.Message}");
+        Console.WriteLine($"Error al aplicar migraciones: {ex.Message}");
+        try
+        {
+            await context.Database.OpenConnectionAsync();
+            Console.WriteLine("Conexión exitosa a la base de datos de Azure!");
+            await context.Database.CloseConnectionAsync();
+        }
+        catch (Exception innerEx)
+        {
+            Console.WriteLine($"Error de conexión: {innerEx.Message}");
+        }
     }
 }
 

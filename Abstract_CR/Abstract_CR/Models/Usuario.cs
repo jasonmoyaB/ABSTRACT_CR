@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Abstract_CR.Models
@@ -50,6 +51,7 @@ namespace Abstract_CR.Models
         public virtual ICollection<PlanNutricional> PlanesNutricionales { get; set; } = new List<PlanNutricional>();
         public virtual ICollection<Notificacion> Notificaciones { get; set; } = new List<Notificacion>();
         public virtual ICollection<Suscripcion> Suscripciones { get; set; } = new List<Suscripcion>();
+        public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
 
     }
 }

@@ -33,6 +33,7 @@ builder.Services.AddScoped<UserHelper>();
 builder.Services.AddScoped<EbooksHelper>();
 builder.Services.AddScoped<SuscripcionesHelper>();
 builder.Services.AddScoped<CometarioRecetaHelper>();
+builder.Services.AddSingleton<IProductoDisponibilidadService, ProductoDisponibilidadService>();
 
 // Configurar servicios de email
 builder.Services.AddScoped<IEmailService, EmailService>();

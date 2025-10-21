@@ -21,6 +21,8 @@ namespace Abstract_CR.Data
         public DbSet<EbookEdicion> EbookEdicion { get; set; }
         public DbSet<Suscripcion> Suscripciones { get; set; }
         public DbSet<ComentarioReceta> ComentarioRecetas { get; set; }
+        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<PedidoDetalle> PedidoDetalles { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -85,6 +87,31 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.RecetaID).IsRequired();
                 entity.Property(e => e.ComentarioID).IsRequired();
                 entity.Property(e => e.FechaComentario).IsRequired();
+            });
+
+            modelBuilder.Entity<Pedido>(entity =>
+            {
+                entity.HasKey(e => e.PedidoID);
+                entity.Property(e => e.DireccionEntrega).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Estado).HasMaxLength(50);
+                entity.Property(e => e.Total).HasColumnType("decimal(18,2)");
+
+                entity.HasOne(e => e.Usuario)
+                      .WithMany(u => u.Pedidos)
+                      .HasForeignKey(e => e.UsuarioID)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<PedidoDetalle>(entity =>
+            {
+                entity.HasKey(e => e.PedidoDetalleID);
+                entity.Property(e => e.NombreProducto).IsRequired().HasMaxLength(150);
+                entity.Property(e => e.PrecioUnitario).HasColumnType("decimal(18,2)");
+
+                entity.HasOne(e => e.Pedido)
+                      .WithMany(p => p.Detalles)
+                      .HasForeignKey(e => e.PedidoID)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

@@ -1,0 +1,72 @@
+@using System.Linq
+@model IEnumerable<Abstract_CR.Models.ViewModels.PedidoHistorialViewModel>
+@{
+    ViewBag.Title = "Historial de pedidos";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="section-heading-upper text-primary mb-3">Historial de pedidos</h2>
+                <p class="text-muted">Seleccioná un pedido anterior para repetirlo rápidamente.</p>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Todavía no registrás pedidos anteriores. Cuando confirmes uno, aparecerá aquí.
+            </div>
+        }
+        else
+        {
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha del pedido</th>
+                                    <th>Entrega</th>
+                                    <th>Dirección</th>
+                                    <th>Estado</th>
+                                    <th>Total</th>
+                                    <th>Productos</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var pedido in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@pedido.PedidoId</td>
+                                        <td>@pedido.FechaPedido.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @(pedido.FechaEntrega.HasValue
+                                                ? pedido.FechaEntrega.Value.ToString("dd/MM/yyyy")
+                                                : "Sin definir")
+                                        </td>
+                                        <td>@pedido.DireccionEntrega</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@pedido.Estado</span>
+                                        </td>
+                                        <td>$ @pedido.Total.ToString("N2")</td>
+                                        <td>@pedido.CantidadProductos</td>
+                                        <td class="text-end">
+                                            <a class="btn btn-sm btn-primary" asp-action="Repetir" asp-route-id="@pedido.PedidoId">
+                                                <i class="fas fa-redo me-1"></i> Repetir pedido
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,141 @@
+@model Abstract_CR.Models.ViewModels.RepetirPedidoViewModel
+@{
+    ViewBag.Title = "Repetir pedido";
+}
+
+<section class="page-section">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <h2 class="section-heading-upper text-primary mb-2">Revisá tu pedido</h2>
+                <p class="text-muted mb-0">Los datos se cargaron automáticamente desde el pedido seleccionado. Podés ajustar la información antes de confirmarlo.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form asp-action="Repetir" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="PedidoAnteriorId" />
+
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label asp-for="FechaEntrega" class="form-label"></label>
+                                    <input asp-for="FechaEntrega" class="form-control" />
+                                    <span asp-validation-for="FechaEntrega" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="DireccionEntrega" class="form-label"></label>
+                                    <input asp-for="DireccionEntrega" class="form-control" placeholder="Dirección para la entrega" />
+                                    <span asp-validation-for="DireccionEntrega" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th style="width: 120px;">Cantidad</th>
+                                            <th style="width: 140px;">Precio unitario</th>
+                                            <th style="width: 160px;">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < Model.Detalles.Count; i++)
+                                        {
+                                            <tr class="@(Model.Detalles[i].Disponible ? string.Empty : "table-warning")">
+                                                <td>
+                                                    <input type="hidden" asp-for="Detalles[i].PedidoDetalleID" />
+                                                    <input type="hidden" asp-for="Detalles[i].NombreProducto" />
+                                                    <div class="fw-semibold">@Model.Detalles[i].NombreProducto</div>
+                                                </td>
+                                                <td>
+                                                    <input asp-for="Detalles[i].Cantidad" class="form-control" type="number" min="0" />
+                                                    <span asp-validation-for="Detalles[i].Cantidad" class="text-danger"></span>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input asp-for="Detalles[i].PrecioUnitario" class="form-control" type="number" step="0.01" min="0" />
+                                                    </div>
+                                                    <span asp-validation-for="Detalles[i].PrecioUnitario" class="text-danger"></span>
+                                                </td>
+                                                <td>
+                                                    @if (Model.Detalles[i].Disponible)
+                                                    {
+                                                        <span class="badge bg-success">Disponible</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="text-warning small">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i> No disponible
+                                                            @if (Model.Detalles[i].Sugerencias.Any())
+                                                            {
+                                                                <div class="mt-2">
+                                                                    <span class="fw-semibold">Sugerencias:</span>
+                                                                    <ul class="list-unstyled mb-0">
+                                                                        @foreach (var sugerencia in Model.Detalles[i].Sugerencias)
+                                                                        {
+                                                                            <li><i class="fas fa-chevron-right me-1"></i>@sugerencia</li>
+                                                                        }
+                                                                    </ul>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (Model.TieneProductosNoDisponibles)
+                            {
+                                <div class="alert alert-warning d-flex align-items-start">
+                                    <i class="fas fa-lightbulb me-2 mt-1"></i>
+                                    <div>
+                                        Actualizá los productos marcados como no disponibles antes de confirmar.
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                <a asp-action="Historial" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Volver al historial
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check me-1"></i> Confirmar nuevo pedido
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Cómo funciona</h5>
+                        <p class="card-text small text-muted">
+                            Reutilizamos los detalles del pedido seleccionado y verificamos la disponibilidad de cada plato. Si algo cambió, te sugerimos alternativas para que no pierdas tu menú favorito.
+                        </p>
+                        <ul class="list-unstyled small mb-0">
+                            <li class="mb-2"><i class="fas fa-mouse-pointer text-primary me-2"></i>Actualizá cantidades en caso de ser necesario.</li>
+                            <li class="mb-2"><i class="fas fa-calendar text-primary me-2"></i>Elegí una nueva fecha de entrega.</li>
+                            <li><i class="fas fa-map-marker-alt text-primary me-2"></i>Confirmá o modificá la dirección.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

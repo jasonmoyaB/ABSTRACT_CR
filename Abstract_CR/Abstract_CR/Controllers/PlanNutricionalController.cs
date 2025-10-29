@@ -382,7 +382,7 @@ namespace Abstract_CR.Controllers
             return View(notificaciones);
         }
 
-        // Dedupe permanente por Plan+Umbral, sin problemas con corchetes
+        
         private bool YaSeEnvioVencimiento(SqlConnection connection, int usuarioId, string token)
         {
             var sql = @"
@@ -415,7 +415,162 @@ namespace Abstract_CR.Controllers
             var result = cmd.ExecuteScalar();
             return result == null || result == DBNull.Value ? null : Convert.ToString(result);
         }
+        [HttpGet]
+        public IActionResult EvaluarPlan()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                var vmNoSesion = new EvaluacionPlanViewModel
+                {
+                    TienePlanActivo = false,
+                    ErrorMensaje = "Debes iniciar sesión para evaluar tu plan."
+                };
+                return View("EvaluarPlan", vmNoSesion);
+            }
 
+            int? planId = null;
+            string? nombrePlan = null;
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                var sqlPlan = @"
+            SELECT TOP 1 PlanID, NombrePlan
+            FROM dbo.PlanesNutricionales
+            WHERE UsuarioID = @UsuarioID
+              AND (
+                    FechaVencimiento IS NULL
+                    OR FechaVencimiento >= CAST(GETDATE() AS date)
+                  )
+            ORDER BY FechaCarga DESC;
+        ";
+
+                using (var cmd = new SqlCommand(sqlPlan, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            planId = reader.GetInt32(reader.GetOrdinal("PlanID"));
+                            nombrePlan = reader["NombrePlan"]?.ToString() ?? "(Plan sin nombre)";
+                        }
+                    }
+                }
+            }
+
+            if (planId == null)
+            {
+                var vmSinPlan = new EvaluacionPlanViewModel
+                {
+                    TienePlanActivo = false,
+                    ErrorMensaje = "No tienes un plan nutricional activo en este momento."
+                };
+                return View("EvaluarPlan", vmSinPlan);
+            }
+
+            var vm = new EvaluacionPlanViewModel
+            {
+                TienePlanActivo = true,
+                PlanID = planId,
+                NombrePlanActual = nombrePlan
+            };
+
+            return View("EvaluarPlan", vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EvaluarPlan(EvaluacionPlanViewModel model)
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                var vmNoSesion = new EvaluacionPlanViewModel
+                {
+                    TienePlanActivo = false,
+                    ErrorMensaje = "Debes iniciar sesión para enviar la evaluación."
+                };
+                return View("EvaluarPlan", vmNoSesion);
+            }
+
+            bool planEsValido = false;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                var sqlCheckPlan = @"
+            SELECT COUNT(1)
+            FROM dbo.PlanesNutricionales
+            WHERE PlanID = @PlanID
+              AND UsuarioID = @UsuarioID
+              AND (
+                    FechaVencimiento IS NULL
+                    OR FechaVencimiento >= CAST(GETDATE() AS date)
+                  );
+        ";
+
+                using (var checkCmd = new SqlCommand(sqlCheckPlan, connection))
+                {
+                    checkCmd.Parameters.AddWithValue("@PlanID", model.PlanID ?? 0);
+                    checkCmd.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+                    var count = (int)checkCmd.ExecuteScalar();
+                    planEsValido = (count > 0);
+                }
+            }
+
+            if (!planEsValido)
+            {
+                var vmSinAcceso = new EvaluacionPlanViewModel
+                {
+                    TienePlanActivo = false,
+                    ErrorMensaje = "No tienes acceso para evaluar este plan."
+                };
+                return View("EvaluarPlan", vmSinAcceso);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.TienePlanActivo = true;
+                model.ErrorMensaje = "Por favor completa todos los campos obligatorios.";
+                return View("EvaluarPlan", model);
+            }
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                var sqlInsert = @"
+            INSERT INTO dbo.EvaluarPlanesNutricionales
+                (PlanID, UsuarioID, Calificacion, Comentario, FechaRegistro)
+            VALUES
+                (@PlanID, @UsuarioID, @Calificacion, @Comentario, SYSUTCDATETIME());
+        ";
+
+                using (var insertCmd = new SqlCommand(sqlInsert, connection))
+                {
+                    insertCmd.Parameters.AddWithValue("@PlanID", model.PlanID ?? (object)DBNull.Value);
+                    insertCmd.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+                    insertCmd.Parameters.AddWithValue("@Calificacion", model.Calificacion ?? (object)DBNull.Value);
+                    insertCmd.Parameters.AddWithValue("@Comentario", (object?)model.Comentario ?? DBNull.Value);
+                    insertCmd.ExecuteNonQuery();
+                }
+            }
+
+            var vmGracias = new EvaluacionPlanViewModel
+            {
+                TienePlanActivo = true,
+                PlanID = model.PlanID,
+                NombrePlanActual = model.NombrePlanActual,
+                Calificacion = model.Calificacion,
+                Comentario = model.Comentario,
+                SuccessMensaje = "¡Gracias! Tu evaluación fue enviada exitosamente 🥗"
+            };
+
+            return View("EvaluarPlan", vmGracias);
+        }
 
     }
 }

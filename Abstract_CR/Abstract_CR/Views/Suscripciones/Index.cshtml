@@ -34,14 +34,14 @@
         </div>
     }
 
-    <!-- Estadísticas de Suscripciones -->
+    <!-- Stats -->
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4 class="card-title">@ViewBag.TotalUsuarios</h4>
+                            <h4 class="card-title mb-0">@ViewBag.TotalUsuarios</h4>
                             <p class="card-text">Total Usuarios</p>
                         </div>
                         <div class="align-self-center">
@@ -51,12 +51,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mt-3 mt-md-0">
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4 class="card-title">@ViewBag.SuscripcionesActivas</h4>
+                            <h4 class="card-title mb-0">@ViewBag.SuscripcionesActivas</h4>
                             <p class="card-text">Suscripciones Activas</p>
                         </div>
                         <div class="align-self-center">
@@ -66,12 +66,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mt-3 mt-md-0">
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4 class="card-title">@ViewBag.UsuariosConSuscripcion</h4>
+                            <h4 class="card-title mb-0">@ViewBag.UsuariosConSuscripcion</h4>
                             <p class="card-text">Con Suscripción</p>
                         </div>
                         <div class="align-self-center">
@@ -81,12 +81,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mt-3 mt-md-0">
             <div class="card bg-warning text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4 class="card-title">@ViewBag.UsuariosSinSuscripcion</h4>
+                            <h4 class="card-title mb-0">@ViewBag.UsuariosSinSuscripcion</h4>
                             <p class="card-text">Sin Suscripción</p>
                         </div>
                         <div class="align-self-center">
@@ -98,7 +98,7 @@
         </div>
     </div>
 
-    <!-- Lista de Usuarios y Suscripciones -->
+    <!-- Tabla -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm">
@@ -110,7 +110,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table id="tabla-usuarios" class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th>Usuario</th>
@@ -131,13 +131,17 @@
                                         <tr>
                                             <td><strong>@usuario.NombreCompleto</strong></td>
                                             <td>@usuario.CorreoElectronico</td>
-                                            <td><span class="badge bg-primary">@(usuario.Rol?.NombreRol ?? "Sin rol")</span></td>
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    @(usuario.Rol?.NombreRol ?? "Sin rol")
+                                                </span>
+                                            </td>
                                             <td class="text-center">
                                                 @if (suscripcion != null)
                                                 {
                                                     <span class="badge @(suscripcion.Estado switch {
                                                         "Activa" => "bg-success",
-                                                        "Pausada" => "bg-warning", 
+                                                        "Pausada" => "bg-warning",
                                                         "Cancelada" => "bg-danger",
                                                         _ => "bg-secondary"
                                                     })">
@@ -145,7 +149,8 @@
                                                     </span>
                                                     @if (suscripcion.VencePronto)
                                                     {
-                                                        <br><small class="text-danger">Vence pronto</small>
+                                                        <br />
+                                                        <small class="text-danger">Vence pronto</small>
                                                     }
                                                 }
                                                 else
@@ -169,7 +174,8 @@
                                                     @suscripcion.FechaFin.Value.ToString("dd/MM/yyyy")
                                                     @if (suscripcion.DiasRestantes.HasValue)
                                                     {
-                                                        <br><small class="@(suscripcion.VencePronto ? "text-danger" : "text-muted")">
+                                                        <br />
+                                                        <small class="@(suscripcion.VencePronto ? "text-danger" : "text-muted")">
                                                             @suscripcion.DiasRestantes días restantes
                                                         </small>
                                                     }
@@ -182,39 +188,56 @@
                                             <td class="text-center">
                                                 @if (suscripcion != null)
                                                 {
-                                                    <div class="btn-group" role="group">
+                                                    <div class="d-flex flex-wrap justify-content-center">
                                                         @if (suscripcion.Estado == "Activa")
                                                         {
-                                                            <button class="btn btn-sm btn-warning" onclick="cambiarEstado(@usuario.UsuarioID, 'Pausada')" title="Pausar">
+                                                            <button class="btn btn-sm btn-warning me-2 mb-2"
+                                                                    onclick="cambiarEstado(@usuario.UsuarioID, 'Pausada')"
+                                                                    title="Pausar">
                                                                 <i class="fas fa-pause"></i>
                                                             </button>
-                                                            <button class="btn btn-sm btn-danger" onclick="cambiarEstado(@usuario.UsuarioID, 'Cancelada')" title="Cancelar">
+
+                                                            <button class="btn btn-sm btn-danger me-2 mb-2"
+                                                                    onclick="cambiarEstado(@usuario.UsuarioID, 'Cancelada')"
+                                                                    title="Cancelar">
                                                                 <i class="fas fa-times"></i>
                                                             </button>
                                                         }
                                                         else if (suscripcion.Estado == "Pausada")
                                                         {
-                                                            <button class="btn btn-sm btn-success" onclick="cambiarEstado(@usuario.UsuarioID, 'Activa')" title="Reactivar">
+                                                            <button class="btn btn-sm btn-success me-2 mb-2"
+                                                                    onclick="cambiarEstado(@usuario.UsuarioID, 'Activa')"
+                                                                    title="Reactivar">
                                                                 <i class="fas fa-play"></i>
                                                             </button>
-                                                            <button class="btn btn-sm btn-danger" onclick="cambiarEstado(@usuario.UsuarioID, 'Cancelada')" title="Cancelar">
+
+                                                            <button class="btn btn-sm btn-danger me-2 mb-2"
+                                                                    onclick="cambiarEstado(@usuario.UsuarioID, 'Cancelada')"
+                                                                    title="Cancelar">
                                                                 <i class="fas fa-times"></i>
                                                             </button>
                                                         }
                                                         else
                                                         {
-                                                            <button class="btn btn-sm btn-success" onclick="cambiarEstado(@usuario.UsuarioID, 'Activa')" title="Reactivar">
+                                                            <button class="btn btn-sm btn-success me-2 mb-2"
+                                                                    onclick="cambiarEstado(@usuario.UsuarioID, 'Activa')"
+                                                                    title="Reactivar">
                                                                 <i class="fas fa-play"></i>
                                                             </button>
                                                         }
-                                                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarSuscripcion(@usuario.UsuarioID)" title="Eliminar">
+
+                                                        <button class="btn btn-sm btn-outline-danger mb-2"
+                                                                onclick="eliminarSuscripcion(@usuario.UsuarioID)"
+                                                                title="Eliminar">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <button class="btn btn-sm btn-success" onclick="crearSuscripcion(@usuario.UsuarioID)" title="Crear Suscripción">
+                                                    <button class="btn btn-sm btn-success"
+                                                            onclick="crearSuscripcion(@usuario.UsuarioID)"
+                                                            title="Crear Suscripción">
                                                         <i class="fas fa-plus"></i> Crear
                                                     </button>
                                                 }
@@ -230,7 +253,7 @@
                                 }
                             </tbody>
                         </table>
-                    </div>
+                    </div> <!-- table-responsive -->
                 </div>
             </div>
         </div>
@@ -239,15 +262,38 @@
 
 @section Scripts {
     <script>
+        // inicializar DataTable
+        $(document).ready(function () {
+            $('#tabla-usuarios').DataTable({
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [],
+                columnDefs: [
+                    { orderable: false, targets: [6] }
+                ],
+                language: {
+                    decimal: ",",
+                    thousands: ".",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    zeroRecords: "No se encontraron resultados",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ usuarios",
+                    infoEmpty: "Mostrando 0 a 0 de 0 usuarios",
+                    infoFiltered: "(filtrado de _MAX_ en total)",
+                    search: "Buscar:",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                }
+            });
+        });
+
         function crearSuscripcion(usuarioId) {
-            console.log('Iniciando creación de suscripción para usuario:', usuarioId);
-            
             if (confirm('¿Crear suscripción activa para este usuario?')) {
-                console.log('Usuario confirmó la creación de suscripción');
-                
                 var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                console.log('Token anti-falsificación:', token ? 'Presente' : 'Ausente');
-                
+
                 fetch('@Url.Action("CrearSuscripcion", "Suscripciones")', {
                     method: 'POST',
                     headers: {
@@ -256,15 +302,11 @@
                     },
                     body: `usuarioId=${usuarioId}&estado=Activa&mesesDuracion=1&__RequestVerificationToken=${encodeURIComponent(token)}`
                 })
-                .then(response => {
-                    console.log('Respuesta recibida:', response.status);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Respuesta del servidor:', data);
                     if (data.success) {
                         mostrarMensaje('success', data.message);
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 1500);
                     } else {
@@ -272,24 +314,21 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error en la petición:', error);
                     mostrarMensaje('error', 'Error al crear la suscripción: ' + error.message);
                 });
-            } else {
-                console.log('Usuario canceló la creación de suscripción');
             }
         }
 
         function cambiarEstado(usuarioId, nuevoEstado) {
-            const accion = nuevoEstado === 'Activa' ? 'reactivar' : 
-                          nuevoEstado === 'Pausada' ? 'pausar' : 'cancelar';
-            const confirmacion = nuevoEstado === 'Activa' ? '¿Reactivar la suscripción?' :
-                               nuevoEstado === 'Pausada' ? '¿Pausar la suscripción?' : 
-                               '¿Cancelar la suscripción?';
-            
+            const confirmacion = nuevoEstado === 'Activa'
+                ? '¿Reactivar la suscripción?'
+                : nuevoEstado === 'Pausada'
+                    ? '¿Pausar la suscripción?'
+                    : '¿Cancelar la suscripción?';
+
             if (confirm(confirmacion)) {
                 var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                
+
                 fetch('@Url.Action("CambiarEstado", "Suscripciones")', {
                     method: 'POST',
                     headers: {
@@ -302,7 +341,7 @@
                 .then(data => {
                     if (data.success) {
                         mostrarMensaje('success', data.message);
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 1500);
                     } else {
@@ -310,7 +349,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     mostrarMensaje('error', 'Error al cambiar el estado de la suscripción');
                 });
             }
@@ -319,7 +357,7 @@
         function eliminarSuscripcion(usuarioId) {
             if (confirm('¿Eliminar permanentemente la suscripción? Esta acción no se puede deshacer.')) {
                 var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                
+
                 fetch('@Url.Action("EliminarSuscripcion", "Suscripciones")', {
                     method: 'POST',
                     headers: {
@@ -332,7 +370,7 @@
                 .then(data => {
                     if (data.success) {
                         mostrarMensaje('success', data.message);
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 1500);
                     } else {
@@ -340,7 +378,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     mostrarMensaje('error', 'Error al eliminar la suscripción');
                 });
             }
@@ -349,7 +386,7 @@
         function mostrarMensaje(tipo, mensaje) {
             var alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
             var icon = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            
+
             var alertHtml = `
                 <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
                     <i class="fas ${icon} me-2"></i>
@@ -357,15 +394,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
-            
+
             var container = document.querySelector('.container-fluid');
             container.insertAdjacentHTML('afterbegin', alertHtml);
-            
-            setTimeout(function() {
+
+            setTimeout(function () {
                 var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
+                alerts.forEach(function (alert) {
                     alert.style.opacity = '0';
-                    setTimeout(function() {
+                    setTimeout(function () {
                         alert.remove();
                     }, 300);
                 });

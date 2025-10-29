@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mt-3 mt-md-0">
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -50,7 +50,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mt-3 mt-md-0">
             <div class="card bg-warning text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -65,7 +65,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mt-3 mt-md-0">
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -95,7 +95,8 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <!-- 👇 Agregamos id="tabla-usuarios" -->
+                        <table id="tabla-usuarios" class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th>Nombre</th>
@@ -115,7 +116,11 @@
                                         <tr>
                                             <td><strong>@usuario.Nombre @usuario.Apellido</strong></td>
                                             <td>@usuario.CorreoElectronico</td>
-                                            <td><span class="badge bg-primary">@(usuario.Rol?.NombreRol ?? "Sin rol")</span></td>
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    @(usuario.Rol?.NombreRol ?? "Sin rol")
+                                                </span>
+                                            </td>
                                             <td>@(usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "N/A")</td>
                                             <td>
                                                 @if (usuario.Activo)
@@ -134,8 +139,8 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="form-check form-switch d-inline-block">
-                                                    <input class="form-check-input toggle-usuario-descarga" 
-                                                           type="checkbox" 
+                                                    <input class="form-check-input toggle-usuario-descarga"
+                                                           type="checkbox"
                                                            data-usuario-id="@usuario.UsuarioID"
                                                            @(usuario.PermitirDescargaEbook ? "checked" : "")>
                                                 </div>
@@ -151,7 +156,7 @@
                                 }
                             </tbody>
                         </table>
-                    </div>
+                    </div><!-- /.table-responsive -->
                 </div>
             </div>
         </div>
@@ -160,80 +165,124 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado, configurando toggles...');
-            
-            // Manejar los toggles individuales de cada usuario
+        // Inicializar DataTable cuando el DOM y los scripts globales estén listos
+        $(document).ready(function () {
+            console.log("Inicializando DataTable en Gestión de Usuarios...");
+
+            $('#tabla-usuarios').DataTable({
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [], // sin orden inicial forzado
+                columnDefs: [
+                    // "Acciones" (col 5) y "Permitir Descarga" (col 6) no ordenables
+                    { orderable: false, targets: [5, 6] }
+                ],
+                language: {
+                    decimal: ",",
+                    thousands: ".",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    zeroRecords: "No se encontraron resultados",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ usuarios",
+                    infoEmpty: "Mostrando 0 a 0 de 0 usuarios",
+                    infoFiltered: "(filtrado de _MAX_ en total)",
+                    search: "Buscar:",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                }
+            });
+
+            console.log("DataTable inicializado ✅");
+
+            // Configurar los toggles de descarga después de inicializar la tabla
+            configurarTogglesDescarga();
+        });
+
+        // Separamos la lógica de toggles en una función para poder llamarla
+        function configurarTogglesDescarga() {
+            console.log('Configurando toggles de permitir descarga...');
+
             const toggles = document.querySelectorAll('.toggle-usuario-descarga');
             console.log(`Encontrados ${toggles.length} toggles`);
-            
-            toggles.forEach(function(toggle) {
-                toggle.addEventListener('change', function() {
+
+            toggles.forEach(function (toggle) {
+                toggle.addEventListener('change', function () {
                     console.log('Toggle cambiado:', this);
+
                     const checkbox = this;
                     const usuarioId = checkbox.getAttribute('data-usuario-id');
                     const permitirDescarga = checkbox.checked;
-                    
+
                     console.log(`UsuarioID: ${usuarioId}, PermitirDescarga: ${permitirDescarga}`);
-                    
+
                     // Deshabilitar el toggle mientras se procesa
                     checkbox.disabled = true;
-                    
+
                     // Obtener el token anti-forgery
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
                     console.log('Token anti-forgery:', token ? 'Encontrado' : 'No encontrado');
-                    
-                    // Crear FormData
+
+                    // FormData para POST
                     const formData = new FormData();
                     formData.append('usuarioId', usuarioId);
                     formData.append('permitirDescarga', permitirDescarga);
                     formData.append('__RequestVerificationToken', token);
-                    
+
                     fetch('@Url.Action("ToggleUsuarioDescarga", "Usuarios")', {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => {
-                        console.log('Respuesta recibida:', response.status);
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Datos recibidos:', data);
-                        if (data.success) {
-                            mostrarMensaje('success', data.message);
-                        } else {
-                            mostrarMensaje('error', data.message);
+                        .then(response => {
+                            console.log('Respuesta recibida:', response.status);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Datos recibidos:', data);
+                            if (data.success) {
+                                mostrarMensaje('success', data.message);
+                            } else {
+                                mostrarMensaje('error', data.message);
+                                // Revertir el toggle si hay error
+                                checkbox.checked = !permitirDescarga;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error en la petición:', error);
+                            mostrarMensaje('error', 'Error al actualizar la configuración del usuario');
                             // Revertir el toggle si hay error
                             checkbox.checked = !permitirDescarga;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error en la petición:', error);
-                        mostrarMensaje('error', 'Error al actualizar la configuración del usuario');
-                        // Revertir el toggle si hay error
-                        checkbox.checked = !permitirDescarga;
-                    })
-                    .finally(() => {
-                        // Rehabilitar el toggle
-                        checkbox.disabled = false;
-                    });
+                        })
+                        .finally(() => {
+                            // Rehabilitar el toggle
+                            checkbox.disabled = false;
+                        });
                 });
             });
-        });
+        }
 
         function verDetallesUsuario(usuarioId) {
-            // Implementar vista de detalles del usuario
+            // En el futuro podés abrir modal con más info del usuario
             mostrarMensaje('info', 'Funcionalidad de detalles de usuario en desarrollo');
         }
 
         function mostrarMensaje(tipo, mensaje) {
             console.log(`Mostrando mensaje ${tipo}:`, mensaje);
-            
-            const alertClass = tipo === 'success' ? 'alert-success' : 
-                             tipo === 'error' ? 'alert-danger' : 'alert-info';
-            const icon = tipo === 'success' ? 'fa-check-circle' : 
-                        tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-            
+
+            const alertClass = tipo === 'success'
+                ? 'alert-success'
+                : tipo === 'error'
+                    ? 'alert-danger'
+                    : 'alert-info';
+
+            const icon = tipo === 'success'
+                ? 'fa-check-circle'
+                : tipo === 'error'
+                    ? 'fa-exclamation-circle'
+                    : 'fa-info-circle';
+
             const alertHtml = `
                 <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
                     <i class="fas ${icon} me-2"></i>
@@ -241,13 +290,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
-            
-            // Insertar al inicio del contenido
+
             const container = document.querySelector('.container-fluid');
             container.insertAdjacentHTML('afterbegin', alertHtml);
-            
-            // Auto-remover después de 5 segundos
-            setTimeout(function() {
+
+            setTimeout(function () {
                 const alert = container.querySelector('.alert');
                 if (alert) {
                     alert.remove();

@@ -15,8 +15,8 @@
                     </a>
                     <div class="text-center">
                         <h2 class="section-heading">
-                            <span class="section-heading-upper">Menús</span>
-                            <span class="section-heading-lower">Personalizados</span>
+                            <span class="section-heading-upper" style="color:#e6a756 ">Menús</span>
+                            <span class="section-heading-lower" style="color:#f6e1c5 ">Personalizados</span>
                         </h2>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                             <i class="fas fa-utensils me-2"></i>
                             Menús Generados
                         </h5>
-                        <a href="@Url.Action("GenerarMenus", "PlanNutricional", new { planId = plan?.Id })" class="btn btn-primary">
+                        <a href="@Url.Action("GenerarMenus", "PlanNutricional", new { /* planId = plan?.Id */ planId = plan?.PlanID})" class="btn btn-primary">
                             <i class="fas fa-magic me-2"></i>
                             Generar Nuevos Menús
                         </a>
@@ -171,7 +171,7 @@
                                 <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
                                 <h5 class="text-muted">No hay menús generados</h5>
                                 <p class="text-muted">Genera menús personalizados basados en tu plan nutricional.</p>
-                                <a href="@Url.Action("GenerarMenus", "PlanNutricional", new { planId = plan?.Id })" class="btn btn-primary">
+                                <a href="@Url.Action("GenerarMenus", "PlanNutricional", new { /* planId = plan?.Id */planId = plan?.PlanID })" class="btn btn-primary">
                                     <i class="fas fa-magic me-2"></i>
                                     Generar Menús
                                 </a>

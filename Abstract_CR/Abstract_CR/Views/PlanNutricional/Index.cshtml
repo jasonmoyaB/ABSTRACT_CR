@@ -1,181 +1,192 @@
-@model List<Abstract_CR.Models.PlanNutricional>
+@model IEnumerable<Abstract_CR.Models.PlanNutricional>
 
 @{
     ViewData["Title"] = "Mis Planes Nutricionales";
 }
 
+<link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+
 <section class="page-section">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <div class="position-relative mb-5">
-                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mi Perfil">
-                        ←
-                    </a>
-                    <div class="text-center">
-                        <h2 class="section-heading">
-                            <span class="section-heading-upper">Mis</span>
-                            <span class="section-heading-lower">Planes Nutricionales</span>
-                        </h2>
-                    </div>
+                <div class="text-center mb-5">
+                    <h2 class="section-heading">
+                        <span class="section-heading-upper" style="color:#e6a756">Mis</span>
+                        <span class="section-heading-lower" style="color:#f6e1c5">Planes Nutricionales</span>
+                    </h2>
                 </div>
             </div>
         </div>
 
-        @if (TempData["Mensaje"] != null)
+        @if (TempData["Success"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
-                @TempData["Mensaje"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
 
         <div class="row mb-4">
             <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-upload me-2"></i>
-                            Cargar Nuevo Plan
-                        </h5>
-                        <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>
-                            Cargar Plan
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted mb-0">
-                            Sube tu plan nutricional en formato PDF, imagen o completa el formulario directamente.
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="lead mb-0" style="color:#fff">
+                            Gestiona tus planes nutricionales personalizados
                         </p>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>
-                            Planes Activos
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if (Model.Any())
-                        {
-                            <div class="row">
-                                @foreach (var plan in Model)
-                                {
-                                    <div class="col-lg-6 col-md-12 mb-4">
-                                        <div class="card h-100 border-0 shadow-sm">
-                                            <div class="card-header bg-light">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <h6 class="mb-0">
-                                                        <i class="fas fa-clipboard-list me-2"></i>
-                                                        @plan.Nombre
-                                                    </h6>
-                                                    <span class="badge bg-@(plan.Estado == "Activo" ? "success" : "warning")">
-                                                        @plan.Estado
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="card-body">
-                                                <p class="text-muted small mb-2">@plan.Descripcion</p>
-                                                
-                                                <div class="row text-center mb-3">
-                                                    <div class="col-4">
-                                                        <div class="border rounded p-2">
-                                                            <small class="text-muted d-block">Calorías</small>
-                                                            <strong>@(plan.CaloriasDiarias?.ToString() ?? "N/A")</strong>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="border rounded p-2">
-                                                            <small class="text-muted d-block">Proteínas</small>
-                                                            <strong>@(plan.Proteinas?.ToString() ?? "N/A")g</strong>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="border rounded p-2">
-                                                            <small class="text-muted d-block">Carbohidratos</small>
-                                                            <strong>@(plan.Carbohidratos?.ToString() ?? "N/A")g</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-3">
-                                                    <div class="col-6">
-                                                        <small class="text-muted d-block">Inicio</small>
-                                                        <strong>@plan.FechaInicio.ToString("dd/MM/yyyy")</strong>
-                                                    </div>
-                                                    <div class="col-6">
-                                                        <small class="text-muted d-block">Vencimiento</small>
-                                                        <strong class="@(plan.FechaVencimiento <= DateTime.Now.AddDays(7) ? "text-danger" : "")">
-                                                            @plan.FechaVencimiento.ToString("dd/MM/yyyy")
-                                                        </strong>
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-grid gap-2">
-                                                    <a href="@Url.Action("Detalles", "PlanNutricional", new { id = plan.Id })" class="btn btn-outline-primary btn-sm">
-                                                        <i class="fas fa-eye me-2"></i>
-                                                        Ver Detalles
-                                                    </a>
-                                                    <a href="@Url.Action("Menus", "PlanNutricional", new { planId = plan.Id })" class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-utensils me-2"></i>
-                                                        Ver Menús
-                                                    </a>
-                                                    <a href="@Url.Action("Evaluar", "PlanNutricional", new { planId = plan.Id })" class="btn btn-outline-secondary btn-sm">
-                                                        <i class="fas fa-star me-2"></i>
-                                                        Evaluar Plan
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="text-center py-5">
-                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted">No tienes planes nutricionales</h5>
-                                <p class="text-muted">Comienza cargando tu primer plan nutricional.</p>
-                                <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>
-                                    Cargar Primer Plan
-                                </a>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bell me-2"></i>
-                            Notificaciones
-                        </h5>
-                        <a href="@Url.Action("Notificaciones", "PlanNutricional")" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye me-2"></i>
-                            Ver Todas
+                    <div>
+                        <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Nuevo Plan
                         </a>
                     </div>
-                    <div class="card-body">
-                        <div class="alert alert-warning mb-0">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Recordatorio:</strong> Tu plan "Plan de Pérdida de Peso" vence en 5 días.
+                </div>
+            </div>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="row">
+                @foreach (var plan in Model)
+                {
+                    <div class="col-lg-6 col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header bg-faded d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clipboard-list me-2"></i>
+                                    @plan.Nombre
+                                </h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("Details", "PlanNutricional", new { id = plan.PlanID })">
+                                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                                            </a>
+                                        </li>
+                                        @if (!string.IsNullOrEmpty(plan.DocumentoURL))
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" href="@plan.DocumentoURL" target="_blank">
+                                                    <i class="fas fa-download me-2"></i>Descargar
+                                                </a>
+                                            </li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="@Url.Action("Delete", "PlanNutricional", new { id = plan.PlanID })">
+                                                <i class="fas fa-trash me-2"></i>Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrEmpty(plan.Descripcion))
+                                {
+                                    <p class="card-text">
+                                        @(plan.Descripcion.Length > 150 ?
+                                            plan.Descripcion.Substring(0, 150) + "..." :
+                                            plan.Descripcion)
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="card-text text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Sin descripción disponible
+                                    </p>
+                                }
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Fecha de Carga</small>
+                                        <strong>@plan.FechaCarga.ToString("dd/MM/yyyy")</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Vencimiento</small>
+                                        @if (plan.FechaVencimiento.HasValue)
+                                        {
+                                            var isExpired = plan.FechaVencimiento < DateTime.Today;
+                                            var isExpiringSoon = plan.FechaVencimiento <= DateTime.Today.AddDays(7) && !isExpired;
+
+                                            <strong class="@(isExpired ? "text-danger" : isExpiringSoon ? "text-warning" : "text-success")">
+                                                @plan.FechaVencimiento.Value.ToString("dd/MM/yyyy")
+                                                @if (isExpired)
+                                                {
+                                                    <i class="fas fa-exclamation-triangle ms-1"></i>
+                                                }
+                                                else if (isExpiringSoon)
+                                                {
+                                                    <i class="fas fa-clock ms-1"></i>
+                                                }
+                                            </strong>
+                                        }
+                                        else
+                                        {
+                                            <strong class="text-muted">No definido</strong>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <nav aria-label="Paginacion de planes">
+                        <ul class="pagination justify-content-center">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card text-center">
+                        <div class="card-body py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No tienes planes nutricionales</h4>
+                            <p class="text-muted mb-4">
+                                Carga tu primer plan nutricional para comenzar a recibir menús personalizados.
+                            </p>
+                            <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>
+                                Cargar Mi Primer Plan
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
-</section> 
+</section>
+
+@section Scripts {
+    <script>
+        // Auto-cerrar alertas despues de 5 segundos
+        setTimeout(function () {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}

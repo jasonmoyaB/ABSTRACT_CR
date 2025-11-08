@@ -12,6 +12,19 @@ namespace Abstract_CR.Helpers
             _context = context;
         }
 
+        public Usuario GetUsuarioPorId(int id)
+        {
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioID == id && 
+                                                                u.Activo);
+
+            if (usuario == null)
+            {
+                return new Usuario();
+            }
+
+            return usuario;
+        }
+
         public Usuario ObtenerUsuarioPorCorreo(string email)
         {
             var usuario = _context.Usuarios

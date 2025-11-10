@@ -52,4 +52,11 @@ namespace Abstract_CR.Models
         public virtual ICollection<Suscripcion> Suscripciones { get; set; } = new List<Suscripcion>();
 
     }
+
+    public class UsuarioPorAsignar
+    {
+        public int UsuarioID { get; set; }
+        public string NombreCompleto { get; set; } = string.Empty;
+        public string CorreoElectronico { get; set; }
+    }
 }

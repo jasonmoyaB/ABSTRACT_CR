@@ -52,6 +52,11 @@
                         <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
                     </a>
 
+                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["controller"]?.ToString() == "Recetas" ? "active" : "")"
+                       href='@Url.Action("ObtenerRecetas", "Recetas")'>
+                        <i class="fa-solid fa-cutlery me-2"></i> Asignar Recetas
+                    </a>
+
                     <a class="nav-link text-light text-start" href='@Url.Action("Index", "Planes")'>
                         <i class="fa-solid fa-clipboard-list me-2"></i> Planes
                     </a>

@@ -21,7 +21,8 @@ namespace Abstract_CR.Data
         public DbSet<EbookEdicion> EbookEdicion { get; set; }
         public DbSet<Suscripcion> Suscripciones { get; set; }
         public DbSet<ComentarioReceta> ComentarioRecetas { get; set; }
-
+        public DbSet<Receta> Recetas { get; set; }
+        public DbSet<RecetaPorUsuario> RecetasPorUsuario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -85,6 +86,26 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.RecetaID).IsRequired();
                 entity.Property(e => e.ComentarioID).IsRequired();
                 entity.Property(e => e.FechaComentario).IsRequired();
+            });
+
+            modelBuilder.Entity<Receta>(entity =>
+            {
+                entity.HasKey(e => e.RecetaID);
+                entity.Property(e => e.Titulo).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Descripcion).IsRequired();
+                entity.Property(e => e.Instrucciones).IsRequired();
+                entity.Property(e => e.EsGratuita).IsRequired().HasDefaultValue(false);
+                entity.Property(e => e.EsParteDeEbook).IsRequired().HasDefaultValue(false);
+                entity.Property(e => e.ChefID).IsRequired();
+            });
+
+            modelBuilder.Entity<RecetaPorUsuario>(entity =>
+            {
+                entity.ToTable("RecetasPorUsuario");
+                entity.HasKey(e => e.RecetaPorUsuarioID);
+                entity.Property(e => e.RecetaID).IsRequired();
+                entity.Property(e => e.UsuarioID).IsRequired();
+                entity.Property(e => e.Dia).IsRequired().HasMaxLength(20);
             });
         }
     }

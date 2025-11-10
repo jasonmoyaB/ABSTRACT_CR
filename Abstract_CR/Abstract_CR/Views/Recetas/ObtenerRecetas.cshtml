@@ -1,0 +1,496 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Gestión de Recetas";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Gestión de Recetas</h1>
+                <div class="text-muted">
+                    <i class="fas fa-utensils me-2"></i>
+                    Administración del Sistema
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.Recetas as List<RecetasViewModel>)?.Count ?? 0)</h4>
+                            <p class="card-text">Total Recetas</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-utensils fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-3 mt-md-0">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.Recetas as List<RecetasViewModel>)?.Count(r => r.EsGratuita) ?? 0)</h4>
+                            <p class="card-text">Recetas Gratuitas</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-gift fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-3 mt-md-0">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.Recetas as List<RecetasViewModel>)?.Count(r => !r.EsGratuita) ?? 0)</h4>
+                            <p class="card-text">Recetas Premium</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-crown fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-3 mt-md-0">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@((ViewBag.Recetas as List<RecetasViewModel>)?.Count(r => r.EsParteDeEbook) ?? 0)</h4>
+                            <p class="card-text">En Ebook</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Lista de Recetas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-utensils me-2"></i>
+                        Recetas Registradas
+                    </h5>
+                    <button class="btn btn-primary btn-sm" onclick="abrirModalNuevaReceta()">
+                        <i class="fas fa-plus me-1"></i>
+                        Nueva Receta
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="tabla-recetas" class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Descripción</th>
+                                    <th>Chef</th>
+                                    <th>Tipo</th>
+                                    <th class="text-center">En Ebook</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.Recetas != null && (ViewBag.Recetas as List<RecetasViewModel>).Any())
+                                {
+                                    @foreach (var receta in ViewBag.Recetas as List<RecetasViewModel>)
+                                    {
+                                        <tr>
+                                            <td><strong>@receta.Titulo</strong></td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(receta.Descripcion))
+                                                {
+                                                    <span>@(receta.Descripcion.Length > 50 ? receta.Descripcion.Substring(0, 50) + "..." : receta.Descripcion)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin descripción</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    @receta.Chef
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (receta.EsGratuita)
+                                                {
+                                                    <span class="badge bg-success">Gratuita</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Premium</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                @if (receta.EsParteDeEbook)
+                                                {
+                                                    <span class="badge bg-success">Sí</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="verDetallesReceta(@receta.RecetaID)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-success" onclick="editarReceta(@receta.RecetaID)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarReceta(@receta.RecetaID)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-warning" onclick="asignarReceta(@receta.RecetaID, '@receta.Titulo')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">No hay recetas registradas</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Asignar Receta -->
+<div class="modal fade" id="modalAsignarReceta" tabindex="-1" aria-labelledby="modalAsignarRecetaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="modalAsignarRecetaLabel">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Asignar Receta al Menú
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAsignarReceta">
+                    <input type="hidden" id="recetaIdAsignar" name="recetaId" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Receta Seleccionada:</label>
+                        <p id="recetaTituloAsignar" class="text-muted"></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="personaId" class="form-label fw-bold">
+                            <i class="fas fa-user me-1"></i>
+                            Seleccionar Persona
+                        </label>
+                        <select class="form-select" id="personaId" name="personaId" required>
+                            <option value="">-- Seleccione una persona --</option>
+                            @if (ViewBag.Personas != null)
+                            {
+                                @foreach (var persona in ViewBag.Personas)
+                                {
+                                    <option value="@persona.UsuarioID">@persona.NombreCompleto - (@persona.CorreoElectronico)</option>
+                                }
+                            }
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor seleccione una persona.
+                        </div>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="personaId" class="form-label fw-bold">
+                            <i class="fas fa-user me-1"></i>
+                            Seleccionar Día
+                        </label>
+                        <select class="form-select" id="diaSemana" name="diaSemana" required>
+                            <option value="">-- Seleccione un día --</option>
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Por favor seleccione un día.
+                        </div>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Esta receta se agregará al menú de la persona y día seleccionado.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-warning" onclick="confirmarAsignacion()">
+                    <i class="fas fa-check me-1"></i>
+                    Asignar Receta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Variables globales para el modal
+        let recetaIdSeleccionada = null;
+
+        // Inicializar DataTable cuando el DOM esté listo
+        $(document).ready(function () {
+            console.log("Inicializando DataTable en Gestión de Recetas...");
+
+            $('#tabla-recetas').DataTable({
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [[0, 'asc']], // Ordenar por título por defecto
+                columnDefs: [
+                    // Columnas no ordenables: En Ebook (4), Acciones (5)
+                    { orderable: false, targets: [4, 5] }
+                ],
+                language: {
+                    decimal: ",",
+                    thousands: ".",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    zeroRecords: "No se encontraron resultados",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ recetas",
+                    infoEmpty: "Mostrando 0 a 0 de 0 recetas",
+                    infoFiltered: "(filtrado de _MAX_ en total)",
+                    search: "Buscar:",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                }
+            });
+
+            console.log("DataTable inicializado ✅");
+
+            // Configurar los toggles después de inicializar la tabla
+            configurarToggles();
+        });
+
+        // Configuración de toggles
+        function configurarToggles() {
+            console.log('Configurando toggles de recetas...');
+
+            // Toggle para "Es Parte De Ebook"
+            const togglesEbook = document.querySelectorAll('.toggle-receta-ebook');
+            console.log(`Encontrados ${togglesEbook.length} toggles de ebook`);
+
+            togglesEbook.forEach(function (toggle) {
+                toggle.addEventListener('change', function () {
+                    const checkbox = this;
+                    const recetaId = checkbox.getAttribute('data-receta-id');
+                    const esParteDeEbook = checkbox.checked;
+
+                    console.log(`RecetaID: ${recetaId}, EsParteDeEbook: ${esParteDeEbook}`);
+                    actualizarReceta(checkbox, recetaId, 'ebook', esParteDeEbook);
+                });
+            });
+        }
+
+        // Función genérica para actualizar propiedades de receta
+        function actualizarReceta(checkbox, recetaId, tipo, valor) {
+            checkbox.disabled = true;
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const formData = new FormData();
+            formData.append('recetaId', recetaId);
+            formData.append('valor', valor);
+            formData.append('__RequestVerificationToken', token);
+
+            const action = 'ToggleRecetaEbook';
+
+            fetch(`@Url.Action("ToggleRecetaEbook", "Recetas")`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    console.log('Respuesta recibida:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Datos recibidos:', data);
+                    if (data.success) {
+                        mostrarMensaje('success', data.message);
+                    } else {
+                        mostrarMensaje('error', data.message);
+                        checkbox.checked = !valor;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en la petición:', error);
+                    mostrarMensaje('error', 'Error al actualizar la receta');
+                    checkbox.checked = !valor;
+                })
+                .finally(() => {
+                    checkbox.disabled = false;
+                });
+        }
+
+        function abrirModalNuevaReceta() {
+            mostrarMensaje('info', 'Funcionalidad de nueva receta en desarrollo');
+        }
+
+        function verDetallesReceta(recetaId) {
+            mostrarMensaje('info', 'Funcionalidad de detalles de receta en desarrollo');
+        }
+
+        function editarReceta(recetaId) {
+            mostrarMensaje('info', 'Funcionalidad de editar receta en desarrollo');
+        }
+
+        // Función para abrir el modal de asignar receta
+        function asignarReceta(recetaId, tituloReceta) { 
+            // Guardar el ID de la receta
+            recetaIdSeleccionada = recetaId;
+            
+            // Establecer los valores en el modal
+            document.getElementById('recetaIdAsignar').value = recetaId;
+            document.getElementById('recetaTituloAsignar').textContent = tituloReceta;
+            
+            // Resetear el select de persona
+            document.getElementById('personaId').value = '';
+            document.getElementById('diaSemana').value = '';
+            document.getElementById('formAsignarReceta').classList.remove('was-validated');
+            
+            // Abrir el modal
+            const modal = new bootstrap.Modal(document.getElementById('modalAsignarReceta'));
+            modal.show();
+        }
+
+        // Función para confirmar la asignación
+        function confirmarAsignacion() {
+            const form = document.getElementById('formAsignarReceta');
+            const personaId = document.getElementById('personaId').value;
+            const diaSemana = document.getElementById('diaSemana').value;
+            
+            // Validar que se haya seleccionado una persona
+            if (!personaId) {
+                form.classList.add('was-validated');
+                mostrarMensaje('error', 'Por favor seleccione una persona');
+                return;
+            }
+
+            // Validar que se haya seleccionado un dia
+            if (!diaSemana) {
+                form.classList.add('was-validated');
+                mostrarMensaje('error', 'Por favor seleccione un día');
+                return;
+            }
+            
+            const recetaId = document.getElementById('recetaIdAsignar').value;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            
+            // Deshabilitar el botón mientras se procesa
+            const btnAsignar = event.target;
+            btnAsignar.disabled = true;
+            btnAsignar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Asignando...';
+            
+            // Enviar la petición al controlador
+            const formData = new FormData();
+            formData.append('recetaId', recetaId);
+            formData.append('personaId', personaId);
+            formData.append('diaSemana', diaSemana);
+            
+            fetch('@Url.Action("AsignarReceta", "Recetas")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('success', data.message || 'Receta asignada correctamente');
+                    // Cerrar el modal
+                    bootstrap.Modal.getInstance(document.getElementById('modalAsignarReceta')).hide();
+                } else {
+                    mostrarMensaje('error', data.message || 'Error al asignar la receta');
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                mostrarMensaje('error', 'Error al procesar la solicitud');
+            })
+            .finally(() => {
+                // Rehabilitar el botón
+                btnAsignar.disabled = false;
+                btnAsignar.innerHTML = '<i class="fas fa-check me-1"></i> Asignar Receta';
+            });
+        }
+
+        function eliminarReceta(recetaId) {
+            if (confirm('¿Está seguro de que desea eliminar esta receta?')) {
+                mostrarMensaje('info', 'Funcionalidad de eliminar receta en desarrollo');
+            }
+        }
+
+        function mostrarMensaje(tipo, mensaje) {
+            console.log(`Mostrando mensaje ${tipo}:`, mensaje);
+
+            const alertClass = tipo === 'success'
+                ? 'alert-success'
+                : tipo === 'error'
+                    ? 'alert-danger'
+                    : 'alert-info';
+
+            const icon = tipo === 'success'
+                ? 'fa-check-circle'
+                : tipo === 'error'
+                    ? 'fa-exclamation-circle'
+                    : 'fa-info-circle';
+
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas ${icon} me-2"></i>
+                    ${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            const container = document.querySelector('.container-fluid');
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+
+            setTimeout(function () {
+                const alert = container.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+}

@@ -58,5 +58,25 @@ namespace Abstract_CR.Helpers
             var result = _context.SaveChanges();
             return result > 0;
         }
+
+        public List<UsuarioPorAsignar> GetUsuarioPorAsignar()
+        {
+            var usuarios = _context.Usuarios
+                                  .Where(u => u.Activo == true)
+                                  .Select(u => new UsuarioPorAsignar
+                                  {
+                                      UsuarioID = u.UsuarioID,
+                                      NombreCompleto = u.Nombre + " " + u.Apellido,
+                                      CorreoElectronico = u.CorreoElectronico
+                                  })
+                                  .ToList();
+
+            if (usuarios.Count > 0)
+            {
+                return usuarios;
+            }
+
+            return [];
+        }
     }
 }

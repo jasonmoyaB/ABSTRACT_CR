@@ -1,5 +1,6 @@
 ﻿using Abstract_CR.Helpers;
 using Abstract_CR.Models;
+using Abstract_CR.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Abstract_CR.Controllers
@@ -7,10 +8,16 @@ namespace Abstract_CR.Controllers
     public class RecetasController : Controller
     {
         private readonly CometarioRecetaHelper _cometarioRecetaHelper;
+        private readonly IEmailService _emailService;
+        private readonly UserHelper _userHelper;
+        private readonly RecetasHelper _recetasHelper;
 
-        public RecetasController(CometarioRecetaHelper cometarioRecetaHelper)
+        public RecetasController(CometarioRecetaHelper cometarioRecetaHelper, IEmailService emailService, UserHelper userHelper, RecetasHelper recetasHelper)
         {
             _cometarioRecetaHelper = cometarioRecetaHelper;
+            _emailService = emailService;
+            _userHelper = userHelper;
+            _recetasHelper = recetasHelper;
         }
 
         public IActionResult Index()
@@ -96,6 +103,63 @@ namespace Abstract_CR.Controllers
             else
             {
                 return "<span>Sin comentarios</span>";
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ObtenerRecetas()
+        {
+            ViewBag.Recetas = _recetasHelper.GetRecetasViewModel().ToList();
+            ViewBag.Personas = _userHelper.GetUsuarioPorAsignar().ToList();
+            return View();
+        }
+
+        public IActionResult AsignarMenu()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AsignarReceta(int recetaId, int personaId, string diaSemana)
+        {
+            try
+            {
+                var recetaAsignada = _recetasHelper.AsignarRecetas(recetaId, personaId, diaSemana);
+                //var recetaAsignada = true;
+                if (recetaAsignada)
+                {
+                    var usuarioAsignado = _userHelper.GetUsuarioPorId(personaId);
+                    var subject = $"Se le ha asignado un nuevo menú";
+                    var body = $@"
+                            <html>
+                                <body style='font-family:Arial,Helvetica,sans-serif; line-height:1.5;'>
+                                <h2>El chef le ha asignado un nuevo menú para el día {diaSemana}</h2>
+                                <hr/>
+                                <p style='font-size:12px;color:#666'>Si ya revisate el menú, puedes ignorar este mensaje.</p>
+                                </body>
+                            </html>";
+                    try { await _emailService.SendEmailAsync(usuarioAsignado.CorreoElectronico, subject, body); } catch { }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Receta asignada correctamente a {usuarioAsignado.NombreCompleto}"
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Error al asignar la receta"
+                });
+            }
+            catch (Exception)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error al asignar la receta"
+                });
             }
         }
     }

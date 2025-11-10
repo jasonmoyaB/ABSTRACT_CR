@@ -1,4 +1,5 @@
 using Abstract_CR.Data;
+using Abstract_CR.Helpers;
 using Abstract_CR.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +11,13 @@ namespace Abstract_CR.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<UsuarioController> _logger;
+        private readonly InteraccionHelper _interaccionHelper;
 
-        public UsuarioController(ApplicationDbContext context, ILogger<UsuarioController> logger)
+        public UsuarioController(ApplicationDbContext context, ILogger<UsuarioController> logger, InteraccionHelper interaccionHelper)
         {
             _context = context;
             _logger = logger;
+            _interaccionHelper = interaccionHelper;
         }
 
 
@@ -25,14 +28,25 @@ namespace Abstract_CR.Controllers
             if (usuarioId == null)
                 return RedirectToAction("Login");
 
-            var usuario = await _context.Usuarios
-                .Include(u => u.Rol)
-                .FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+            var (usuario, mensajes, historial) = await _interaccionHelper.ObtenerDetalleUsuarioAsync(usuarioId.Value);
 
             if (usuario == null)
                 return NotFound();
 
-            return View(usuario);
+            await _interaccionHelper.MarcarMensajesComoLeidosAsync(usuario.UsuarioID, paraChef: false);
+
+            var viewModel = new PerfilInteraccionViewModel
+            {
+                Usuario = usuario,
+                Mensajes = mensajes,
+                HistorialPuntos = historial,
+                NuevoMensaje = new MensajeInteraccionInputModel
+                {
+                    UsuarioId = usuario.UsuarioID
+                }
+            };
+
+            return View(viewModel);
         }
 
 
@@ -93,6 +107,42 @@ namespace Abstract_CR.Controllers
             TempData["Mensaje"] = "Perfil actualizado correctamente";
 
             return RedirectToAction("Perfil");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EnviarMensajeChef(MensajeInteraccionInputModel model)
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            if (usuarioId.Value != model.UsuarioId)
+            {
+                TempData["Error"] = "No tienes permisos para enviar mensajes por otro usuario.";
+                return RedirectToAction(nameof(Perfil));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Por favor revisa el contenido del mensaje.";
+                return RedirectToAction(nameof(Perfil));
+            }
+
+            var (success, error) = await _interaccionHelper.RegistrarMensajeAsync(model.UsuarioId, model.Contenido, enviadoPorChef: false, TipoMensajeInteraccion.Mensaje, usuarioId);
+
+            if (!success)
+            {
+                TempData["Error"] = error ?? "No se pudo enviar el mensaje.";
+            }
+            else
+            {
+                TempData["Mensaje"] = "Tu mensaje fue enviado al chef.";
+            }
+
+            return RedirectToAction(nameof(Perfil));
         }
 
         [HttpGet]

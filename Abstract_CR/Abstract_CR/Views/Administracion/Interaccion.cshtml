@@ -1,0 +1,298 @@
+@model Abstract_CR.Models.InteraccionAdminViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Interacción con Usuarios";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">Interacción con Usuarios</h2>
+            <p class="text-muted mb-0">Gestiona mensajes, resúmenes y puntos para acompañar a tus clientes.</p>
+        </div>
+    </div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-4 col-xl-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Usuarios</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @if (Model.Usuarios.Any())
+                        {
+                            foreach (var usuario in Model.Usuarios)
+                            {
+                                var activo = Model.UsuarioSeleccionado?.UsuarioID == usuario.UsuarioId ? "active" : "";
+                                <a class="list-group-item list-group-item-action @activo"
+                                   href="@Url.Action("Interaccion", "Administracion", new { usuarioId = usuario.UsuarioId })">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-semibold">@usuario.NombreCompleto</div>
+                                            <small class="text-muted">@usuario.CorreoElectronico</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-star me-1"></i>@usuario.PuntosTotales
+                                            </span>
+                                            <div>
+                                                <small class="text-muted">
+                                                    @(usuario.UltimaActividad?.ToString("dd/MM/yyyy HH:mm") ?? "Sin actividad")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <div class="p-3 text-muted">
+                                No hay usuarios disponibles.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-xl-9">
+            @if (Model.UsuarioSeleccionado != null)
+            {
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0">@Model.UsuarioSeleccionado.NombreCompleto</h5>
+                                    <small class="text-muted">@Model.UsuarioSeleccionado.CorreoElectronico</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-primary fs-6">
+                                        <i class="fas fa-star me-2"></i>@Model.UsuarioSeleccionado.PuntosTotales puntos
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-light">
+                                            <div class="text-muted">Rol</div>
+                                            <div class="fw-semibold">@Model.UsuarioSeleccionado.Rol?.NombreRol ?? "Cliente"</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-light">
+                                            <div class="text-muted">Miembro desde</div>
+                                            <div class="fw-semibold">@Model.UsuarioSeleccionado.FechaRegistro?.ToString("dd/MM/yyyy")</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-light">
+                                            <div class="text-muted">Estado</div>
+                                            <div class="fw-semibold">
+                                                @if (Model.UsuarioSeleccionado.Activo)
+                                                {
+                                                    <span class="badge bg-success">Activo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Inactivo</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-7">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Conversación</h5>
+                            </div>
+                            <div class="card-body" style="max-height: 520px; overflow-y: auto;">
+                                @if (Model.Mensajes.Any())
+                                {
+                                    foreach (var mensaje in Model.Mensajes.OrderBy(m => m.FechaEnvio))
+                                    {
+                                        var clase = mensaje.EnviadoPorChef ? "bg-primary text-white ms-auto" : "bg-light me-auto";
+                                        var alineacion = mensaje.EnviadoPorChef ? "text-end" : "text-start";
+                                        <div class="mb-3 d-flex @alineacion">
+                                            <div class="p-3 rounded-3 @clase" style="max-width: 80%;">
+                                                <div class="fw-semibold mb-2">
+                                                    @(mensaje.EnviadoPorChef
+                                                        ? (mensaje.Tipo == Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal ? "Resumen del Chef" : "Chef")
+                                                        : "Usuario")
+                                                </div>
+                                                <div class="mb-2">
+                                                    @mensaje.Contenido
+                                                </div>
+                                                <small class="opacity-75">
+                                                    @mensaje.FechaEnvio.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-5">
+                                        <i class="fas fa-inbox fa-2x mb-3"></i>
+                                        <p class="mb-0">Todavía no hay mensajes con este usuario.</p>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-footer bg-white">
+                                <form asp-action="EnviarMensajeAdmin" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="UsuarioId" value="@Model.UsuarioSeleccionado.UsuarioID" />
+                                    <input type="hidden" name="Tipo" value="@( (int)Abstract_CR.Models.TipoMensajeInteraccion.Mensaje)" />
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Mensaje al usuario</label>
+                                        <textarea class="form-control" name="Contenido" rows="3" placeholder="Escribe una nota o recomendación..."></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane me-2"></i>Enviar mensaje
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-5">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-star me-2"></i>Asignar puntos</h5>
+                            </div>
+                            <div class="card-body">
+                                <form asp-action="AsignarPuntos" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="UsuarioId" value="@Model.UsuarioSeleccionado.UsuarioID" />
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Cantidad de puntos</label>
+                                        <input class="form-control" name="Puntos" type="number" />
+                                        <small class="text-muted">Puedes usar valores negativos para ajustes.</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Motivo</label>
+                                        <input class="form-control" name="Motivo" placeholder="Ej: Compra del plan premium" />
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="fas fa-plus me-2"></i>Registrar puntos
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Resumen semanal</h5>
+                            </div>
+                            <div class="card-body">
+                                <form asp-action="EnviarMensajeAdmin" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="UsuarioId" value="@Model.UsuarioSeleccionado.UsuarioID" />
+                                    <input type="hidden" name="Tipo" value="@( (int)Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal)" />
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Resumen para el usuario</label>
+                                        <textarea class="form-control" name="Contenido" rows="5" placeholder="Comparte el resumen semanal de hábitos, logros y recomendaciones..."></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-warning text-white">
+                                            <i class="fas fa-envelope-open-text me-2"></i>Enviar resumen
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Historial de puntos</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Puntos</th>
+                                                <th>Motivo</th>
+                                                <th>Asignado por</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.HistorialPuntos.Any())
+                                            {
+                                                foreach (var registro in Model.HistorialPuntos)
+                                                {
+                                                    <tr>
+                                                        <td>@registro.FechaAsignacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                                        <td>
+                                                            <span class="fw-semibold @(registro.Puntos >= 0 ? "text-success" : "text-danger")">
+                                                                @(registro.Puntos >= 0 ? "+" : "")@registro.Puntos
+                                                            </span>
+                                                        </td>
+                                                        <td>@(string.IsNullOrWhiteSpace(registro.Motivo) ? "-" : registro.Motivo)</td>
+                                                        <td>@(registro.AsignadoPor?.NombreCompleto ?? "Chef")</td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-4">
+                                                        No hay registros de puntos para este usuario aún.
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body text-center text-muted py-5">
+                        <i class="fas fa-user-circle fa-3x mb-3"></i>
+                        <p class="mb-0">Selecciona un usuario para comenzar a interactuar.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
+

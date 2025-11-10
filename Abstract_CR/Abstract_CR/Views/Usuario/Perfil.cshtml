@@ -1,4 +1,4 @@
-@model Abstract_CR.Models.Usuario
+@model Abstract_CR.Models.PerfilInteraccionViewModel
 @{
     ViewData["Title"] = "Mi Perfil";
 }
@@ -25,6 +25,15 @@
             </div>
         }
 
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
         <div class="row">
             <!-- Información Personal -->
             <div class="col-lg-8">
@@ -39,24 +48,24 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Nombre Completo</label>
-                                <p class="form-control-plaintext">@Model.NombreCompleto</p>
+                                <p class="form-control-plaintext">@Model.Usuario.NombreCompleto</p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Correo Electrónico</label>
-                                <p class="form-control-plaintext">@Model.CorreoElectronico</p>
+                                <p class="form-control-plaintext">@Model.Usuario.CorreoElectronico</p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Fecha de Registro</label>
-                                <p class="form-control-plaintext">@(Model.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
+                                <p class="form-control-plaintext">@(Model.Usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Rol</label>
-                                <p class="form-control-plaintext">@(Model.Rol?.NombreRol ?? "No especificado")</p>
+                                <p class="form-control-plaintext">@(Model.Usuario.Rol?.NombreRol ?? "No especificado")</p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Estado</label>
                                 <p class="form-control-plaintext">
-                                    @if (Model.Activo)
+                                    @if (Model.Usuario.Activo)
                                     {
                                         <span class="badge bg-success">Activo</span>
                                     }
@@ -73,6 +82,65 @@
                                 Editar Perfil
                             </a>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Conversación con el Chef -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-faded d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Conversación con el Chef
+                        </h5>
+                        <span class="badge bg-primary">
+                            <i class="fas fa-star me-1"></i>@Model.Usuario.PuntosTotales pts
+                        </span>
+                    </div>
+                    <div class="card-body" style="max-height: 450px; overflow-y: auto;">
+                        @if (Model.Mensajes.Any())
+                        {
+                            foreach (var mensaje in Model.Mensajes.OrderBy(m => m.FechaEnvio))
+                            {
+                                var esChef = mensaje.EnviadoPorChef;
+                                var clase = esChef ? "bg-primary text-white" : "bg-light";
+                                var alineacion = esChef ? "text-end" : "text-start";
+                                <div class="mb-3">
+                                    <div class="@alineacion">
+                                        <div class="small text-muted mb-1">
+                                            @(esChef
+                                                ? (mensaje.Tipo == Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal ? "Resumen del Chef" : "Chef")
+                                                : "Yo")
+                                            · @mensaje.FechaEnvio.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                        <div class="d-inline-block p-3 rounded-3 @clase" style="max-width: 80%;">
+                                            @mensaje.Contenido
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-3"></i>
+                                <p class="mb-0">Aún no tienes mensajes. Empieza la conversación con tu chef.</p>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer bg-white">
+                        <form asp-action="EnviarMensajeChef" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="UsuarioId" value="@Model.Usuario.UsuarioID" />
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Escribe tu mensaje</label>
+                                <textarea class="form-control" name="Contenido" rows="3" placeholder="Comparte tus dudas, logros o comentarios..."></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Enviar
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -124,11 +192,80 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Miembro desde</label>
-                            <p class="form-control-plaintext">@(Model.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
+                            <p class="form-control-plaintext">@(Model.Usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Puntos acumulados</label>
+                            <p class="form-control-plaintext">
+                                <span class="badge bg-primary fs-6">
+                                    <i class="fas fa-star me-2"></i>@Model.Usuario.PuntosTotales puntos
+                                </span>
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Últimas asignaciones</label>
+                            @if (Model.HistorialPuntos.Any())
+                            {
+                                <ul class="list-unstyled mb-0">
+                                    @foreach (var registro in Model.HistorialPuntos.Take(5))
+                                    {
+                                        <li class="mb-2 d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-semibold @(registro.Puntos >= 0 ? "text-success" : "text-danger")">
+                                                    @(registro.Puntos >= 0 ? "+" : "")@registro.Puntos pts
+                                                </div>
+                                                <small class="text-muted">@registro.FechaAsignacion.ToString("dd/MM")</small>
+                                            </div>
+                                            <small class="text-muted text-end ms-3">
+                                                @(string.IsNullOrWhiteSpace(registro.Motivo) ? "Sin motivo" : registro.Motivo)
+                                            </small>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="form-control-plaintext text-muted">Aún no tienes puntos asignados.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-faded">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bell me-2"></i>
+                            Resúmenes Semanales
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Mensajes.Any(m => m.Tipo == Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal))
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var resumen in Model.Mensajes
+                                    .Where(m => m.Tipo == Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal)
+                                    .OrderByDescending(m => m.FechaEnvio)
+                                    .Take(5))
+                                {
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="fw-semibold">Resumen del @resumen.FechaEnvio.ToString("dd/MM")</div>
+                                            <small class="text-muted">@resumen.FechaEnvio.ToString("HH:mm")</small>
+                                        </div>
+                                        <div class="text-muted small mt-2">@resumen.Contenido</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Tu chef aún no te envía resúmenes semanales.</p>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section> 
+</section>
+
+<partial name="_ValidationScriptsPartial" />

@@ -23,6 +23,8 @@ namespace Abstract_CR.Data
         public DbSet<ComentarioReceta> ComentarioRecetas { get; set; }
         public DbSet<Receta> Recetas { get; set; }
         public DbSet<RecetaPorUsuario> RecetasPorUsuario { get; set; }
+        public DbSet<MensajeInteraccion> MensajesInteraccion { get; set; }
+        public DbSet<PuntosUsuario> PuntosUsuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,6 +43,7 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.ContrasenaHash).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.FechaRegistro).HasDefaultValueSql("sysutcdatetime()");
                 entity.Property(e => e.Activo).HasDefaultValue(true);
+                entity.Property(e => e.PuntosTotales).HasDefaultValue(0);
 
                 // Relación con Rol
                 entity.HasOne(e => e.Rol)
@@ -106,6 +109,44 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.RecetaID).IsRequired();
                 entity.Property(e => e.UsuarioID).IsRequired();
                 entity.Property(e => e.Dia).IsRequired().HasMaxLength(20);
+            });
+
+            modelBuilder.Entity<MensajeInteraccion>(entity =>
+            {
+                entity.ToTable("MensajesInteraccion");
+                entity.HasKey(e => e.MensajeInteraccionId);
+                entity.Property(e => e.Contenido).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.FechaEnvio).IsRequired();
+                entity.Property(e => e.Tipo).HasConversion<int>();
+
+                entity.HasOne(e => e.Usuario)
+                      .WithMany(u => u.Mensajes)
+                      .HasForeignKey(e => e.UsuarioId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Remitente)
+                      .WithMany()
+                      .HasForeignKey(e => e.RemitenteId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<PuntosUsuario>(entity =>
+            {
+                entity.ToTable("PuntosUsuarios");
+                entity.HasKey(e => e.PuntosUsuarioId);
+                entity.Property(e => e.Puntos).IsRequired();
+                entity.Property(e => e.Motivo).HasMaxLength(250);
+                entity.Property(e => e.FechaAsignacion).IsRequired();
+
+                entity.HasOne(e => e.Usuario)
+                      .WithMany(u => u.HistorialPuntos)
+                      .HasForeignKey(e => e.UsuarioId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.AsignadoPor)
+                      .WithMany()
+                      .HasForeignKey(e => e.AsignadoPorId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

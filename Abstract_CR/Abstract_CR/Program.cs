@@ -33,6 +33,7 @@ builder.Services.AddScoped<UserHelper>();
 builder.Services.AddScoped<EbooksHelper>();
 builder.Services.AddScoped<SuscripcionesHelper>();
 builder.Services.AddScoped<CometarioRecetaHelper>();
+builder.Services.AddScoped<InteraccionHelper>();
 builder.Services.AddScoped<RecetasHelper>();
 
 // Configurar servicios de email

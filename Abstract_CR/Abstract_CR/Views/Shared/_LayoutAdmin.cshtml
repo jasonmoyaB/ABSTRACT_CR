@@ -52,6 +52,11 @@
                         <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
                     </a>
 
+                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["action"]?.ToString() == "Interaccion" ? "active" : "")"
+                       href='@Url.Action("Interaccion", "Administracion")'>
+                        <i class="fa-solid fa-comments me-2"></i> Interacción
+                    </a>
+
                     <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["controller"]?.ToString() == "Recetas" ? "active" : "")"
                        href='@Url.Action("ObtenerRecetas", "Recetas")'>
                         <i class="fa-solid fa-cutlery me-2"></i> Asignar Recetas
@@ -132,6 +137,11 @@
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "text-light")"
                                href='@Url.Action("Index", "Usuarios")'>
                                 <i class="fa-solid fa-users me-2"></i> Usuarios
+                            </a>
+
+                            <a class="nav-link text-light @(ViewContext.RouteData.Values["action"]?.ToString() == "Interaccion" ? "active" : "")"
+                               href='@Url.Action("Interaccion", "Administracion")'>
+                                <i class="fa-solid fa-comments me-2"></i> Interacción
                             </a>
 
                             <a class="nav-link text-light" href='@Url.Action("Index", "Planes")'>

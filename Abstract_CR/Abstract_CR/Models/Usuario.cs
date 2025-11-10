@@ -42,6 +42,9 @@ namespace Abstract_CR.Models
 
         public string CorreoNorm { get; set; } = string.Empty;
 
+        [Display(Name = "Puntos Acumulados")]
+        public int PuntosTotales { get; set; }
+
         public virtual Rol? Rol { get; set; }
 
         [Display(Name = "Nombre Completo")]
@@ -50,6 +53,8 @@ namespace Abstract_CR.Models
         public virtual ICollection<PlanNutricional> PlanesNutricionales { get; set; } = new List<PlanNutricional>();
         public virtual ICollection<Notificacion> Notificaciones { get; set; } = new List<Notificacion>();
         public virtual ICollection<Suscripcion> Suscripciones { get; set; } = new List<Suscripcion>();
+        public virtual ICollection<MensajeInteraccion> Mensajes { get; set; } = new List<MensajeInteraccion>();
+        public virtual ICollection<PuntosUsuario> HistorialPuntos { get; set; } = new List<PuntosUsuario>();
 
     }
 

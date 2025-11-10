@@ -7,7 +7,7 @@
 <section class="page-section">
     <div class="container position-relative" style="max-width: 800px;">
 
-        <!-- 🔙 Botón Volver a Perfil completamente a la izquierda -->
+
         <a href="@Url.Action("Index", "PlanNutricional")"
            class="btn position-absolute"
            style="left: -100px; top: 0; background-color:#2F170F; border-color:#2F170F; color:white; z-index: 1000;"
@@ -15,7 +15,7 @@
             <i class="fas fa-arrow-left"></i>
         </a>
 
-        <!-- Encabezado estilo branding consistente -->
+
         <div class="text-center mb-4">
             <h2 class="section-heading">
                 <span class="section-heading-upper" style="color:#e6a756">Tu opinión</span>
@@ -26,7 +26,6 @@
             </p>
         </div>
 
-        <!-- Mensaje de éxito -->
         @if (!string.IsNullOrEmpty(Model.SuccessMensaje))
         {
             <div class="alert alert-success alert-dismissible fade show">

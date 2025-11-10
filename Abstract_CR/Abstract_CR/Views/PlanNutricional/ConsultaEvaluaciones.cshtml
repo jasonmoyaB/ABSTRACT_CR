@@ -1,0 +1,201 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Consulta de Evaluaciones";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0 text-primary"><i class="fa-solid fa-clipboard-check me-2"></i> Evaluaciones de Planes Nutricionales</h1>
+                <p class="text-muted mb-0">Consulta y exportación de evaluaciones registradas</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0"><i class="fa-solid fa-table-list me-2 text-primary"></i> Lista de evaluaciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <!-- Tabla limpia: DataTables generará su wrapper -->
+                        <table id="tblEvaluaciones" class="table table-hover table-bordered align-middle mb-0">
+                            <thead class="table-light text-center align-middle">
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Usuario</th>
+                                    <th>Calificación</th>
+                                    <th>Comentario</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalle (sin mostrar IDs) -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-eye me-2"></i> Detalle de la evaluación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Plan</dt>
+                    <dd class="col-sm-9" id="det-plan"></dd>
+
+                    <dt class="col-sm-3">Usuario</dt>
+                    <dd class="col-sm-9" id="det-usuario"></dd>
+
+                    <dt class="col-sm-3">Calificación</dt>
+                    <dd class="col-sm-9" id="det-calificacion"></dd>
+
+                    <dt class="col-sm-3">Comentario</dt>
+                    <dd class="col-sm-9 small" id="det-comentario"></dd>
+
+                    <dt class="col-sm-3">Fecha de registro</dt>
+                    <dd class="col-sm-9" id="det-fecha"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // helper para leer varias keys posibles del JSON
+            function getVal(row, keys, def = null) {
+                if (!row) return def;
+                for (var i = 0; i < keys.length; i++) {
+                    var k = keys[i];
+                    if (row.hasOwnProperty(k) && row[k] != null && row[k] != undefined) return row[k];
+                }
+                // case-insensitive fallback
+                var lower = {};
+                Object.keys(row).forEach(rk => lower[rk.toLowerCase()] = row[rk]);
+                for (var j = 0; j < keys.length; j++) {
+                    var kk = keys[j].toLowerCase();
+                    if (lower.hasOwnProperty(kk) && lower[kk] != null && lower[kk] != undefined) return lower[kk];
+                }
+                return def;
+            }
+
+            var table = $('#tblEvaluaciones').DataTable({
+                ajax: {
+                    url: '@Url.Action("GetEvaluaciones", "PlanNutricional")',
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: row => getVal(row, ['NombrePlan','nombrePlan'], '(Sin plan)') },
+                    { data: row => getVal(row, ['NombreUsuario','nombreUsuario','UsuarioNombre'], '(Usuario desconocido)') },
+                    {
+                        data: row => {
+                            var v = getVal(row, ['Calificacion','calificacion'], '');
+                            return v;
+                        },
+                        className: 'text-center'
+                    },
+                    {
+                        // comentario reducido en tabla, con title para ver completo
+                        data: row => {
+                            var c = getVal(row, ['Comentario','comentario','Observacion'], '');
+                            if (!c) return '';
+                            var display = (typeof c === 'string' && c.length > 60) ? c.substr(0, 60) + '...' : c;
+                            return `<span title="${$('<div>').text(c).html()}">${$('<div>').text(display).html()}</span>`;
+                        },
+                        className: 'small text-start'
+                    },
+                    {
+                        data: row => {
+                            var f = getVal(row, ['FechaRegistro','fechaRegistro','createdAt'], '');
+                            var d = new Date(f);
+                            return isNaN(d.getTime()) ? f : d.toLocaleString();
+                        },
+                        className: 'text-center'
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center',
+                        render: function (data, type, row) {
+                            var id = getVal(row, ['EvaluacionID','evaluacionId'], '');
+                            return `<button class="btn btn-sm btn-outline-primary btn-ver" data-id="${id}" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>`;
+                        }
+                    }
+                ],
+                order: [[4, 'desc']],
+                lengthMenu: [10, 25, 50],
+                pageLength: 10,
+                dom: '<"d-flex justify-content-between mb-2"<"btn-toolbar"fB>><"table-responsive"t>ip',
+                buttons: [
+                    { extend: 'excelHtml5', className: 'btn btn-sm btn-success me-2', text: '<i class="fa-solid fa-file-excel me-1"></i> Excel' },
+                    { extend: 'pdfHtml5', className: 'btn btn-sm btn-danger me-2', text: '<i class="fa-solid fa-file-pdf me-1"></i> PDF' }
+                ],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                },
+                initComplete: function () {
+                    // asegurar que botones no hagan wrap y mostrar siempre texto
+                    table.buttons().container().addClass('text-nowrap');
+                }
+            });
+
+            // Mostrar detalle en modal (sin IDs visibles); comentario recortado a 300 chars
+            $('#tblEvaluaciones tbody').on('click', '.btn-ver', function () {
+                var row = table.row($(this).closest('tr')).data();
+                if (!row) return;
+
+                $('#det-plan').text(getVal(row, ['NombrePlan','nombrePlan'], '(Sin plan)'));
+                $('#det-usuario').text(getVal(row, ['NombreUsuario','nombreUsuario','UsuarioNombre'], '(Usuario desconocido)'));
+                $('#det-calificacion').text(getVal(row, ['Calificacion','calificacion'], ''));
+                var fullComment = getVal(row, ['Comentario','comentario','Observacion'], '');
+                var shortComment = fullComment && fullComment.length > 300 ? fullComment.substr(0, 300) + '...' : fullComment;
+                $('#det-comentario').text(shortComment);
+                $('#det-comentario').attr('title', fullComment || '');
+
+                var f = getVal(row, ['FechaRegistro','fechaRegistro','createdAt'], '');
+                var d = new Date(f);
+                $('#det-fecha').text(isNaN(d.getTime()) ? f : d.toLocaleString());
+
+                new bootstrap.Modal(document.getElementById('modalDetalle')).show();
+            });
+        });
+    </script>
+}

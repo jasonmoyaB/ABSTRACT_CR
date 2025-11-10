@@ -1,6 +1,22 @@
 ﻿@{
     Layout = null;
     var usuario = Context.Session.GetString("NombreUsuario") ?? "Administrador";
+
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+    bool openUsuarios = currentController.Equals("Usuarios", StringComparison.OrdinalIgnoreCase)
+                        || currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase);
+
+    bool openContenido = currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase)
+                         || currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase)
+                         || currentController.Equals("Ebooks", StringComparison.OrdinalIgnoreCase);
+
+    bool openComunicacion = currentController.Equals("Administracion", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("Interaccion", StringComparison.OrdinalIgnoreCase)
+                            || currentController.Equals("Notificaciones", StringComparison.OrdinalIgnoreCase);
+
+    bool openHerramientas = currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase)
+                            || (currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("ConsultaEvaluaciones", StringComparison.OrdinalIgnoreCase));
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -15,16 +31,13 @@
     <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600,700|Lora:400,400i,700" rel="stylesheet" />
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
 
     <!-- Font Awesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <!-- DataTables (Bootstrap 5 skin) -->
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
 </head>
 <body class="bg-light">
     <div class="container-fluid p-0">
@@ -36,59 +49,146 @@
                     <strong>Abstract · Admin</strong>
                 </div>
 
-                <nav class="nav nav-pills flex-column">
-                    <a class="nav-link text-start @(ViewContext.RouteData.Values["action"]?.ToString() == "PanelAdministracion" ? "active" : "text-light")"
+                <nav class="nav nav-pills flex-column" id="sidebarNav" role="navigation">
+
+                    <!-- Dashboard (no collapse) -->
+                    <a class="nav-link text-start mb-1 @(currentAction == "PanelAdministracion" ? "active bg-primary text-white" : "text-light")"
                        href='@Url.Action("PanelAdministracion", "Administracion")'>
                         <i class="fa-solid fa-gauge me-2"></i> Panel
                     </a>
 
-                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")"
-                       href='@Url.Action("Index", "Usuarios")'>
-                        <i class="fa-solid fa-users me-2"></i> Usuarios
-                    </a>
+                    <hr class="border-secondary my-2" />
 
-                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["controller"]?.ToString() == "Suscripciones" ? "active" : "")"
-                       href='@Url.Action("Index", "Suscripciones")'>
-                        <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
-                    </a>
+                    <!-- Usuarios & Suscripciones (collapse) -->
+                    <div class="mb-1">
+                        <button class="btn btn-toggle w-100 text-start d-flex align-items-center justify-content-between @(openUsuarios ? "bg-secondary bg-opacity-10 text-white" : "text-light")"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseUsuarios"
+                                aria-expanded="@(openUsuarios.ToString().ToLower())"
+                                aria-controls="collapseUsuarios">
+                            <span><i class="fa-solid fa-users me-2"></i> Usuarios</span>
+                            <i class="fa-solid fa-chevron-down small"></i>
+                        </button>
 
-                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["action"]?.ToString() == "Interaccion" ? "active" : "")"
-                       href='@Url.Action("Interaccion", "Administracion")'>
-                        <i class="fa-solid fa-comments me-2"></i> Interacción
-                    </a>
+                        <div class="collapse @(openUsuarios ? "show" : "") mt-2" id="collapseUsuarios">
+                            <nav class="nav nav-pills flex-column ms-2">
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Usuarios", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("Index", "Usuarios")'>
+                                    <i class="fa-solid fa-user-gear me-2"></i> Gestión de usuarios
+                                </a>
 
-                    <a class="nav-link text-light text-start @(ViewContext.RouteData.Values["controller"]?.ToString() == "Recetas" ? "active" : "")"
-                       href='@Url.Action("ObtenerRecetas", "Recetas")'>
-                        <i class="fa-solid fa-cutlery me-2"></i> Asignar Recetas
-                    </a>
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("Index", "Suscripciones")'>
+                                    <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
 
-                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Planes")'>
-                        <i class="fa-solid fa-clipboard-list me-2"></i> Planes
-                    </a>
+                    <hr class="border-secondary my-2" />
 
-                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Notificaciones")'>
-                        <i class="fa-regular fa-bell me-2"></i> Notificaciones
-                    </a>
+                    <!-- Contenido (collapse) -->
+                    <div class="mb-1">
+                        <button class="btn btn-toggle w-100 text-start d-flex align-items-center justify-content-between @(openContenido ? "bg-secondary bg-opacity-10 text-white" : "text-light")"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseContenido"
+                                aria-expanded="@(openContenido.ToString().ToLower())"
+                                aria-controls="collapseContenido">
+                            <span><i class="fa-solid fa-book-open-reader me-2"></i> Contenido</span>
+                            <i class="fa-solid fa-chevron-down small"></i>
+                        </button>
 
-                    <a class="nav-link text-light text-start" href='@Url.Action("Index", "Reportes")'>
+                        <div class="collapse @(openContenido ? "show" : "") mt-2" id="collapseContenido">
+                            <nav class="nav nav-pills flex-column ms-2">
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("Index", "Planes")'>
+                                    <i class="fa-solid fa-clipboard-list me-2"></i> Planes
+                                </a>
+
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("ObtenerRecetas", "Recetas")'>
+                                    <i class="fa-solid fa-cutlery me-2"></i> Asignar recetas
+                                </a>
+
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Ebooks", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("SubirArchivo", "Ebooks")'>
+                                    <i class="fa-solid fa-upload me-2"></i> Subir PDF / eBook
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-2" />
+
+                    <!-- Comunicación (collapse) -->
+                    <div class="mb-1">
+                        <button class="btn btn-toggle w-100 text-start d-flex align-items-center justify-content-between @(openComunicacion ? "bg-secondary bg-opacity-10 text-white" : "text-light")"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseComunicacion"
+                                aria-expanded="@(openComunicacion.ToString().ToLower())"
+                                aria-controls="collapseComunicacion">
+                            <span><i class="fa-solid fa-comments me-2"></i> Comunicación</span>
+                            <i class="fa-solid fa-chevron-down small"></i>
+                        </button>
+
+                        <div class="collapse @(openComunicacion ? "show" : "") mt-2" id="collapseComunicacion">
+                            <nav class="nav nav-pills flex-column ms-2">
+                                <a class="nav-link text-start mb-1 @(currentAction.Equals("Interaccion", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("Interaccion", "Administracion")'>
+                                    <i class="fa-solid fa-comments-dollar me-2"></i> Interacción
+                                </a>
+
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Notificaciones", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("Index", "Notificaciones")'>
+                                    <i class="fa-regular fa-bell me-2"></i> Notificaciones
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-2" />
+
+                    <!-- Reportes (no collapse) -->
+                    <a class="nav-link text-start mb-1 @(currentController.Equals("Reportes", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                       href='@Url.Action("Index", "Reportes")'>
                         <i class="fa-solid fa-chart-line me-2"></i> Reportes
                     </a>
 
-                   @*  <a class="nav-link text-light text-start" href='@Url.Action("Index", "EbookEdicion")'>
-                        <i class="fa-solid fa-book-open me-2"></i> Editar eBook
-                    </a> *@
-                    <a class="nav-link text-light text-start" href='@Url.Action("SubirArchivo", "Ebooks")'>
-                        <i class="fa-solid fa-upload me-2"></i> Subir PDF - Ebook
-                    </a>
+                    <hr class="border-secondary my-2" />
+
+                    <!-- Herramientas (collapse) -->
+                    <div class="mb-1">
+                        <button class="btn btn-toggle w-100 text-start d-flex align-items-center justify-content-between @(openHerramientas ? "bg-secondary bg-opacity-10 text-white" : "text-light")"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseHerramientas"
+                                aria-expanded="@(openHerramientas.ToString().ToLower())"
+                                aria-controls="collapseHerramientas">
+                            <span><i class="fa-solid fa-wrench me-2"></i> Herramientas</span>
+                            <i class="fa-solid fa-chevron-down small"></i>
+                        </button>
+
+                        <div class="collapse @(openHerramientas ? "show" : "") mt-2" id="collapseHerramientas">
+                            <nav class="nav nav-pills flex-column ms-2">
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("ConsultaEvaluaciones", "PlanNutricional")'>
+                                    <i class="fa-solid fa-clipboard-check me-2"></i> Evaluaciones (planes)
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
 
                     <hr class="border-secondary my-3" />
 
-                    <a class="nav-link text-light text-start" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>
-                        <i class="fa-regular fa-user me-2"></i> Mi Perfil
+                    <!-- Perfil / Cerrar sesión -->
+                    <a class="nav-link text-light text-start mb-1" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>
+                        <i class="fa-regular fa-user me-2"></i> Mi perfil
                     </a>
-
                     <a class="nav-link text-light text-start" href='@Url.Action("CerrarSesion", "Autenticacion")'>
-                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Salir
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Cerrar sesión
                     </a>
                 </nav>
 
@@ -129,45 +229,100 @@
                 <div class="collapse d-lg-none" id="adminMobileMenu">
                     <div class="bg-dark">
                         <nav class="nav nav-pills flex-column p-2">
-                            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "PanelAdministracion" ? "active" : "text-light")"
+
+                            <div class="mb-2 text-uppercase small text-secondary px-2">Dashboard</div>
+                            <a class="nav-link text-light @(currentAction == "PanelAdministracion" ? "active" : "")"
                                href='@Url.Action("PanelAdministracion", "Administracion")'>
                                 <i class="fa-solid fa-gauge me-2"></i> Panel
                             </a>
 
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "text-light")"
-                               href='@Url.Action("Index", "Usuarios")'>
-                                <i class="fa-solid fa-users me-2"></i> Usuarios
-                            </a>
+                            <hr class="border-secondary my-2" />
 
-                            <a class="nav-link text-light @(ViewContext.RouteData.Values["action"]?.ToString() == "Interaccion" ? "active" : "")"
-                               href='@Url.Action("Interaccion", "Administracion")'>
-                                <i class="fa-solid fa-comments me-2"></i> Interacción
-                            </a>
+                            <div class="mb-2 text-uppercase small text-secondary px-2">Usuarios</div>
+                            <button class="btn btn-toggle w-100 text-start text-light d-flex align-items-center justify-content-between"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#mCollapseUsuarios" aria-expanded="@(openUsuarios.ToString().ToLower())">
+                                <span><i class="fa-solid fa-users me-2"></i> Usuarios</span>
+                                <i class="fa-solid fa-chevron-down small"></i>
+                            </button>
+                            <div class="collapse @(openUsuarios ? "show" : "") mt-2" id="mCollapseUsuarios">
+                                <nav class="nav nav-pills flex-column ms-2">
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("Usuarios", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("Index", "Usuarios")'>
+                                        <i class="fa-solid fa-user-gear me-2"></i> Gestión de usuarios
+                                    </a>
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("Index", "Suscripciones")'>
+                                        <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
+                                    </a>
+                                </nav>
+                            </div>
 
-                            <a class="nav-link text-light" href='@Url.Action("Index", "Planes")'>
-                                <i class="fa-solid fa-clipboard-list me-2"></i> Planes
-                            </a>
+                            <hr class="border-secondary my-2" />
 
-                            <a class="nav-link text-light" href='@Url.Action("Index", "Notificaciones")'>
-                                <i class="fa-regular fa-bell me-2"></i> Notificaciones
-                            </a>
+                            <div class="mb-2 text-uppercase small text-secondary px-2">Contenido</div>
+                            <button class="btn btn-toggle w-100 text-start text-light d-flex align-items-center justify-content-between"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#mCollapseContenido" aria-expanded="@(openContenido.ToString().ToLower())">
+                                <span><i class="fa-solid fa-book-open-reader me-2"></i> Contenido</span>
+                                <i class="fa-solid fa-chevron-down small"></i>
+                            </button>
+                            <div class="collapse @(openContenido ? "show" : "") mt-2" id="mCollapseContenido">
+                                <nav class="nav nav-pills flex-column ms-2">
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("Index", "Planes")'>
+                                        <i class="fa-solid fa-clipboard-list me-2"></i> Planes
+                                    </a>
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("ObtenerRecetas", "Recetas")'>
+                                        <i class="fa-solid fa-cutlery me-2"></i> Asignar recetas
+                                    </a>
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("Ebooks", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("SubirArchivo", "Ebooks")'>
+                                        <i class="fa-solid fa-upload me-2"></i> Subir PDF / eBook
+                                    </a>
+                                </nav>
+                            </div>
+
+                            <hr class="border-secondary my-2" />
+
+                            <div class="mb-2 text-uppercase small text-secondary px-2">Comunicación</div>
+                            <button class="btn btn-toggle w-100 text-start text-light d-flex align-items-center justify-content-between"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#mCollapseComunicacion" aria-expanded="@(openComunicacion.ToString().ToLower())">
+                                <span><i class="fa-solid fa-comments me-2"></i> Comunicación</span>
+                                <i class="fa-solid fa-chevron-down small"></i>
+                            </button>
+                            <div class="collapse @(openComunicacion ? "show" : "") mt-2" id="mCollapseComunicacion">
+                                <nav class="nav nav-pills flex-column ms-2">
+                                    <a class="nav-link text-light mb-1 @(currentAction.Equals("Interaccion", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("Interaccion", "Administracion")'>
+                                        <i class="fa-solid fa-comments-dollar me-2"></i> Interacción
+                                    </a>
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("Notificaciones", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("Index", "Notificaciones")'>
+                                        <i class="fa-regular fa-bell me-2"></i> Notificaciones
+                                    </a>
+                                </nav>
+                            </div>
+
+                            <hr class="border-secondary my-2" />
 
                             <a class="nav-link text-light" href='@Url.Action("Index", "Reportes")'>
                                 <i class="fa-solid fa-chart-line me-2"></i> Reportes
                             </a>
 
-                            @* <a class="nav-link text-light text-start" href='@Url.Action("Index", "EbookEdicion")'>
-                                <i class="fa-solid fa-book-open me-2"></i> Editar eBook
-                            </a> *@
+                            <hr class="border-secondary my-2" />
+
+                            <a class="nav-link text-light" href='@Url.Action("ConsultaEvaluaciones", "PlanNutricional")'>
+                                <i class="fa-solid fa-clipboard-check me-2"></i> Evaluaciones (planes)
+                            </a>
 
                             <hr class="border-secondary my-2" />
 
                             <a class="nav-link text-light" href='@Url.Action("EditarPerfilAdmin", "Usuario")'>
-                                <i class="fa-regular fa-user me-2"></i> Mi Perfil
+                                <i class="fa-regular fa-user me-2"></i> Mi perfil
                             </a>
 
                             <a class="nav-link text-light" href='@Url.Action("CerrarSesion", "Autenticacion")'>
-                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Salir
+                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Cerrar sesión
                             </a>
                         </nav>
                     </div>

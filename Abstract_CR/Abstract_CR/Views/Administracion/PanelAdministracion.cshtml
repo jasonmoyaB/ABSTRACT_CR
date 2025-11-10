@@ -1,10 +1,235 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Panel de Administración";
+
+    // valores opcionales que puedes setear desde el controller
+    var totalUsuarios = ViewBag.TotalUsuarios ?? "--";
+    var usuariosActivos = ViewBag.UsuariosActivos ?? "--";
+    var totalPlanes = ViewBag.TotalPlanes ?? "--";
+    var totalEvaluaciones = ViewBag.TotalEvaluaciones ?? "--";
 }
 
 <div class="container-fluid">
-    <h1 class="mb-4">Panel de Administración</h1>
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0 text-primary"><i class="fa-solid fa-chart-pie me-2"></i> Panel de Administración</h1>
+                <p class="text-muted small mb-0">Resumen rápido con métricas, gráficos y actividad reciente</p>
+            </div>
+        </div>
+    </div>
 
-    
+    <!-- métricas rápidas -->
+    @* <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fa-solid fa-users fa-2x text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Total usuarios</div>
+                        <div class="h5 mb-0">@totalUsuarios</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fa-solid fa-user-check fa-2x text-success"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Usuarios activos</div>
+                        <div class="h5 mb-0">@usuariosActivos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fa-solid fa-clipboard-list fa-2x text-info"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Planes</div>
+                        <div class="h5 mb-0">@totalPlanes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fa-solid fa-clipboard-check fa-2x text-warning"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Evaluaciones</div>
+                        <div class="h5 mb-0">@totalEvaluaciones</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> *@
+
+    <!-- graficos -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <div class="fw-semibold">Evaluaciones (últimos 30 días)</div>
+                    <small class="text-muted">Actualizado: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartEvaluaciones" width="400" height="160"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-white fw-semibold">Distribución de calificaciones de plan nutrional</div>
+                <div class="card-body">
+                    <canvas id="chartCalificaciones" width="300" height="300"></canvas>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Top planes por evaluaciones</div>
+                <div class="card-body">
+                    <canvas id="chartTopPlanes" width="300" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- actividad reciente y tabla compacta -->
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Actividad reciente</div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @* Reemplaza por datos reales desde el controlador *@
+                        <li class="list-group-item">Usuario <strong>jason</strong> agregó una evaluación. <small class="text-muted ms-2">10/11/2025</small></li>
+                        <li class="list-group-item">Usuario <strong>maria</strong> subió un plan. <small class="text-muted ms-2">09/11/2025</small></li>
+                        <li class="list-group-item">Se envió notificación de promoción. <small class="text-muted ms-2">08/11/2025</small></li>
+                        <li class="list-group-item">Usuario <strong>carlos</strong> creó cuenta. <small class="text-muted ms-2">07/11/2025</small></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Últimas evaluaciones</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light small text-center">
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Usuario</th>
+                                    <th>Calif.</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small text-center">
+                                <tr><td>Plan A</td><td>jason</td><td>5</td><td>10/11/2025</td></tr>
+                                <tr><td>Plan B</td><td>maria</td><td>4</td><td>09/11/2025</td></tr>
+                                <tr><td>Plan C</td><td>carlos</td><td>3</td><td>08/11/2025</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        // helpers: datos de ejemplo; reemplaza con llamadas fetch a tus endpoints si quieres datos reales
+        var labels30 = [];
+        var values30 = [];
+        (function() {
+            // generar últimos 30 días (labels) y valores aleatorios como ejemplo
+            var now = new Date();
+            for (var i = 29; i >= 0; i--) {
+                var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+                labels30.push(d.toLocaleDateString());
+                values30.push(Math.floor(Math.random() * 10) + 1);
+            }
+        })();
+
+        // Chart: evaluaciones últimos 30 días (line)
+        const ctxEval = document.getElementById('chartEvaluaciones');
+        if (ctxEval) {
+            new Chart(ctxEval, {
+                type: 'line',
+                data: {
+                    labels: labels30,
+                    datasets: [{
+                        label: 'Evaluaciones',
+                        data: values30,
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 2,
+                        backgroundColor: 'rgba(54,162,235,0.08)',
+                        borderColor: 'rgb(54,162,235)',
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { maxTicksLimit: 10 } } }
+                }
+            });
+        }
+
+        // Chart: calificaciones (pie)
+        const ctxCalif = document.getElementById('chartCalificaciones');
+        if (ctxCalif) {
+            new Chart(ctxCalif, {
+                type: 'doughnut',
+                data: {
+                    labels: ['1★','2★','3★','4★','5★'],
+                    datasets: [{
+                        data: [5, 8, 15, 25, 47],
+                        backgroundColor: [
+                            '#ff6384','#ff9f40','#ffcd56','#4bc0c0','#36a2eb'
+                        ]
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // Chart: top planes (bar)
+        const ctxTop = document.getElementById('chartTopPlanes');
+        if (ctxTop) {
+            new Chart(ctxTop, {
+                type: 'bar',
+                data: {
+                    labels: ['Plan A','Plan B','Plan C','Plan D'],
+                    datasets: [{
+                        label: 'Evaluaciones',
+                        data: [45, 32, 20, 12],
+                        backgroundColor: 'rgba(54,162,235,0.7)'
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+        }
+    </script>
+}

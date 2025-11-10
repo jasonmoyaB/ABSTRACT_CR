@@ -317,15 +317,15 @@ namespace Abstract_CR.Controllers
 
                     string? mensajeLimpio = diasRestantes switch
                     {
-                        7 => $"⚠️ 7 días antes del vencimiento: Te avisamos que tu plan \"{plan.Descripcion}\" expirará en una semana.",
-                        3 => $"⚠️ 3 días antes del vencimiento: Un recordatorio cercano para que no olvides tu plan \"{plan.Descripcion}\".",
-                        1 => $"⚠️ 1 día antes del vencimiento: Último aviso para que tomes acción sobre tu plan \"{plan.Descripcion}\" antes de que caduque.",
-                        0 => $"⚠️ El día del vencimiento: Tu plan \"{plan.Descripcion}\" ha llegado a su fecha final.",
+                        7 => $" 7 días antes del vencimiento: Te avisamos que tu plan \"{plan.Descripcion}\" expirará en una semana.",
+                        3 => $" 3 días antes del vencimiento: Un recordatorio cercano para que no olvides tu plan \"{plan.Descripcion}\".",
+                        1 => $" 1 día antes del vencimiento: Último aviso para que tomes acción sobre tu plan \"{plan.Descripcion}\" antes de que caduque.",
+                        0 => $" El día del vencimiento: Tu plan \"{plan.Descripcion}\" ha llegado a su fecha final.",
                         _ => null
                     };
                     if (mensajeLimpio == null) continue;
 
-                    // Para la vista mostramos SOLO el mensaje limpio (sin token)
+                    
                     notificaciones.Add(new Notificacion
                     {
                         UsuarioID = usuarioId.Value,
@@ -334,14 +334,14 @@ namespace Abstract_CR.Controllers
                         FechaEnvio = DateTime.Now
                     });
 
-                    // Si no es ejecución, no persistimos ni enviamos
+                    
                     if (!run) continue;
 
-                    // Dedupe por Plan+Umbral usando token (no se reenvía si ya existe)
+                   
                     if (YaSeEnvioVencimiento(connection, usuarioId.Value, token))
                         continue;
 
-                    // Guardamos en BD el mensaje con token para control
+                    
                     var mensajeConToken = $"{token} {mensajeLimpio}";
 
                     var sqlInsert = @"
@@ -357,7 +357,7 @@ namespace Abstract_CR.Controllers
                         commandInsert.ExecuteNonQuery();
                     }
 
-                    // Envío de email con mensaje limpio (sin token)
+                  
                     if (!string.IsNullOrWhiteSpace(emailUsuario))
                     {
                         var subject = $"Recordatorio de vencimiento – {plan.Descripcion}";
@@ -394,7 +394,7 @@ namespace Abstract_CR.Controllers
     ";
             using var cmd = new SqlCommand(sql, connection);
             cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
-            cmd.Parameters.AddWithValue("@Token", token); // ← sin % y literal
+            cmd.Parameters.AddWithValue("@Token", token); 
             var count = (int)cmd.ExecuteScalar();
             return count > 0;
         }
@@ -566,11 +566,112 @@ namespace Abstract_CR.Controllers
                 NombrePlanActual = model.NombrePlanActual,
                 Calificacion = model.Calificacion,
                 Comentario = model.Comentario,
-                SuccessMensaje = "¡Gracias! Tu evaluación fue enviada exitosamente 🥗"
+                SuccessMensaje = "¡Gracias! Tu evaluación fue enviada exitosamente"
             };
 
             return View("EvaluarPlan", vmGracias);
         }
+        public IActionResult ConsultaEvaluaciones()
+        {
+            return View(); 
+        }
+        [HttpGet]
+        public IActionResult GetEvaluaciones()
+        {
+            var lista = new List<object>();
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                var sql = @"
+SELECT 
+    e.EvaluacionID,
+    e.PlanID,
+    p.NombrePlan,
+    e.UsuarioID,
+    u.Nombre AS UsuarioNombre,
+    u.Apellido AS UsuarioApellido,
+    u.CorreoElectronico AS UsuarioCorreo,
+    e.Calificacion,
+    e.Comentario,
+    e.FechaRegistro
+FROM dbo.EvaluarPlanesNutricionales e
+LEFT JOIN dbo.PlanesNutricionales p ON e.PlanID = p.PlanID
+LEFT JOIN dbo.Usuarios u ON e.UsuarioID = u.UsuarioID
+ORDER BY e.FechaRegistro DESC;
+";
+                using (var cmd = new SqlCommand(sql, connection))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int idxEval = reader.GetOrdinal("EvaluacionID");
+                            int idxPlan = reader.GetOrdinal("PlanID");
+                            int idxNombrePlan = reader.GetOrdinal("NombrePlan");
+                            int idxUsuarioID = reader.GetOrdinal("UsuarioID");
+                            int idxNombre = reader.GetOrdinal("UsuarioNombre");
+                            int idxApellido = reader.GetOrdinal("UsuarioApellido");
+                            int idxCorreo = reader.GetOrdinal("UsuarioCorreo");
+                            int idxCal = reader.GetOrdinal("Calificacion");
+                            int idxCom = reader.GetOrdinal("Comentario");
+                            int idxFecha = reader.GetOrdinal("FechaRegistro");
+
+                            // construir nombre de usuario seguro
+                            string nombreUsuario = "(Usuario desconocido)";
+                            var n = reader.IsDBNull(idxNombre) ? string.Empty : reader.GetString(idxNombre).Trim();
+                            var a = reader.IsDBNull(idxApellido) ? string.Empty : reader.GetString(idxApellido).Trim();
+                            var c = reader.IsDBNull(idxCorreo) ? string.Empty : reader.GetString(idxCorreo).Trim();
+
+                            if (!string.IsNullOrEmpty(n) || !string.IsNullOrEmpty(a))
+                                nombreUsuario = $"{n} {a}".Trim();
+                            else if (!string.IsNullOrEmpty(c))
+                                nombreUsuario = c;
+
+                            // fecha a ISO (o null)
+                            string? fechaIso = null;
+                            bool fechaValida = false;
+                            if (!reader.IsDBNull(idxFecha))
+                            {
+                                var val = reader.GetValue(idxFecha);
+                                if (val is DateTimeOffset dto)
+                                {
+                                    fechaIso = dto.ToString("o");
+                                    fechaValida = true;
+                                }
+                                else if (val is DateTime dt)
+                                {
+                                    // especificar kind local/utc según tu DB
+                                    fechaIso = DateTime.SpecifyKind(dt, DateTimeKind.Utc).ToString("o");
+                                    fechaValida = true;
+                                }
+                                else
+                                {
+                                    fechaIso = val.ToString();
+                                }
+                            }
+
+                            lista.Add(new
+                            {
+                                EvaluacionID = reader.GetInt32(idxEval),
+                                PlanID = reader.IsDBNull(idxPlan) ? (int?)null : reader.GetInt32(idxPlan),
+                                NombrePlan = reader.IsDBNull(idxNombrePlan) ? "(Sin plan)" : reader.GetString(idxNombrePlan),
+                                UsuarioID = reader.IsDBNull(idxUsuarioID) ? (int?)null : reader.GetInt32(idxUsuarioID),
+                                NombreUsuario = nombreUsuario,
+                                Calificacion = reader.IsDBNull(idxCal) ? (int?)null : reader.GetInt32(idxCal),
+                                Comentario = reader.IsDBNull(idxCom) ? null : reader.GetString(idxCom),
+                                FechaRegistro = (object?)fechaIso ?? null,
+                                FechaRegistroValida = fechaValida
+                            });
+                        }
+                    }
+                }
+            }
+
+            return Json(lista);
+        }
+
 
     }
 }

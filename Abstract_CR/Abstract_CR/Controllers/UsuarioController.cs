@@ -1,49 +1,211 @@
-using Microsoft.AspNetCore.Mvc;
+using Abstract_CR.Data;
+using Abstract_CR.Helpers;
 using Abstract_CR.Models;
-using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Abstract_CR.Controllers
 {
     public class UsuarioController : Controller
     {
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<UsuarioController> _logger;
+        private readonly InteraccionHelper _interaccionHelper;
 
-        public UsuarioController(ILogger<UsuarioController> logger)
+        public UsuarioController(ApplicationDbContext context, ILogger<UsuarioController> logger, InteraccionHelper interaccionHelper)
         {
+            _context = context;
             _logger = logger;
+            _interaccionHelper = interaccionHelper;
         }
 
-        // GET: Usuario/Perfil
-        public IActionResult Perfil()
+
+        // GET: Perfil
+        public async Task<IActionResult> Perfil()
         {
-            // TODO: Obtener usuario actual desde la sesión/base de datos
-            var usuario = ObtenerUsuarioEjemplo();
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+                return RedirectToAction("Login");
+
+            var (usuario, mensajes, historial) = await _interaccionHelper.ObtenerDetalleUsuarioAsync(usuarioId.Value);
+
+            if (usuario == null)
+                return NotFound();
+
+            await _interaccionHelper.MarcarMensajesComoLeidosAsync(usuario.UsuarioID, paraChef: false);
+
+            var viewModel = new PerfilInteraccionViewModel
+            {
+                Usuario = usuario,
+                Mensajes = mensajes,
+                HistorialPuntos = historial,
+                NuevoMensaje = new MensajeInteraccionInputModel
+                {
+                    UsuarioId = usuario.UsuarioID
+                }
+            };
+
+            return View(viewModel);
+        }
+
+
+        // GET: EditarPerfil
+        [HttpGet]
+        public async Task<IActionResult> EditarPerfil()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+                return RedirectToAction("Login");
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+
+            if (usuario == null)
+                return NotFound();
+
             return View(usuario);
         }
 
-        // GET: Usuario/EditarPerfil
-        public IActionResult EditarPerfil()
-        {
-            // TODO: Obtener usuario actual desde la sesión/base de datos
-            var usuario = ObtenerUsuarioEjemplo();
-            return View(usuario);
-        }
-
-        // POST: Usuario/EditarPerfil
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditarPerfil(Usuario usuario)
+        public async Task<IActionResult> EditarPerfil(Usuario model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // TODO: Guardar cambios en la base de datos
-                usuario.FechaActualizacion = DateTime.Now;
-                
-                TempData["Mensaje"] = "Perfil actualizado correctamente";
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Error de validación: {Error}", error.ErrorMessage);
+                }
+                return View(model);
+            }
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == model.UsuarioID);
+            if (usuario == null)
+                return NotFound();
+
+            usuario.Nombre = model.Nombre;
+            usuario.Apellido = model.Apellido;
+            usuario.CorreoElectronico = model.CorreoElectronico;
+            usuario.Activo = model.Activo;
+
+            if (model.RolID.HasValue)
+                usuario.RolID = model.RolID.Value;
+
+            if (!string.IsNullOrWhiteSpace(model.ContrasenaHash))
+            {
+                using var sha256 = System.Security.Cryptography.SHA256.Create();
+                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.ContrasenaHash));
+                usuario.ContrasenaHash = Convert.ToBase64String(bytes); 
+            }
+
+            _context.Entry(usuario).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
+            HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
+            TempData["Mensaje"] = "Perfil actualizado correctamente";
+
+            return RedirectToAction("Perfil");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EnviarMensajeChef(MensajeInteraccionInputModel model)
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            if (usuarioId.Value != model.UsuarioId)
+            {
+                TempData["Error"] = "No tienes permisos para enviar mensajes por otro usuario.";
                 return RedirectToAction(nameof(Perfil));
             }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Por favor revisa el contenido del mensaje.";
+                return RedirectToAction(nameof(Perfil));
+            }
+
+            var (success, error) = await _interaccionHelper.RegistrarMensajeAsync(model.UsuarioId, model.Contenido, enviadoPorChef: false, TipoMensajeInteraccion.Mensaje, usuarioId);
+
+            if (!success)
+            {
+                TempData["Error"] = error ?? "No se pudo enviar el mensaje.";
+            }
+            else
+            {
+                TempData["Mensaje"] = "Tu mensaje fue enviado al chef.";
+            }
+
+            return RedirectToAction(nameof(Perfil));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditarPerfilAdmin()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+                return RedirectToAction("Login", "Autenticacion"); // <- opcional, más explícito
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+
+            if (usuario == null)
+                return NotFound();
+
             return View(usuario);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditarPerfilAdmin(Usuario model)
+        {
+            if (!ModelState.IsValid)
+            {
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Error de validación: {Error}", error.ErrorMessage);
+                }
+                return View(model);
+            }
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == model.UsuarioID);
+            if (usuario == null)
+                return NotFound();
+
+            usuario.Nombre = model.Nombre;
+            usuario.Apellido = model.Apellido;
+            usuario.CorreoElectronico = model.CorreoElectronico;
+            usuario.Activo = model.Activo;
+
+            if (model.RolID.HasValue)
+                usuario.RolID = model.RolID.Value;
+
+            if (!string.IsNullOrWhiteSpace(model.ContrasenaHash))
+            {
+                using var sha256 = System.Security.Cryptography.SHA256.Create();
+                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(model.ContrasenaHash));
+                usuario.ContrasenaHash = Convert.ToBase64String(bytes);
+            }
+
+            _context.Entry(usuario).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
+            HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
+            TempData["Mensaje"] = "Perfil actualizado correctamente";
+
+            // Redirige al Panel de Administración
+            return RedirectToAction("PanelAdministracion", "Administracion");
+        }
+
+
+
 
         // GET: Usuario/Alergias
         public IActionResult Alergias()
@@ -68,7 +230,7 @@ namespace Abstract_CR.Controllers
             {
                 // TODO: Guardar alergia en la base de datos
                 alergia.UsuarioId = 1; // TODO: Obtener ID del usuario actual
-                
+
                 TempData["Mensaje"] = "Alergia agregada correctamente";
                 return RedirectToAction(nameof(Alergias));
             }
@@ -98,7 +260,7 @@ namespace Abstract_CR.Controllers
             {
                 // TODO: Guardar restricción en la base de datos
                 restriccion.UsuarioId = 1; // TODO: Obtener ID del usuario actual
-                
+
                 TempData["Mensaje"] = "Restricción agregada correctamente";
                 return RedirectToAction(nameof(Restricciones));
             }
@@ -128,7 +290,7 @@ namespace Abstract_CR.Controllers
             {
                 // TODO: Guardar preferencia en la base de datos
                 preferencia.UsuarioId = 1; // TODO: Obtener ID del usuario actual
-                
+
                 TempData["Mensaje"] = "Preferencia agregada correctamente";
                 return RedirectToAction(nameof(Preferencias));
             }
@@ -140,17 +302,14 @@ namespace Abstract_CR.Controllers
         {
             return new Usuario
             {
-                Id = 1,
-                NombreCompleto = "Juan Pérez",
-                Email = "juan.perez@email.com",
-                Telefono = "+54 11 1234-5678",
-                FechaNacimiento = new DateTime(1990, 5, 15),
-                Genero = "Masculino",
-                Altura = 175,
-                Peso = 70.5m,
-                NivelActividad = "Moderado",
-                ObjetivoNutricional = "Mantener peso saludable",
-                FechaCreacion = DateTime.Now.AddDays(-30)
+                UsuarioID = 1,
+                Nombre = "Juan",
+                Apellido = "Pérez",
+                CorreoElectronico = "juan.perez@email.com",
+                ContrasenaHash = "hashedpassword",
+                FechaRegistro = DateTime.Now.AddDays(-30),
+                RolID = 2, // Cliente
+                Activo = true
             };
         }
 
@@ -239,4 +398,4 @@ namespace Abstract_CR.Controllers
             };
         }
     }
-} 
+}

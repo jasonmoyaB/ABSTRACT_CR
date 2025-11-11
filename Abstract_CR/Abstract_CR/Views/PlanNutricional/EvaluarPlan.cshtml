@@ -1,0 +1,151 @@
+﻿@model Abstract_CR.Models.EvaluacionPlanViewModel
+@{
+    ViewData["Title"] = "Evaluar Plan Nutricional";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="page-section">
+    <div class="container position-relative" style="max-width: 800px;">
+
+
+        <a href="@Url.Action("Index", "PlanNutricional")"
+           class="btn position-absolute"
+           style="left: -100px; top: 0; background-color:#2F170F; border-color:#2F170F; color:white; z-index: 1000;"
+           title="Volver a Mi Perfil">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+
+        <div class="text-center mb-4">
+            <h2 class="section-heading">
+                <span class="section-heading-upper" style="color:#e6a756">Tu opinión</span>
+                <span class="section-heading-lower" style="color:#f6e1c5">Evaluar mi Plan Nutricional</span>
+            </h2>
+            <p class="mb-0" style="font-size:.95rem; color:#f6e1c5;">
+                Tu retroalimentación nos ayuda a mejorar recetas, porciones y sabor.
+            </p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SuccessMensaje))
+        {
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                @Model.SuccessMensaje
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- BLOQUE SIN PLAN ACTIVO / NO AUTORIZADO -->
+        @if (!Model.TienePlanActivo)
+        {
+            <div class="card text-center shadow-sm border-0" style="border-top:4px solid #dc3545;">
+                <div class="card-body" style="background-color:#2c2c2c; color:#f6e1c5;">
+                    <i class="fa-solid fa-lock mb-3" style="color:#dc3545; font-size:2rem;"></i>
+
+                    <h4 class="fw-bold mb-2" style="color:#dc3545;">Acceso no autorizado</h4>
+
+                    <p class="mb-4" style="color:#ddd;">@Model.ErrorMensaje</p>
+
+                    <a asp-controller="PlanNutricional"
+                       asp-action="Index"
+                       class="btn"
+                       style="background-color:#e6a756; border:1px solid #e6a756; color:#2c2c2c; font-weight:600;">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Volver
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- BLOQUE CON FORMULARIO -->
+            <div class="card shadow-sm border-0" style="border-top:4px solid #e6a756;">
+                <div class="card-header"
+                     style="background-color:#2c2c2c; color:#f6e1c5; font-weight:600;">
+                    <strong>Plan: </strong>@Model.NombrePlanActual
+                </div>
+
+                <div class="card-body" style="background-color:#fff; color:#2c2c2c;">
+                    <form asp-action="EvaluarPlan"
+                          asp-controller="PlanNutricional"
+                          method="post"
+                          novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="PlanID" value="@Model.PlanID" />
+                        <input type="hidden" name="NombrePlanActual" value="@Model.NombrePlanActual" />
+
+                        <!-- Calificación -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="color:#2c2c2c;">
+                                Calificación (1 a 5) <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="d-flex flex-wrap gap-3">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="Calificacion"
+                                               id="cal-@i"
+                                               value="@i"
+                                               @(Model.Calificacion == i ? "checked" : "") />
+                                        <label class="form-check-label" for="cal-@i" style="color:#2c2c2c;">
+                                            @i ⭐
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+
+                            <span class="text-danger d-block mt-1" asp-validation-for="Calificacion"></span>
+                        </div>
+
+                        <!-- Comentario -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="color:#2c2c2c;">
+                                Tu comentario o sugerencia <span class="text-danger">*</span>
+                            </label>
+
+                            <textarea class="form-control"
+                                  name="Comentario"
+                                  rows="4"
+                                  maxlength="1000"
+                                  style="color:#2c2c2c;"
+                                  placeholder="Ejemplo: Me gustaron las recetas pero en la cena las porciones eran muy grandes, tal vez podría ser algo más ligero.">@Model.Comentario</textarea>
+
+                            <span class="text-danger d-block mt-1" asp-validation-for="Comentario"></span>
+                        </div>
+
+                        <!-- Mensaje de validación general -->
+                        @if (!string.IsNullOrEmpty(Model.ErrorMensaje))
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fa-solid fa-circle-exclamation me-2"></i>
+                                @Model.ErrorMensaje
+                            </div>
+                        }
+
+                        <!-- Botón enviar -->
+                        <div class="text-end">
+                            <button type="submit"
+                                    class="btn"
+                                    style="background-color:#e6a756; border:1px solid #e6a756; color:#2c2c2c; font-weight:600;">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Enviar Evaluación
+                            </button>
+                        </div>
+
+                        <!-- Nota legal -->
+                        <div class="mt-4" style="font-size:.8rem; color:#666;">
+                            Al enviar esta evaluación autorizas a Abstract a usar tu retroalimentación
+                            para mejorar el servicio. No se publicará tu nombre.
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

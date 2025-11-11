@@ -1,0 +1,344 @@
+﻿@model IEnumerable<Abstract_CR.Models.EbookEdicion>
+@{
+    ViewData["Title"] = "Ebooks - Abstract";
+    // si tenés un layout público, usalo. Si no, podés dejarlo en null o al _Layout principal.
+    // Layout = "~/Views/Shared/_Layout.cshtml";
+
+    Func<int, string> ImgFor = esc => esc switch
+    {
+        1 => Url.Content("~/assets/img/FondoCarneMolida.jpeg"),
+        2 => Url.Content("~/assets/img/FondoAlbondigas.jpeg"),
+        3 => Url.Content("~/assets/img/fondoReceta.jpeg"),
+        _ => Url.Content("~/assets/img/FondoRecipientes.jpeg")
+    };
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+}
+
+<section class="page-section clearfix" style="background: linear-gradient(135deg, rgba(230, 167, 86, 0.1) 0%, rgba(47, 23, 15, 0.05) 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="intro-text left-0 text-center bg-faded p-5 rounded">
+                    <h1 class="section-heading mb-4">
+                        <span class="section-heading-upper text-primary">ABSTRACT</span>
+                        <span class="section-heading-lower d-block">No pierdas más tiempo en la cocina</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        Con nuestra guía de preparaciones harás tu semana mucho más sencilla.
+                        Aprende técnicas profesionales de meal prep y optimiza tu tiempo en la cocina.
+                    </p>
+                    <div class="intro-button mx-auto">
+                        <a class="btn btn-primary btn-lg" href="#productos">
+                            Ver Productos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img class="img-fluid rounded shadow" src="~/assets/img/FondoRecipientes.jpeg" alt="Meal Prep" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page-section cta" id="beneficios">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-9 mx-auto">
+                <div class="cta-inner bg-faded text-center rounded p-4 p-md-5">
+                    <h2 class="section-heading mb-4">
+                        <span class="section-heading-upper d-block">Beneficios</span>
+                        <span class="section-heading-lower d-block">de Nuestras Guías</span>
+                    </h2>
+                    <div class="row mt-4">
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                                <h5 class="fw-semibold">Ahorra Tiempo</h5>
+                                <p class="text-muted mb-0">Prepara tus comidas de toda la semana en solo 2-3 horas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <i class="fas fa-dollar-sign fa-3x text-primary mb-3"></i>
+                                <h5 class="fw-semibold">Economiza Dinero</h5>
+                                <p class="text-muted mb-0">Reduce desperdicios y compras innecesarias</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center">
+                                <i class="fas fa-heart fa-3x text-primary mb-3"></i>
+                                <h5 class="fw-semibold">Mejora tu Salud</h5>
+                                <p class="text-muted mb-0">Come más saludable con comidas planificadas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page-section" id="productos">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-lg text-white" style="background: linear-gradient(135deg, #e6a756 0%, #d4944a 100%);">
+                    <div class="card-body p-5">
+                        <h3 class="card-title mb-4 fw-semibold">¿Qué incluye el Pack Especial?</h3>
+                        <div class="mb-4">
+                            <h5 class="mb-3 fw-semibold">Incluye:</h5>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    E-Book Meal Prep: Cocina una vez, come toda la semana
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Regalía: Recetario básico para el meal prep
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Herramienta de apoyo 1 (especializado en dietas)
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Herramienta de apoyo 2 (especializado en dietas)
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card text-center border-0 shadow-lg"
+                     style="background: rgba(230, 167, 86, 0.75); backdrop-filter: blur(10px); border-radius: 15px; color:#fff;">
+                    <div class="card-body p-5">
+                        <h4 class="card-title fw-bold mb-4" style="color:#fff;">Accede al Pack aquí</h4>
+
+                        @if (ViewBag.subscripcion.SuscripcionID != 0 && ViewBag.subscripcion.Estado == "Activa")
+                        {
+                            var usuarioActual = ViewBag.UsuarioActual as Usuario;
+                            var ebookActual = ViewBag.EbookActual as EbookEdicion;
+                            var puedeDescargarPack = ebookActual?.PermitirDescarga == true && (usuarioActual?.PermitirDescargaEbook ?? false);
+
+                            @if (puedeDescargarPack && !string.IsNullOrEmpty(ebookActual?.RutaArchivo))
+                            {
+                                <a href="@Url.Action("Descargar", "Ebooks", new { id = ebookActual.EbookEdicionID })"
+                                   class="btn btn-lg fw-semibold px-5 py-3 border-0 shadow-sm"
+                                   style="background-color:#fff; color:#4a3a27; font-size:1.2rem;">
+                                    <i class="fas fa-download me-2"></i>Descargar Pack
+                                </a>
+                            }
+                            else if (ebookActual != null && !ebookActual.PermitirDescarga)
+                            {
+                                <button class="btn btn-lg fw-semibold px-5 py-3 border-0 shadow-sm"
+                                        style="background-color:rgba(255,255,255,0.3); color:#fff; font-size:1.2rem;" disabled>
+                                    <i class="fas fa-lock me-2"></i>Descarga Deshabilitada
+                                </button>
+                                <div class="mt-3 fw-semibold" style="color:#fff;">
+                                    El administrador ha deshabilitado las descargas temporalmente
+                                </div>
+                            }
+                            else if (usuarioActual != null && !usuarioActual.PermitirDescargaEbook)
+                            {
+                                <button class="btn btn-lg fw-semibold px-5 py-3 border-0 shadow-sm"
+                                        style="background-color:#fff; color:#4a3a27; font-size:1.2rem;" disabled>
+                                    <i class="fas fa-credit-card me-2"></i>Requiere Pago Extra
+                                </button>
+                                <div class="mt-3 fw-semibold" style="color:#fff;">
+                                    Este ebook es un producto adicional que requiere pago extra. Contacta al administrador.
+                                </div>
+                            }
+                            else
+                            {
+                                <button class="btn btn-lg fw-semibold px-5 py-3 border-0 shadow-sm"
+                                        style="background-color:rgba(255,255,255,0.3); color:#fff; font-size:1.2rem;" disabled>
+                                    <i class="fas fa-file-alt me-2"></i>Documento no disponible
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <button class="btn btn-lg fw-semibold px-5 py-3 border-0 shadow-sm"
+                                    style="background-color:#fff; color:#4a3a27; font-size:1.2rem;" disabled>
+                                <i class="fas fa-info-circle me-2"></i>Requiere Suscripción
+                            </button>
+                            <div class="mt-3 fw-semibold" style="color:#fff;">
+                                Debes tener una suscripción activa para descargar el pack
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+@* <section class="page-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-9 mx-auto">
+                <div class="text-center mb-5">
+                    <h2 class="section-heading">
+                        <span class="section-heading-upper d-block" style="color:#e6a756">E-books</span>
+                        <span class="section-heading-lower d-block" style="color:#f6e1c5">por separado</span>
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        No hay e-books disponibles por el momento.
+                    </div>
+                </div>
+            }
+            else
+            {
+                foreach (var e in Model)
+                {
+                    var img = ImgFor(e.Escenario);
+                    <div class="col-lg-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4 d-flex flex-column">
+                                <div class="mb-3">
+                                    <img src="@img" alt="E-book" class="img-fluid rounded mb-3" style="height: 200px; object-fit: cover; width: 100%;" />
+                                </div>
+
+                                <h5 class="card-title flex-grow-1 fw-semibold">
+                                    @e.TituloHU
+                                    <div class="small text-muted mt-1">Escenario @e.Escenario</div>
+                                </h5>
+
+                                <div class="text-start mt-2 small">
+                                    <ul class="list-unstyled mb-2">
+                                        <li><strong>Criterio:</strong> @e.CriterioAceptacion</li>
+                                        <li><strong>Contexto:</strong> @e.Contexto</li>
+                                        <li><strong>Evento:</strong> @e.Evento</li>
+                                        <li><strong>Resultado:</strong> @e.Resultado</li>
+                                    </ul>
+                                </div>
+
+                                @if (ViewBag.subscripcion.SuscripcionID != 0 && ViewBag.subscripcion.Estado == "Activa")
+                                {
+                                    var usuarioActual = ViewBag.UsuarioActual as Usuario;
+                                    var puedeDescargar = e.PermitirDescarga && (usuarioActual?.PermitirDescargaEbook ?? false);
+
+                                    @if (puedeDescargar && !string.IsNullOrEmpty(e.RutaArchivo))
+                                    {
+                                        <a href="@Url.Action("Descargar", "Ebooks", new { id = e.EbookEdicionID })"
+                                           class="btn btn-success w-100 mt-auto fw-semibold">
+                                            <i class="fas fa-download me-2"></i>Descargar
+                                        </a>
+                                    }
+                                    else if (!e.PermitirDescarga)
+                                    {
+                                        <button class="btn btn-outline-secondary w-100 mt-auto fw-semibold" disabled>
+                                            <i class="fas fa-lock me-2"></i>Descarga Deshabilitada
+                                        </button>
+                                        <div class="text-muted mt-2 d-block fw-semibold" style="font-size: 0.9rem;">
+                                            El administrador ha deshabilitado las descargas temporalmente
+                                        </div>
+                                    }
+                                    else if (usuarioActual != null && !usuarioActual.PermitirDescargaEbook)
+                                    {
+                                        <button class="btn btn-outline-danger w-100 mt-auto fw-semibold" disabled>
+                                            <i class="fas fa-credit-card me-2"></i>Requiere Pago Extra
+                                        </button>
+                                        <div class="text-muted mt-2 d-block fw-semibold" style="font-size: 0.9rem;">
+                                            Producto adicional - Contacta al admin
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-outline-secondary w-100 mt-auto fw-semibold" disabled>
+                                            <i class="fas fa-file-alt me-2"></i>Documento no disponible
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="w-100 mt-auto text-center">
+                                        <button class="btn btn-outline-warning w-100 fw-semibold" disabled>
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Requiere Suscripción
+                                        </button>
+                                        <div class="text-warning mt-2 d-block fw-semibold" style="font-size: 1rem;">
+                                            No estás suscripto para poder descargar el eBook
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section> *@
+
+<section class="page-section cta">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-9 mx-auto">
+                <div class="cta-inner bg-faded text-center rounded p-4 p-md-5">
+                    <h2 class="section-heading mb-4">
+                        <span class="section-heading-upper d-block">¿Tienes Dudas?</span>
+                        <span class="section-heading-lower d-block">Contáctanos</span>
+                    </h2>
+                    <p class="mb-4">Si tienes alguna duda puedes contactarnos al WhatsApp</p>
+                    <a href="https://wa.me/1234567890" class="btn btn-success btn-lg fw-semibold" target="_blank">
+                        <i class="fab fa-whatsapp me-2"></i>Enviar Mensaje
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+        }
+
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+</style>

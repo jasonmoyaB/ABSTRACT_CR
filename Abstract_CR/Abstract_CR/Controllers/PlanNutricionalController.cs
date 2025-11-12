@@ -14,16 +14,18 @@ namespace Abstract_CR.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
+        private readonly ILogger<PlanNutricionalController> _logger;
 
 
         private readonly IEmailService _emailService;
 
 
-        public PlanNutricionalController(IConfiguration configuration, IEmailService emailService)
+        public PlanNutricionalController(IConfiguration configuration, IEmailService emailService, ILogger<PlanNutricionalController> logger)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("DefaultConnection");
             _emailService = emailService;
+            _logger = logger;
         }
 
 
@@ -263,19 +265,22 @@ namespace Abstract_CR.Controllers
 
             return $"/uploads/planes/{fileName}";
         }
+
+
+        //NOTIFICACIONES PLAN
         [HttpGet]
         public async Task<IActionResult> Notificaciones()
         {
-            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
-            if (usuarioId == null)
+            var usuarioIdNullable = HttpContext.Session.GetInt32("UsuarioID");
+            if (!usuarioIdNullable.HasValue)
             {
                 TempData["Error"] = "Debes iniciar sesión para ver tus notificaciones.";
                 return RedirectToAction("Login", "Autenticacion");
             }
 
-            // Solo ejecuta INSERT/EMAIL si vienes con ?run=1
-            bool run = string.Equals(Request.Query["run"], "1", StringComparison.Ordinal);
+            int usuarioId = usuarioIdNullable.Value;
 
+            // Procesamos notificaciones para el usuario (inserta y envía email cuando corresponda)
             var notificaciones = new List<Notificacion>();
 
             using var connection = new SqlConnection(_connectionString);
@@ -293,76 +298,127 @@ namespace Abstract_CR.Controllers
 
             using (var commandPlanes = new SqlCommand(sqlPlanes, connection))
             {
-                commandPlanes.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
+                commandPlanes.Parameters.AddWithValue("@UsuarioID", usuarioId);
                 using var reader = commandPlanes.ExecuteReader();
                 while (reader.Read())
                 {
                     planes.Add((
                         PlanID: reader.GetInt32(reader.GetOrdinal("PlanID")),
-                        Descripcion: reader["Descripcion"]?.ToString() ?? "",
+                        Descripcion: reader["Descripcion"]?.ToString() ?? string.Empty,
                         FechaVencimiento: reader.GetDateTime(reader.GetOrdinal("FechaVencimiento"))
                     ));
                 }
             }
 
-            var emailUsuario = ObtenerEmailUsuario(usuarioId.Value);
+            var emailUsuario = ObtenerEmailUsuario(usuarioId);
 
             foreach (var plan in planes)
             {
                 var diasRestantes = (plan.FechaVencimiento.Date - DateTime.Now.Date).Days;
 
-                if (diasRestantes is 7 or 3 or 1 or 0)
+                if (diasRestantes is not (7 or 3 or 1 or 0))
+                    continue;
+
+                var token = $"[PID={plan.PlanID};UMBRAL={diasRestantes}]";
+
+                string mensajeLimpio = diasRestantes switch
                 {
-                    var token = $"[PID={plan.PlanID};UMBRAL={diasRestantes}]";
+                    7 => $"7 días antes del vencimiento: Te avisamos que tu plan \"{plan.Descripcion ?? ""}\" expirará en una semana.",
+                    3 => $"3 días antes del vencimiento: Un recordatorio cercano para que no olvides tu plan \"{plan.Descripcion ?? ""}\".",
+                    1 => $"1 día antes del vencimiento: Último aviso para que tomes acción sobre tu plan \"{plan.Descripcion ?? ""}\" antes de que caduque.",
+                    0 => $"El día del vencimiento: Tu plan \"{plan.Descripcion ?? ""}\" ha llegado a su fecha final.",
+                    _ => string.Empty
+                };
 
-                    string? mensajeLimpio = diasRestantes switch
-                    {
-                        7 => $" 7 días antes del vencimiento: Te avisamos que tu plan \"{plan.Descripcion}\" expirará en una semana.",
-                        3 => $" 3 días antes del vencimiento: Un recordatorio cercano para que no olvides tu plan \"{plan.Descripcion}\".",
-                        1 => $" 1 día antes del vencimiento: Último aviso para que tomes acción sobre tu plan \"{plan.Descripcion}\" antes de que caduque.",
-                        0 => $" El día del vencimiento: Tu plan \"{plan.Descripcion}\" ha llegado a su fecha final.",
-                        _ => null
-                    };
-                    if (mensajeLimpio == null) continue;
+                if (string.IsNullOrWhiteSpace(mensajeLimpio))
+                    continue;
 
-                    
-                    notificaciones.Add(new Notificacion
-                    {
-                        UsuarioID = usuarioId.Value,
-                        Mensaje = mensajeLimpio,
-                        Tipo = "Vencimiento",
-                        FechaEnvio = DateTime.Now
-                    });
-
-                    
-                    if (!run) continue;
-
-                   
-                    if (YaSeEnvioVencimiento(connection, usuarioId.Value, token))
+                // Evitar duplicados por token
+                try
+                {
+                    if (YaSeEnvioVencimiento(connection, usuarioId, token))
                         continue;
+                }
+                catch (Exception exYa)
+                {
+                    _logger?.LogError(exYa, "Error comprobando duplicado de notificación para Usuario {UsuarioId}, Plan {PlanId}", usuarioId, plan.PlanID);
+                    // Si no podemos comprobar duplicado, saltamos este plan para evitar envíos erróneos
+                    continue;
+                }
 
-                    
-                    var mensajeConToken = $"{token} {mensajeLimpio}";
+                var mensajeConToken = $"{token} {mensajeLimpio}";
 
-                    var sqlInsert = @"
+                // Intentar insertar la notificación y recuperar el ID insertado.
+                int? notificacionId = null;
+                try
+                {
+                    // Primero intento con OUTPUT INSERTED.NotificacionID (si tu tabla tiene NotificacionID identity)
+                    var sqlInsertOutput = @"
                 INSERT INTO dbo.Notificaciones (UsuarioID, Mensaje, Tipo, FechaEnvio)
-                VALUES (@UsuarioID, @Mensaje, @Tipo, @FechaEnvio)
+                OUTPUT INSERTED.NotificacionID
+                VALUES (@UsuarioID, @Mensaje, @Tipo, @FechaEnvio);
             ";
-                    using (var commandInsert = new SqlCommand(sqlInsert, connection))
-                    {
-                        commandInsert.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
-                        commandInsert.Parameters.AddWithValue("@Mensaje", mensajeConToken);
-                        commandInsert.Parameters.AddWithValue("@Tipo", "Vencimiento");
-                        commandInsert.Parameters.AddWithValue("@FechaEnvio", DateTime.Now);
-                        commandInsert.ExecuteNonQuery();
-                    }
 
-                  
-                    if (!string.IsNullOrWhiteSpace(emailUsuario))
+                    using var cmdInsertOut = new SqlCommand(sqlInsertOutput, connection);
+                    cmdInsertOut.Parameters.AddWithValue("@UsuarioID", usuarioId);
+                    cmdInsertOut.Parameters.AddWithValue("@Mensaje", mensajeConToken);
+                    cmdInsertOut.Parameters.AddWithValue("@Tipo", "Vencimiento");
+                    cmdInsertOut.Parameters.AddWithValue("@FechaEnvio", DateTime.Now);
+
+                    var scalarOut = cmdInsertOut.ExecuteScalar();
+                    if (scalarOut != null && scalarOut != DBNull.Value)
+                        notificacionId = Convert.ToInt32(scalarOut);
+                }
+                catch (SqlException exOut)
+                {
+                    _logger?.LogWarning(exOut, "OUTPUT INSERT falló al insertar notificación. Intentando fallback con SCOPE_IDENTITY()");
+
+                    // Fallback a SCOPE_IDENTITY()
+                    try
                     {
-                        var subject = $"Recordatorio de vencimiento – {plan.Descripcion}";
-                        var htmlDescripcion = System.Net.WebUtility.HtmlEncode(plan.Descripcion);
-                        var body = $@"
+                        var sqlInsertScope = @"
+                    INSERT INTO dbo.Notificaciones (UsuarioID, Mensaje, Tipo, FechaEnvio)
+                    VALUES (@UsuarioID, @Mensaje, @Tipo, @FechaEnvio);
+                    SELECT CAST(SCOPE_IDENTITY() AS INT);
+                ";
+                        using var cmdInsertScope = new SqlCommand(sqlInsertScope, connection);
+                        cmdInsertScope.Parameters.AddWithValue("@UsuarioID", usuarioId);
+                        cmdInsertScope.Parameters.AddWithValue("@Mensaje", mensajeConToken);
+                        cmdInsertScope.Parameters.AddWithValue("@Tipo", "Vencimiento");
+                        cmdInsertScope.Parameters.AddWithValue("@FechaEnvio", DateTime.Now);
+
+                        var scalarScope = cmdInsertScope.ExecuteScalar();
+                        if (scalarScope != null && scalarScope != DBNull.Value)
+                            notificacionId = Convert.ToInt32(scalarScope);
+                    }
+                    catch (Exception exScope)
+                    {
+                        _logger?.LogError(exScope, "Fallo el INSERT de notificación (fallback). Usuario {UsuarioId}, Plan {PlanId}", usuarioId, plan.PlanID);
+                        // no lanzamos, pero no continuamos con envío de email si no se pudo insertar
+                        continue;
+                    }
+                }
+                catch (Exception exGeneralInsert)
+                {
+                    _logger?.LogError(exGeneralInsert, "Error insertando notificación para Usuario {UsuarioId}, Plan {PlanId}", usuarioId, plan.PlanID);
+                    continue;
+                }
+
+                // Añadimos a la lista que se mostrará en la vista (sin token visible)
+                notificaciones.Add(new Notificacion
+                {
+                    UsuarioID = usuarioId,
+                    Mensaje = mensajeLimpio,
+                    Tipo = "Vencimiento",
+                    FechaEnvio = DateTime.Now
+                });
+
+                // Intentamos enviar el correo (si hay email)
+                if (!string.IsNullOrWhiteSpace(emailUsuario))
+                {
+                    var subject = $"Recordatorio de vencimiento – {plan.Descripcion}";
+                    var htmlDescripcion = System.Net.WebUtility.HtmlEncode(plan.Descripcion);
+                    var body = $@"
                 <html>
                   <body style='font-family:Arial,Helvetica,sans-serif; line-height:1.5;'>
                     <h2>Recordatorio de tu plan</h2>
@@ -373,113 +429,98 @@ namespace Abstract_CR.Controllers
                     <p style='font-size:12px;color:#666'>Si ya renovaste, puedes ignorar este mensaje.</p>
                   </body>
                 </html>";
-                        try { await _emailService.SendEmailAsync(emailUsuario, subject, body); } catch { }
+
+                    try
+                    {
+                        await _emailService.SendEmailAsync(emailUsuario, subject, body);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Registra el error para diagnóstico
+                        _logger?.LogError(ex, "Error enviando email de vencimiento al usuario {UsuarioId} (email: {Email}) para PlanID {PlanID}", usuarioId, emailUsuario, plan.PlanID);
+
+                        // Marcar la notificación en BD con el error para trazabilidad (si tenemos el id insertado)
+                        if (notificacionId.HasValue)
+                        {
+                            try
+                            {
+                                var sqlUpdateError = @"
+                            UPDATE dbo.Notificaciones
+                            SET Mensaje = Mensaje + ' [ERROR-ENVIO: ' + LEFT(@ErrorMsg, 200) + ']'
+                            WHERE NotificacionID = @NotificacionID;
+                        ";
+                                using var cmdUpd = new SqlCommand(sqlUpdateError, connection);
+                                cmdUpd.Parameters.AddWithValue("@ErrorMsg", ex.Message ?? "Error desconocido");
+                                cmdUpd.Parameters.AddWithValue("@NotificacionID", notificacionId.Value);
+                                cmdUpd.ExecuteNonQuery();
+                            }
+                            catch (Exception updEx)
+                            {
+                                _logger?.LogWarning(updEx, "No se pudo actualizar la notificación con el error de envío para NotificacionID {Id}", notificacionId.Value);
+                            }
+                        }
                     }
                 }
-            }
+            } // foreach planes
 
             notificaciones = notificaciones.OrderBy(n => n.FechaEnvio).ToList();
             return View(notificaciones);
         }
 
-        
+        #region Helpers
+
+        private string? ObtenerEmailUsuario(int usuarioId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                connection.Open();
+
+                const string sql = @"
+            SELECT TOP 1 CorreoElectronico
+            FROM dbo.Usuarios
+            WHERE UsuarioID = @UsuarioID;
+        ";
+
+                using var cmd = new SqlCommand(sql, connection);
+                cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
+
+                var result = cmd.ExecuteScalar();
+                if (result == null || result == DBNull.Value) return null;
+
+                var email = Convert.ToString(result)?.Trim();
+                return string.IsNullOrWhiteSpace(email) ? null : email;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error obteniendo email del usuario {UsuarioId}", usuarioId);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Comprueba si ya se envió una notificación de vencimiento para (usuario, token).
+        /// Usa la conexión existente para evitar crear nuevas conexiones dentro de bucles.
+        /// </summary>
         private bool YaSeEnvioVencimiento(SqlConnection connection, int usuarioId, string token)
         {
-            var sql = @"
+            const string sql = @"
         SELECT COUNT(1)
         FROM dbo.Notificaciones
         WHERE UsuarioID = @UsuarioID
           AND Tipo = 'Vencimiento'
-          AND CHARINDEX(@Token, Mensaje) > 0
+          AND CHARINDEX(@Token, Mensaje) > 0;
     ";
             using var cmd = new SqlCommand(sql, connection);
             cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
-            cmd.Parameters.AddWithValue("@Token", token); 
-            var count = (int)cmd.ExecuteScalar();
-            return count > 0;
-        }
-
-        private string? ObtenerEmailUsuario(int usuarioId)
-        {
-            using var connection = new SqlConnection(_connectionString);
-            connection.Open();
-
-            const string sql = @"
-        SELECT TOP 1 CorreoElectronico
-        FROM dbo.Usuarios
-        WHERE UsuarioID = @UsuarioID";
-
-            using var cmd = new SqlCommand(sql, connection);
-            cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
+            cmd.Parameters.AddWithValue("@Token", token);
 
             var result = cmd.ExecuteScalar();
-            return result == null || result == DBNull.Value ? null : Convert.ToString(result);
+            if (result == null || result == DBNull.Value) return false;
+            return Convert.ToInt32(result) > 0;
         }
-        [HttpGet]
-        public IActionResult EvaluarPlan()
-        {
-            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
-            if (usuarioId == null)
-            {
-                var vmNoSesion = new EvaluacionPlanViewModel
-                {
-                    TienePlanActivo = false,
-                    ErrorMensaje = "Debes iniciar sesión para evaluar tu plan."
-                };
-                return View("EvaluarPlan", vmNoSesion);
-            }
 
-            int? planId = null;
-            string? nombrePlan = null;
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-
-                var sqlPlan = @"
-            SELECT TOP 1 PlanID, NombrePlan
-            FROM dbo.PlanesNutricionales
-            WHERE UsuarioID = @UsuarioID
-              AND (
-                    FechaVencimiento IS NULL
-                    OR FechaVencimiento >= CAST(GETDATE() AS date)
-                  )
-            ORDER BY FechaCarga DESC;
-        ";
-
-                using (var cmd = new SqlCommand(sqlPlan, connection))
-                {
-                    cmd.Parameters.AddWithValue("@UsuarioID", usuarioId.Value);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            planId = reader.GetInt32(reader.GetOrdinal("PlanID"));
-                            nombrePlan = reader["NombrePlan"]?.ToString() ?? "(Plan sin nombre)";
-                        }
-                    }
-                }
-            }
-
-            if (planId == null)
-            {
-                var vmSinPlan = new EvaluacionPlanViewModel
-                {
-                    TienePlanActivo = false,
-                    ErrorMensaje = "No tienes un plan nutricional activo en este momento."
-                };
-                return View("EvaluarPlan", vmSinPlan);
-            }
-
-            var vm = new EvaluacionPlanViewModel
-            {
-                TienePlanActivo = true,
-                PlanID = planId,
-                NombrePlanActual = nombrePlan
-            };
-
-            return View("EvaluarPlan", vm);
-        }
+        #endregion
 
         [HttpPost]
         [ValidateAntiForgeryToken]

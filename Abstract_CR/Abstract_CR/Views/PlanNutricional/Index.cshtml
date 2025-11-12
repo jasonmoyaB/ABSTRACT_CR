@@ -7,7 +7,15 @@
 <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
 
 <section class="page-section">
-    <div class="container">
+    <div class="container position-relative">
+        <!-- Botón de volver posicionado igual que en la vista de EvaluarPlan -->
+        <a href="@Url.Action("Perfil", "Usuario")"
+           class="btn position-absolute"
+           style="left: -100px; top: 0; background-color:#2F170F; border-color:#2F170F; color:white; z-index: 1000;"
+           title="Volver a Mi Perfil">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
         <div class="row">
             <div class="col-lg-12">
                 <div class="text-center mb-5">
@@ -51,12 +59,12 @@
                             Nuevo Plan
                         </a>
 
-                        <!-- Botón global para evaluar (va al EvaluarPlan general del controlador) -->
+                        @* <!-- Botón global para evaluar (va al EvaluarPlan general del controlador) -->
                         <a href="@Url.Action("EvaluarPlan", "PlanNutricional")"
                            class="btn btn-warning text-dark">
                             <i class="fas fa-star-half-stroke me-2"></i>
                             Evaluar mi Plan
-                        </a>
+                        </a> *@
                     </div>
                 </div>
             </div>
@@ -198,6 +206,7 @@
                 <div class="col-lg-12">
                     <nav aria-label="Paginacion de planes">
                         <ul class="pagination justify-content-center">
+                            @* Paginación: agrega aquí la lógica si la necesitas *@
                         </ul>
                     </nav>
                 </div>

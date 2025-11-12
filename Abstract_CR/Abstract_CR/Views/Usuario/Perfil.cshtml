@@ -46,7 +46,7 @@
                             </li>
                             <li class="nav-item mb-2" role="presentation">
                                 <button class="nav-link d-flex align-items-center" id="chef-tab" data-bs-toggle="pill" data-bs-target="#chef" type="button" role="tab" aria-controls="chef" aria-selected="false">
-                                    <i class="fas fa-comments me-2"></i> Chef
+                                    <i class="fas fa-comments me-2"></i> Mensajeria
                                     @* <span class="badge bg-primary ms-auto">@Model.Usuario.PuntosTotales</span> *@
                                 </button>
                             </li>
@@ -75,6 +75,7 @@
             <!-- Contenido principal -->
             <div class="col-lg-9">
                 <div class="tab-content" id="perfilTabsContent">
+
                     <!-- Información Personal -->
                     <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
                         <div class="card shadow-sm mb-4">
@@ -294,6 +295,86 @@
     </div>
 </section>
 <style>
+    /* Estilos elegantes para la tarjeta de Información Personal */
+    .perfil-card {
+        border: 1px solid rgba(33,37,41,0.05);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .perfil-header {
+        background: linear-gradient(90deg, rgba(230,167,86,0.08), rgba(246,225,197,0.03));
+        padding: 1rem 1.25rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .perfil-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #e6a756;
+        font-size: 24px;
+        border: 2px solid rgba(230,167,86,0.18);
+        box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+    }
+
+    .perfil-nombre {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 0;
+    }
+
+    .perfil-rol {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .perfil-body {
+        padding: 1.25rem;
+        background: #fff;
+    }
+
+    .perfil-row .form-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .perfil-row .form-control-plaintext {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.75rem;
+    }
+
+    .perfil-badge {
+        border-radius: 999px;
+        padding: .35rem .6rem;
+        font-weight: 600;
+        font-size: .85rem;
+    }
+
+    /* Botón editar más neutro y elegante */
+    .btn-editar-perfil {
+        color: #212529;
+        border-color: transparent;
+        background-color: rgba(0,0,0,0.04);
+        box-shadow: none;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+        .btn-editar-perfil:hover {
+            background-color: #e6a756;
+            color: #fff;
+        }
     /* --- Estilo personalizado del mini menú --- */
     .nav-pills .nav-link {
         color: #212529; /* negro suave */
@@ -311,7 +392,7 @@
 
         .nav-pills .nav-link.active {
             color: #fff !important;
-            background-color: #e6a756 !important; /* dorado principal */
+            background-color: #3C2313 !important; /* dorado principal */
             box-shadow: 0 0 6px rgba(230, 167, 86, 0.6);
         }
 

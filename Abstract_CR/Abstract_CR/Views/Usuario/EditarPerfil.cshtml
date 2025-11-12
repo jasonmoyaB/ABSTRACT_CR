@@ -9,28 +9,22 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="position-relative mb-5">
-                    <div class="col-lg-12">
-                        <div class="position-relative mb-5">
-                            @{
-                                // Si es admin, el enlace apunta al PanelAdministracion; si no, al Perfil
-                                var enlaceAtras = Model.RolID == 1
-                                ? Url.Action("PanelAdministracion", "Administracion")
-                                : Url.Action("Perfil", "Usuario");
-                            }
+                    @{
+                        var enlaceAtras = Model.RolID == 1
+                        ? Url.Action("PanelAdministracion", "Administracion")
+                        : Url.Action("Perfil", "Usuario");
+                    }
 
-                            <a href="@enlaceAtras" class="btn position-absolute"
-                               style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;"
-                               title="Volver">
-                                <i class="fas fa-arrow-left"></i>
-                            </a>
+                    <a href="@enlaceAtras" class="btn position-absolute"
+                       style="left: 0; top: 0; background-color: #3c2313; border-color: #3c2313; color: #f6e1c5;"
+                       title="Volver">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
 
-                            
-                        </div>
-                    </div>
                     <div class="text-center">
                         <h2 class="section-heading">
-                            <span class="section-heading-upper" style="color:#e6a756">Editar</span>
-                            <span class="section-heading-lower" style="color:#f6e1c5">Mi Perfil</span>
+                            <span class="section-heading-upper" style="color:#e6a756;">Editar</span>
+                            <span class="section-heading-lower" style="color:#f6e1c5;">Mi Perfil</span>
                         </h2>
                     </div>
                 </div>
@@ -39,14 +33,14 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header" style="background-color: #3c2313; color: #f6e1c5;">
                         <h5 class="mb-0">
-                            <i class="fas fa-user-edit me-2"></i>
-                            Información Personal
+                            <i class="fas fa-user-edit me-2"></i> Información Personal
                         </h5>
                     </div>
-                    <div class="card-body">
+
+                    <div class="card-body" style="background-color: #fefaf6;">
                         <form asp-action="EditarPerfil" asp-controller="Usuario" method="post">
                             @Html.AntiForgeryToken()
                             <input asp-for="UsuarioID" type="hidden" />
@@ -55,37 +49,41 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="Nombre" class="form-label"></label>
-                                    <input asp-for="Nombre" class="form-control" placeholder="Nombre" />
+                                    <label asp-for="Nombre" class="form-label fw-bold text-dark"></label>
+                                    <input asp-for="Nombre" class="form-control border-0 shadow-sm" placeholder="Nombre"
+                                           style="background-color:#fffbea; border-radius:10px;" />
                                     <span asp-validation-for="Nombre" class="text-danger"></span>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="Apellido" class="form-label"></label>
-                                    <input asp-for="Apellido" class="form-control" placeholder="Apellido" />
+                                    <label asp-for="Apellido" class="form-label fw-bold text-dark"></label>
+                                    <input asp-for="Apellido" class="form-control border-0 shadow-sm" placeholder="Apellido"
+                                           style="background-color:#fffbea; border-radius:10px;" />
                                     <span asp-validation-for="Apellido" class="text-danger"></span>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="CorreoElectronico" class="form-label"></label>
-                                    <input asp-for="CorreoElectronico" class="form-control" type="email" placeholder="Correo electrónico" />
+                                    <label asp-for="CorreoElectronico" class="form-label fw-bold text-dark"></label>
+                                    <input asp-for="CorreoElectronico" class="form-control border-0 shadow-sm" type="email"
+                                           placeholder="Correo electrónico" style="background-color:#fffbea; border-radius:10px;" />
                                     <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label asp-for="ContrasenaHash" class="form-label">Nueva contraseña (opcional)</label>
-                                    <input asp-for="ContrasenaHash" class="form-control" type="password" placeholder="Contraseña" />
+                                    <label asp-for="ContrasenaHash" class="form-label fw-bold text-dark">
+                                        Nueva contraseña (opcional)
+                                    </label>
+                                    <input asp-for="ContrasenaHash" class="form-control border-0 shadow-sm" type="password"
+                                           placeholder="Contraseña" style="background-color:#fffbea; border-radius:10px;" />
                                     <span asp-validation-for="ContrasenaHash" class="text-danger"></span>
                                 </div>
 
-                               
-
-
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Estado de la cuenta</label>
+                                    <label class="form-label fw-bold text-dark">Estado de la cuenta</label>
                                     <div class="form-check form-switch">
-                                        <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch" />
-                                        <label class="form-check-label" for="activoSwitch">
+                                        <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch"
+                                               style="background-color:#e6a756; border-color:#3c2313;" />
+                                        <label class="form-check-label" for="activoSwitch" style="color:#3c2313;">
                                             @(Model.Activo ? "Activa" : "Inactiva")
                                         </label>
                                     </div>
@@ -93,13 +91,14 @@
                             </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg me-3">
-                                    <i class="fas fa-save me-2"></i>
-                                    Guardar Cambios
+                                <button type="submit" class="btn btn-lg me-3 shadow-sm"
+                                        style="background-color:#3c2313; color:#f6e1c5; border:none;">
+                                    <i class="fas fa-save me-2"></i> Guardar Cambios
                                 </button>
-                                <a href="@Url.Action("Perfil", "Usuario")" class="btn btn-outline-secondary btn-lg">
-                                    <i class="fas fa-times me-2"></i>
-                                    Cancelar
+                                <a href="@Url.Action("Perfil", "Usuario")"
+                                   class="btn btn-lg shadow-sm"
+                                   style="border:1px solid #3c2313; color:#3c2313; background-color:#fefaf6;">
+                                    <i class="fas fa-times me-2"></i> Cancelar
                                 </a>
                             </div>
                         </form>

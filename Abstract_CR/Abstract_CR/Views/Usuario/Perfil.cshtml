@@ -3,6 +3,7 @@
     ViewData["Title"] = "Mi Perfil";
 }
 <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+<link href="~/css/perfil.css" rel="stylesheet" />
 
 <section class="page-section">
     <div class="container">
@@ -78,37 +79,50 @@
 
                     <!-- Información Personal -->
                     <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-faded d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-user me-2"></i> Información Personal</h5>
-                                <a style="color: black" href="@Url.Action("EditarPerfil", "Usuario")" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-edit me-1" style="color: black"></i> Editar
+                        <div class="card shadow-sm mb-4 border-0">
+                            <!-- Header con fondo café oscuro y texto beige -->
+                            <div class="card-header bg-dark text-light d-flex justify-content-between align-items-center"
+                                 style="background-color: #3C2313 !important; color: #f6e1c5 !important;">
+                                <h5 class="mb-0 fw-semibold">
+                                    <i class="fas fa-user me-2" style="color: #f6e1c5;"></i>
+                                    Información Personal
+                                </h5>
+                                <a href="@Url.Action("EditarPerfil", "Usuario")"
+                                   class="btn btn-sm border-light text-light fw-semibold"
+                                   style="--bs-btn-hover-bg: #f6e1c5; --bs-btn-hover-color: #3C2313;">
+                                    <i class="fas fa-edit me-1" style="color: #f6e1c5;"></i> Editar
                                 </a>
                             </div>
-                            <div class="card-body">
+
+                            <!-- Cuerpo con fondo blanco -->
+                            <div class="card-body bg-white">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Nombre Completo</label>
-                                        <p class="form-control-plaintext">@Model.Usuario.NombreCompleto</p>
+                                        <label class="form-label fw-bold text-secondary">Nombre Completo</label>
+                                        <p class="form-control-plaintext fw-semibold text-dark mb-0">@Model.Usuario.NombreCompleto</p>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Correo Electrónico</label>
-                                        <p class="form-control-plaintext">@Model.Usuario.CorreoElectronico</p>
+                                        <label class="form-label fw-bold text-secondary">Correo Electrónico</label>
+                                        <p class="form-control-plaintext fw-semibold text-dark mb-0">@Model.Usuario.CorreoElectronico</p>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Fecha de Registro</label>
-                                        <p class="form-control-plaintext">@(Model.Usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
+                                        <label class="form-label fw-bold text-secondary">Fecha de Registro</label>
+                                        <p class="form-control-plaintext fw-semibold text-dark mb-0">
+                                            @(Model.Usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")
+                                        </p>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Rol</label>
-                                        <p class="form-control-plaintext">@(Model.Usuario.Rol?.NombreRol ?? "No especificado")</p>
+                                        <label class="form-label fw-bold text-secondary">Rol</label>
+                                        <p class="form-control-plaintext fw-semibold text-dark mb-0">
+                                            @(Model.Usuario.Rol?.NombreRol ?? "No especificado")
+                                        </p>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Estado</label>
-                                        <p class="form-control-plaintext">
+                                        <label class="form-label fw-bold text-secondary">Estado</label>
+                                        <p class="form-control-plaintext fw-semibold text-dark mb-0">
                                             @if (Model.Usuario.Activo)
                                             {
-                                                <span class="badge bg-success">Activo</span>
+                                                <span style="background-color:#3C2313 !important; color: #f6e1c5 !important; color:white" " class="badge bg-success">Activo</span>
                                             }
                                             else
                                             {
@@ -123,18 +137,28 @@
 
                     <!-- Conversación con el Chef -->
                     <div class="tab-pane fade" id="chef" role="tabpanel" aria-labelledby="chef-tab">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-faded d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-comments me-2"></i> Conversación con el Chef</h5>
-                                <span class="badge bg-primary"><i class="fas fa-star me-1"></i>@Model.Usuario.PuntosTotales pts</span>
+                        <div class="card shadow-sm mb-4 border-0">
+                            <!-- Header con mismo esquema de color -->
+                            <div class="card-header d-flex justify-content-between align-items-center"
+                                 style="background-color: #3C2313 !important; color: #f6e1c5 !important;">
+                                <h5 class="mb-0 fw-semibold">
+                                    <i class="fas fa-comments me-2" style="color: #f6e1c5;"></i>
+                                    Conversación con el Chef
+                                </h5>
+                                <span class="badge rounded-pill"
+                                      style="background-color: #e6a756; color: #3C2313; font-weight:600;">
+                                    <i class="fas fa-star me-1"></i>@Model.Usuario.PuntosTotales pts
+                                </span>
                             </div>
-                            <div class="card-body" style="max-height: 450px; overflow-y: auto;">
+
+                            <!-- Cuerpo del chat -->
+                            <div class="card-body bg-white" style="max-height: 450px; overflow-y: auto;">
                                 @if (Model.Mensajes.Any())
                                 {
                                     foreach (var mensaje in Model.Mensajes.OrderBy(m => m.FechaEnvio))
                                     {
                                         var esChef = mensaje.EnviadoPorChef;
-                                        var clase = esChef ? "bg-primary text-white" : "bg-light";
+                                        var clase = esChef ? "bg-warning text-dark" : "bg-light";
                                         var alineacion = esChef ? "text-end" : "text-start";
                                         <div class="mb-3">
                                             <div class="@alineacion">
@@ -144,7 +168,7 @@
                                                                                                 : "Yo")
                                             · @mensaje.FechaEnvio.ToString("dd/MM/yyyy HH:mm")
                                         </div>
-                                        <div class="d-inline-block p-3 rounded-3 @clase" style="max-width: 80%;">
+                                        <div class="d-inline-block p-3 rounded-3 @clase shadow-sm" style="max-width: 80%;">
                                             @mensaje.Contenido
                                         </div>
                                     </div>
@@ -159,16 +183,21 @@
                                     </div>
                                 }
                             </div>
+
+                            <!-- Footer para enviar mensaje -->
                             <div class="card-footer bg-white">
                                 <form asp-action="EnviarMensajeChef" method="post">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="UsuarioId" value="@Model.Usuario.UsuarioID" />
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Escribe tu mensaje</label>
+                                        <label class="form-label fw-bold text-secondary">Escribe tu mensaje</label>
                                         <textarea class="form-control" name="Contenido" rows="3" placeholder="Comparte tus dudas, logros o comentarios..."></textarea>
                                     </div>
                                     <div class="text-end">
-                                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>Enviar</button>
+                                        <button type="submit" class="btn fw-semibold text-light border-0"
+                                                style="background-color: #3C2313; --bs-btn-hover-bg: #e6a756; --bs-btn-hover-color: #3C2313;">
+                                            <i class="fas fa-paper-plane me-2"></i>Enviar
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -177,35 +206,52 @@
 
                     <!-- Gestión de Salud -->
                     <div class="tab-pane fade" id="salud" role="tabpanel" aria-labelledby="salud-tab">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-faded">
-                                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i> Gestión de Salud</h5>
+                        <div class="card shadow-sm mb-4 border-0">
+                            <div class="card-header" style="background-color: #3c2313;">
+                                <h5 class="mb-0" style="color: #f6e1c5;">
+                                    <i class="fas fa-cogs me-2" style="color: #f6e1c5;"></i> Gestión de Salud
+                                </h5>
                             </div>
+
                             <div class="card-body">
-                                <div class="row g-2">
+                                <div class="row g-3">
                                     <div class="col-12 col-md-6">
-                                        <a href="@Url.Action("Alergias", "Usuario")" class="btn btn-outline-primary w-100 text-start" style="color:black">
-                                            <i class="fas fa-allergies me-2"></i> Mis Alergias
+                                        <a href="@Url.Action("Alergias", "Usuario")"
+                                           class="btn w-100 text-start custom-btn d-flex align-items-center justify-content-between">
+                                            <div><i class="fas fa-allergies me-2"></i> Mis Alergias</div>
+                                            <i class="fas fa-chevron-right"></i>
                                         </a>
                                     </div>
+
                                     <div class="col-12 col-md-6">
-                                        <a href="@Url.Action("Restricciones", "Usuario")" class="btn btn-outline-primary w-100 text-start" style="color:black">
-                                            <i class="fas fa-ban me-2"></i> Mis Restricciones
+                                        <a href="@Url.Action("Restricciones", "Usuario")"
+                                           class="btn w-100 text-start custom-btn d-flex align-items-center justify-content-between">
+                                            <div><i class="fas fa-ban me-2"></i> Mis Restricciones</div>
+                                            <i class="fas fa-chevron-right"></i>
                                         </a>
                                     </div>
+
                                     <div class="col-12 col-md-6">
-                                        <a href="@Url.Action("Preferencias", "Usuario")" class="btn btn-outline-primary w-100 text-start" style="color:black">
-                                            <i class="fas fa-heart me-2"></i> Mis Preferencias
+                                        <a href="@Url.Action("Preferencias", "Usuario")"
+                                           class="btn w-100 text-start custom-btn d-flex align-items-center justify-content-between">
+                                            <div><i class="fas fa-heart me-2"></i> Mis Preferencias</div>
+                                            <i class="fas fa-chevron-right"></i>
                                         </a>
                                     </div>
+
                                     <div class="col-12 col-md-6">
-                                        <a href="@Url.Action("Index", "PlanNutricional")" class="btn btn-outline-primary w-100 text-start" style="color:black">
-                                            <i class="fas fa-apple-alt me-2"></i> Mi plan
+                                        <a href="@Url.Action("Index", "PlanNutricional")"
+                                           class="btn w-100 text-start custom-btn d-flex align-items-center justify-content-between">
+                                            <div><i class="fas fa-apple-alt me-2"></i> Mi Plan</div>
+                                            <i class="fas fa-chevron-right"></i>
                                         </a>
                                     </div>
+
                                     <div class="col-12">
-                                        <a href="@Url.Action("Notificaciones", "PlanNutricional")" class="btn btn-outline-primary w-100 text-start" style="color:black">
-                                            <i class="fas fa-bell me-2"></i> Notificaciones
+                                        <a href="@Url.Action("Notificaciones", "PlanNutricional")"
+                                           class="btn w-100 text-start custom-btn d-flex align-items-center justify-content-between">
+                                            <div><i class="fas fa-bell me-2"></i> Notificaciones</div>
+                                            <i class="fas fa-chevron-right"></i>
                                         </a>
                                     </div>
                                 </div>
@@ -213,36 +259,54 @@
                         </div>
                     </div>
 
+                   
+
+
                     <!-- Información de Cuenta -->
                     <div class="tab-pane fade" id="cuenta" role="tabpanel" aria-labelledby="cuenta-tab">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-faded">
-                                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Información de Cuenta</h5>
+                        <div class="card shadow-sm mb-4 border-0">
+                            <div class="card-header" style="background-color: #3c2313; color: #f6e1c5;">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2" style="color: #f6e1c5;"></i> Información de Cuenta
+                                </h5>
                             </div>
-                            <div class="card-body">
+
+                            <div class="card-body" style="background-color: #fefaf6;">
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Miembro desde</label>
-                                    <p class="form-control-plaintext">@(Model.Usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Puntos acumulados</label>
-                                    <p class="form-control-plaintext">
-                                        <span class="badge bg-primary fs-6"><i class="fas fa-star me-2"></i>@Model.Usuario.PuntosTotales puntos</span>
+                                    <label class="form-label fw-bold text-dark">Miembro desde</label>
+                                    <p class="form-control-plaintext" style="color: #3c2313;">
+                                        @(Model.Usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")
                                     </p>
                                 </div>
+
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Últimas asignaciones</label>
+                                    <label class="form-label fw-bold text-dark">Puntos acumulados</label>
+                                    <p class="form-control-plaintext">
+                                        <span class="badge fs-6" style="background-color: #3c2313; color: #f6e1c5;">
+                                            <i class="fas fa-star me-2"></i>@Model.Usuario.PuntosTotales puntos
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark">Últimas asignaciones</label>
+
                                     @if (Model.HistorialPuntos.Any())
                                     {
                                         <ul class="list-unstyled mb-0">
                                             @foreach (var registro in Model.HistorialPuntos.Take(5))
                                             {
-                                                <li class="mb-2 d-flex justify-content-between">
+                                                <li class="mb-3 p-2 rounded-3 d-flex justify-content-between align-items-center shadow-sm"
+                                                    style="background-color: #fffbea; border: 1px solid #e0c9a6;">
                                                     <div>
-                                                        <div class="fw-semibold @(registro.Puntos >= 0 ? "text-success" : "text-danger")">@(registro.Puntos >= 0 ? "+" : "")@registro.Puntos pts</div>
+                                                        <div class="fw-semibold" style="color:@(registro.Puntos >= 0 ? "#3c2313" : "#c0392b");">
+                                                            @(registro.Puntos >= 0 ? "+" : "")@registro.Puntos pts
+                                                        </div>
                                                         <small class="text-muted">@registro.FechaAsignacion.ToString("dd/MM")</small>
                                                     </div>
-                                                    <small class="text-muted text-end ms-3">@(string.IsNullOrWhiteSpace(registro.Motivo) ? "Sin motivo" : registro.Motivo)</small>
+                                                    <small class="text-muted text-end ms-3">
+                                                        @(string.IsNullOrWhiteSpace(registro.Motivo) ? "Sin motivo" : registro.Motivo)
+                                                    </small>
                                                 </li>
                                             }
                                         </ul>
@@ -256,10 +320,13 @@
                         </div>
                     </div>
 
+                  
+
+
                     <!-- Resúmenes Semanales -->
                     <div class="tab-pane fade" id="resumen" role="tabpanel" aria-labelledby="resumen-tab">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-faded">
+                        <div  class="card shadow-sm mb-4">
+                            <div style="background-color: #3c2313; color: #f6e1c5;" class="card-header bg-faded">
                                 <h5 class="mb-0"><i class="fas fa-bell me-2"></i> Resúmenes Semanales</h5>
                             </div>
                             <div class="card-body">
@@ -294,116 +361,6 @@
         </div>
     </div>
 </section>
-<style>
-    /* Estilos elegantes para la tarjeta de Información Personal */
-    .perfil-card {
-        border: 1px solid rgba(33,37,41,0.05);
-        border-radius: 12px;
-        overflow: hidden;
-    }
 
-    .perfil-header {
-        background: linear-gradient(90deg, rgba(230,167,86,0.08), rgba(246,225,197,0.03));
-        padding: 1rem 1.25rem;
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .perfil-avatar {
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        background-color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        color: #e6a756;
-        font-size: 24px;
-        border: 2px solid rgba(230,167,86,0.18);
-        box-shadow: 0 6px 18px rgba(16,24,40,0.04);
-    }
-
-    .perfil-nombre {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: #212529;
-        margin-bottom: 0;
-    }
-
-    .perfil-rol {
-        font-size: 0.9rem;
-        color: #6c757d;
-    }
-
-    .perfil-body {
-        padding: 1.25rem;
-        background: #fff;
-    }
-
-    .perfil-row .form-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .perfil-row .form-control-plaintext {
-        font-weight: 600;
-        color: #212529;
-        margin-bottom: 0.75rem;
-    }
-
-    .perfil-badge {
-        border-radius: 999px;
-        padding: .35rem .6rem;
-        font-weight: 600;
-        font-size: .85rem;
-    }
-
-    /* Botón editar más neutro y elegante */
-    .btn-editar-perfil {
-        color: #212529;
-        border-color: transparent;
-        background-color: rgba(0,0,0,0.04);
-        box-shadow: none;
-        font-weight: 600;
-        border-radius: 8px;
-    }
-
-        .btn-editar-perfil:hover {
-            background-color: #e6a756;
-            color: #fff;
-        }
-    /* --- Estilo personalizado del mini menú --- */
-    .nav-pills .nav-link {
-        color: #212529; /* negro suave */
-        font-weight: 500;
-        /* background-color: #f8f9fa; /* gris claro de fondo */ */
-        border-radius: 0.5rem;
-        transition: all 0.2s ease-in-out;
-    }
-
-        .nav-pills .nav-link:hover {
-            color: #000;
-            background-color: #e6a7561a; /* toque dorado al pasar el mouse */
-            transform: scale(1.02);
-        }
-
-        .nav-pills .nav-link.active {
-            color: #fff !important;
-            background-color: #3C2313 !important; /* dorado principal */
-            box-shadow: 0 0 6px rgba(230, 167, 86, 0.6);
-        }
-
-        /* Íconos del menú */
-        .nav-pills .nav-link i {
-            color: #e6a756;
-        }
-
-        .nav-pills .nav-link.active i {
-            color: #fff;
-        }
-</style>
 
 <partial name="_ValidationScriptsPartial" />

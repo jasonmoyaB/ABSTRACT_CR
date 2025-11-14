@@ -6,20 +6,20 @@ using Abstract_CR.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar límites de archivo
+
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; 
 });
 
 // Se agrega el DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+
 builder.Services.AddControllersWithViews();
 
-// Configurar sesiones
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -28,7 +28,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Registrar Helpers para inyeccion de dependencias
+// inyeccion de dependencias
 builder.Services.AddScoped<UserHelper>();
 builder.Services.AddScoped<EbooksHelper>();
 builder.Services.AddScoped<SuscripcionesHelper>();
@@ -36,9 +36,12 @@ builder.Services.AddScoped<CometarioRecetaHelper>();
 builder.Services.AddScoped<InteraccionHelper>();
 builder.Services.AddScoped<RecetasHelper>();
 
-// Configurar servicios de email
+//  email
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddHostedService<VencimientosNotifier>(); // <-- agrega esto
+builder.Services.AddHostedService<VencimientosNotifier>();
+
+// Servicio de  PDF para reportes
+builder.Services.AddScoped<Abstract_CR.Services.IReportePdfService, Abstract_CR.Services.ReportePdfService>();
 
 var app = builder.Build();
 
@@ -50,7 +53,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        // Intenta conectar y hacer una consulta simple
+        
         await context.Database.OpenConnectionAsync();
         Console.WriteLine("Conexi�n exitosa a la base de datos de Azure!");
         await context.Database.CloseConnectionAsync();

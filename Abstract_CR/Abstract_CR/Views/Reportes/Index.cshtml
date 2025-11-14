@@ -1,0 +1,458 @@
+@model Abstract_CR.Models.ReportesDashboardViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Reportes";
+    
+    if (Model == null)
+    {
+        throw new InvalidOperationException("El modelo no puede ser null");
+    }
+    
+  
+    Model.NuevosUsuarios ??= new List<Abstract_CR.Models.SerieTemporalPunto>();
+    Model.SuscripcionesPorEstado ??= new List<Abstract_CR.Models.CategoriaValor>();
+    Model.SuscripcionesPorVencer ??= new List<Abstract_CR.Models.SuscripcionVencimientoViewModel>();
+    Model.MensajesPendientes ??= new List<Abstract_CR.Models.InteraccionPendienteViewModel>();
+    Model.Resumen ??= new Abstract_CR.Models.ResumenMetricasViewModel();
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-2 text-primary"><i class="fa-solid fa-chart-line me-2"></i> Reportes</h1>
+                <p class="text-muted small mb-0">Dashboard de métricas y análisis del sistema</p>
+            </div>
+            <div>
+                <form method="get" action="@Url.Action("DescargarPdf", "Reportes")" id="formDescargarPdf" style="display: inline;">
+                    <input type="hidden" name="desde" id="desdePdf" value="@Model.FechaInicio.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="hasta" id="hastaPdf" value="@Model.FechaFin.ToString("yyyy-MM-dd")" />
+                    <button type="submit" class="btn btn-success" id="btnDescargarPdf">
+                        <i class="fa-solid fa-file-pdf me-2"></i>Descargar PDF
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" action="@Url.Action("Index", "Reportes")" id="filtroFechas">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-12 col-md-3">
+                                <label for="desde" class="form-label small fw-semibold">Fecha Inicio</label>
+                                <input type="date" class="form-control" id="desde" name="desde" 
+                                       value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label for="hasta" class="form-label small fw-semibold">Fecha Fin</label>
+                                <input type="date" class="form-control" id="hasta" name="hasta" 
+                                       value="@Model.FechaFin.ToString("yyyy-MM-dd")" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold d-block">Rangos rápidos</label>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="aplicarRangoDias(7)">
+                                        <i class="fa-solid fa-calendar-week me-1"></i> 7 días
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="aplicarRangoDias(30)">
+                                        <i class="fa-solid fa-calendar me-1"></i> 30 días
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="aplicarRangoDias(90)">
+                                        <i class="fa-solid fa-calendar-days me-1"></i> 90 días
+                                    </button>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm ms-2">
+                                    <i class="fa-solid fa-filter me-1"></i> Aplicar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de error/exito -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Tarjetas de metricas -->
+    <div class="row g-3 mb-4">
+        <!-- Usuarios -->
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-users fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total Usuarios</div>
+                            <div class="h5 mb-0">@Model.Resumen.TotalUsuarios</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-user-check fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Usuarios Activos</div>
+                            <div class="h5 mb-0">@Model.Resumen.UsuariosActivos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-user-xmark fa-2x text-danger"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Usuarios Inactivos</div>
+                            <div class="h5 mb-0">@Model.Resumen.UsuariosInactivos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-user-plus fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Nuevas Altas</div>
+                            <div class="h5 mb-0">@Model.Resumen.NuevasAltas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suscripciones -->
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-credit-card fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total Suscripciones</div>
+                            <div class="h5 mb-0">@Model.Resumen.TotalSuscripciones</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-circle-check fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Activas</div>
+                            <div class="h5 mb-0">@Model.Resumen.SuscripcionesActivas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-pause fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Pausadas</div>
+                            <div class="h5 mb-0">@Model.Resumen.SuscripcionesPausadas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-ban fa-2x text-danger"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Canceladas</div>
+                            <div class="h5 mb-0">@Model.Resumen.SuscripcionesCanceladas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recetas y Mensajes -->
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-book fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Recetas Publicadas</div>
+                            <div class="h5 mb-0">@Model.Resumen.TotalRecetas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fa-solid fa-envelope fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Mensajes Pendientes</div>
+                            <div class="h5 mb-0">@Model.Resumen.MensajesPendientes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graficos -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <div class="fw-semibold">Altas de usuarios por día</div>
+                    <small class="text-muted">Período: @Model.FechaInicio.ToString("dd/MM/yyyy") - @Model.FechaFin.ToString("dd/MM/yyyy")</small>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartNuevosUsuarios" width="400" height="160"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Suscripciones por estado</div>
+                <div class="card-body">
+                    <canvas id="chartSuscripciones" width="300" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablas -->
+    <div class="row g-3">
+        <!-- Suscripciones por vencer -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="fa-solid fa-clock me-2"></i>Suscripciones próximas a vencer
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="small">Usuario</th>
+                                    <th class="small">Correo</th>
+                                    <th class="small">Estado</th>
+                                    <th class="small">Próxima facturación</th>
+                                    <th class="small text-center">Días restantes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.SuscripcionesPorVencer.Any())
+                                {
+                                    @foreach (var item in Model.SuscripcionesPorVencer)
+                                    {
+                                        <tr>
+                                            <td class="small">@item.NombreUsuario</td>
+                                            <td class="small">@item.Correo</td>
+                                            <td>
+                                                <span class="badge bg-success">@item.Estado</span>
+                                            </td>
+                                            <td class="small">
+                                                @(item.ProximaFacturacion?.ToString("dd/MM/yyyy") ?? "N/A")
+                                            </td>
+                                            <td class="small text-center">
+                                                @if (item.DiasRestantes.HasValue)
+                                                {
+                                                    var dias = item.DiasRestantes.Value;
+                                                    var badgeClass = dias <= 7 ? "bg-danger" : dias <= 14 ? "bg-warning" : "bg-info";
+                                                    <span class="badge @badgeClass">@dias días</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted small py-3">
+                                            No hay suscripciones próximas a vencer en los próximos 14 días
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensajes pendientes -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="fa-solid fa-envelope me-2"></i>Mensajes pendientes de respuesta
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="small">Usuario</th>
+                                    <th class="small">Correo</th>
+                                    <th class="small">Fecha último mensaje</th>
+                                    <th class="small">Vista previa</th>
+                                    <th class="small text-center">Total</th>
+                                    <th class="small text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.MensajesPendientes.Any())
+                                {
+                                    @foreach (var item in Model.MensajesPendientes)
+                                    {
+                                        <tr>
+                                            <td class="small">@item.NombreUsuario</td>
+                                            <td class="small">@item.Correo</td>
+                                            <td class="small">@item.FechaUltimoMensaje.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td class="small">
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;" title="@item.ContenidoUltimoMensaje">
+                                                    @item.ContenidoUltimoMensaje
+                                                </span>
+                                            </td>
+                                            <td class="small text-center">
+                                                <span class="badge bg-warning">@item.TotalPendientes</span>
+                                            </td>
+                                            <td class="small text-center">
+                                                <a href="@Url.Action("Interaccion", "Administracion", new { usuarioId = item.UsuarioId })" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fa-solid fa-reply me-1"></i>Responder
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted small py-3">
+                                            No hay mensajes pendientes de respuesta
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Script  reportes -->
+    <script src="~/js/reportes.js"></script>
+    
+    
+    <script>
+        
+        @{
+            var nuevosUsuariosJson = System.Text.Json.JsonSerializer.Serialize(
+                Model.NuevosUsuarios.Select(u => new { label = u.Label, valor = u.Valor }),
+                new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+            var suscripcionesJson = System.Text.Json.JsonSerializer.Serialize(
+                Model.SuscripcionesPorEstado.Select(s => new { categoria = s.Categoria, valor = s.Valor }),
+                new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+        }
+
+        var nuevosUsuariosData = @Html.Raw(nuevosUsuariosJson);
+        var suscripcionesData = @Html.Raw(suscripcionesJson);
+        
+
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarGraficosReportes(nuevosUsuariosData, suscripcionesData);
+            
+            // PDF  fechas
+            var desdeInput = document.getElementById('desde');
+            var hastaInput = document.getElementById('hasta');
+            var desdePdfInput = document.getElementById('desdePdf');
+            var hastaPdfInput = document.getElementById('hastaPdf');
+            
+            if (desdeInput && hastaInput && desdePdfInput && hastaPdfInput) {
+                desdeInput.addEventListener('change', function() {
+                    desdePdfInput.value = desdeInput.value;
+                });
+                hastaInput.addEventListener('change', function() {
+                    hastaPdfInput.value = hastaInput.value;
+                });
+            }
+            
+            // descargar PDF
+            var formDescargarPdf = document.getElementById('formDescargarPdf');
+            var btnDescargarPdf = document.getElementById('btnDescargarPdf');
+            
+            if (formDescargarPdf && btnDescargarPdf) {
+                formDescargarPdf.addEventListener('submit', function() {
+                    btnDescargarPdf.disabled = true;
+                    btnDescargarPdf.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Generando PDF...';
+                });
+            }
+        });
+    </script>
+}
+

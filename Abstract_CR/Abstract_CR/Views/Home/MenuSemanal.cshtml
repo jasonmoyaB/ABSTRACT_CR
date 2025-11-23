@@ -54,203 +54,146 @@
         </div>
 
         <div class="row">
-            <!-- Lunes -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm menu-card">
-                    <div data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Lunes">
-                        <div class="card-header bg-primary text-white text-center">
-                            <h5 class="mb-0">Lunes</h5>
-                        </div>
-                        <div class="card-body text-center p-4">
-                            <img src="~/assets/img/FondoCarneMolida.jpeg" alt="Pollo a la plancha" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
-                            <h6 class="card-title">Pollo a la plancha con vegetales</h6>
-                            <div class="mb-3">
-                                <span class="badge bg-success me-1">Sin gluten</span>
-                                <span class="badge bg-info me-1">Alto en proteína</span>
+            @{
+                var diasSemana = new[] { "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado" };
+                var menus = ViewBag.MenusSemanal as List<Abstract_CR.Models.MenuSemanalViewModel> ?? new List<Abstract_CR.Models.MenuSemanalViewModel>();
+                var colores = new[] { "primary", "success", "warning", "info", "danger", "secondary" };
+            }
+            @for (int i = 0; i < diasSemana.Length; i++)
+            {
+                var dia = diasSemana[i];
+                var menu = menus.FirstOrDefault(m => m.DiaSemana == dia);
+                var color = colores[i % colores.Length];
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm menu-card">
+                        <div data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="@dia">
+                            <div class="card-header bg-@color text-white text-center">
+                                <h5 class="mb-0">@dia</h5>
                             </div>
-                            <div class="d-flex justify-content-center gap-2">
-                                <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('lunes', 5);">
-                                    <i class="fas fa-thumbs-up"></i> Me gustó
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('lunes');">
-                                    <i class="fas fa-star"></i> Favorito
-                                </button>
+                            <div class="card-body text-center p-4">
+                                @if (menu != null && !string.IsNullOrEmpty(menu.RutaImagen))
+                                {
+                                    <img src="@menu.RutaImagen" alt="@menu.NombrePlatillo" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
+                                }
+                                else
+                                {
+                                    <img src="~/assets/img/fondoReceta.jpeg" alt="Platillo" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
+                                }
+                                <h6 class="card-title">@(menu?.NombrePlatillo ?? "Sin platillo asignado")</h6>
+                                <div class="mb-3 d-flex flex-wrap gap-2 justify-content-center">
+                                    @if (menu != null && menu.Caracteristicas != null && menu.Caracteristicas.Any())
+                                    {
+                                        @foreach (var caracteristica in menu.Caracteristicas.Take(2))
+                                        {
+                                            <span class="badge bg-success px-3 py-2" style="font-size: 0.85rem; display: inline-block;">@caracteristica</span>
+                                        }
+                                    }
+                                </div>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('@dia.ToLower()', 5);">
+                                        <i class="fas fa-thumbs-up"></i> Me gustó
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('@dia.ToLower()');">
+                                        <i class="fas fa-star"></i> Favorito
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Martes -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm menu-card" data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Martes">
-                    <div class="card-header bg-success text-white text-center">
-                        <h5 class="mb-0">Martes</h5>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <img src="~/assets/img/FondoAlbondigas.jpeg" alt="Salmón al horno" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
-                        <h6 class="card-title">Salmón al horno con quinoa</h6>
-                        <div class="mb-3">
-                            <span class="badge bg-success me-1">Sin gluten</span>
-                            <span class="badge bg-warning me-1">Omega-3</span>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('martes', 5);">
-                                <i class="fas fa-thumbs-up"></i> Me gustó
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('martes');">
-                                <i class="fas fa-star"></i> Favorito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Miércoles -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm menu-card" data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Miércoles">
-                    <div class="card-header bg-warning text-dark text-center">
-                        <h5 class="mb-0">Miércoles</h5>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <img src="~/assets/img/fondoReceta.jpeg" alt="Ensalada mediterránea" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
-                        <h6 class="card-title">Ensalada mediterránea con atún</h6>
-                        <div class="mb-3">
-                            <span class="badge bg-success me-1">Sin gluten</span>
-                            <span class="badge bg-info me-1">Vegetariano</span>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('miercoles', 5);">
-                                <i class="fas fa-thumbs-up"></i> Me gustó
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('miercoles');">
-                                <i class="fas fa-star"></i> Favorito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jueves -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm menu-card" data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Jueves">
-                    <div class="card-header bg-info text-white text-center">
-                        <h5 class="mb-0">Jueves</h5>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <img src="~/assets/img/FondoRecipientes.jpeg" alt="Pasta integral" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
-                        <h6 class="card-title">Pasta integral con vegetales</h6>
-                        <div class="mb-3">
-                            <span class="badge bg-info me-1">Integral</span>
-                            <span class="badge bg-success me-1">Bajo en grasa</span>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('jueves', 5);">
-                                <i class="fas fa-thumbs-up"></i> Me gustó
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('jueves');">
-                                <i class="fas fa-star"></i> Favorito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Viernes -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm menu-card" data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Viernes">
-                    <div class="card-header bg-danger text-white text-center">
-                        <h5 class="mb-0">Viernes</h5>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <img src="~/assets/img/FondoCarneMolida.jpeg" alt="Carne magra" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
-                        <h6 class="card-title">Carne magra con puré de papa</h6>
-                        <div class="mb-3">
-                            <span class="badge bg-success me-1">Sin gluten</span>
-                            <span class="badge bg-info me-1">Alto en hierro</span>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('viernes', 5);">
-                                <i class="fas fa-thumbs-up"></i> Me gustó
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('viernes');">
-                                <i class="fas fa-star"></i> Favorito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sábado -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm menu-card" data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="Sábado">
-                    <div class="card-header bg-secondary text-white text-center">
-                        <h5 class="mb-0">Sábado</h5>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <img src="~/assets/img/fondoReceta.jpeg" alt="Sopa de vegetales" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
-                        <h6 class="card-title">Sopa de vegetales con pollo</h6>
-                        <div class="mb-3">
-                            <span class="badge bg-success me-1">Sin gluten</span>
-                            <span class="badge bg-info me-1">Bajo en calorías</span>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('sabado', 5);">
-                                <i class="fas fa-thumbs-up"></i> Me gustó
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning" onclick="event.stopPropagation(); toggleFavorito('sabado');">
-                                <i class="fas fa-star"></i> Favorito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
 
 <!-- Modal Detalle del Día -->
 <div class="modal fade" id="detalleModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detalle del Día - <span id="diaSeleccionado"></span></h5>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-calendar-day me-2 text-primary"></i>
+                    Detalle del Día - <span id="diaSeleccionado" class="text-primary"></span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <img id="imagenPlato" src="" alt="Plato" class="img-fluid rounded mb-3" />
-                    </div>
-                    <div class="col-md-6">
-                        <h6 id="nombrePlato"></h6>
-                        <div id="etiquetasPlato" class="mb-3"></div>
-
-                        <h6>Ingredientes principales:</h6>
-                        <ul id="ingredientesLista" class="list-unstyled">
-                            <!-- Se llenará dinámicamente -->
-                        </ul>
-
-                        <div class="alert alert-info">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            <strong>Tip del Chef:</strong>
-                            <p id="tipChef" class="mb-0 mt-2"></p>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <!-- Columna Izquierda: Imagen -->
+                    <div class="col-lg-5">
+                        <div class="position-relative">
+                            <img id="imagenPlato" src="" alt="Plato" class="img-fluid rounded shadow-sm" style="width: 100%; height: 400px; object-fit: cover;" />
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-light text-dark p-2">
+                                    <i class="fas fa-image me-1"></i>Imagen del Platillo
+                                </span>
+                            </div>
                         </div>
-                        <div class="mt-3 text-start">
-                            <h6>Comentarios:</h6>
-                            <div id="listaComentariosReceta">
-                                @if (ViewBag.ComentariosReceta.Count > 0)
+                    </div>
+                    
+                    <!-- Columna Derecha: Información -->
+                    <div class="col-lg-7">
+                        <!-- Nombre del Platillo -->
+                        <h4 id="nombrePlato" class="fw-bold mb-3 text-dark"></h4>
+                        
+                        <!-- Características -->
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">
+                                <i class="fas fa-tags me-2 text-primary"></i>Características Principales
+                            </h6>
+                            <div id="etiquetasPlato" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Ingredientes -->
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-list-ul me-2 text-primary"></i>Ingredientes Principales
+                            </h6>
+                            <ul id="ingredientesLista" class="list-unstyled ps-3">
+                                <!-- Se llenará dinámicamente -->
+                            </ul>
+                        </div>
+
+                        <!-- Tip del Chef -->
+                        <div class="alert alert-info border-start border-4 border-info mb-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-lightbulb me-2 mt-1 text-warning"></i>
+                                <div>
+                                    <strong class="d-block mb-2">Tip del Chef</strong>
+                                    <p id="tipChef" class="mb-0 text-muted"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descripción (si existe) -->
+                        <div id="descripcionContainer" class="mb-4" style="display: none;">
+                            <h6 class="text-muted mb-2">
+                                <i class="fas fa-info-circle me-2 text-primary"></i>Descripción
+                            </h6>
+                            <p id="descripcionPlato" class="text-muted"></p>
+                        </div>
+
+                        <!-- Comentarios -->
+                        <div class="border-top pt-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-comments me-2 text-primary"></i>Comentarios
+                            </h6>
+                            <div id="listaComentariosReceta" class="mb-3" style="max-height: 200px; overflow-y: auto;">
+                                @if (ViewBag.ComentariosReceta != null && ViewBag.ComentariosReceta.Count > 0)
                                 {
                                     <ul class="list-unstyled">
                                         @foreach (var item in ViewBag.ComentariosReceta)
                                         {
-                                            <li class="d-flex justify-content-between align-items-center mb-2">
-                                                <span>
-                                                    <i class="fas fa-comment-dots text-secondary me-2"></i>@item.Comentario
+                                            <li class="d-flex justify-content-between align-items-start mb-3 p-2 bg-light rounded">
+                                                <span class="flex-grow-1">
+                                                    <i class="fas fa-comment-dots text-secondary me-2"></i>
+                                                    <span class="text-dark">@item.Comentario</span>
                                                 </span>
-                                                <button class="btn btn-sm btn-danger btn-eliminar-comentario"
+                                                <button class="btn btn-sm btn-outline-danger ms-2"
                                                         data-comentario-id="@item.ComentarioID"
-                                                        onclick="event.stopPropagation(); eliminarComentario(@item.ComentarioID);">
+                                                        onclick="event.stopPropagation(); eliminarComentario(@item.ComentarioID);"
+                                                        title="Eliminar comentario">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </li>
@@ -259,33 +202,38 @@
                                 }
                                 else
                                 {
-                                    <span>Sin comentarios</span>
+                                    <p class="text-muted text-center py-3">
+                                        <i class="fas fa-comment-slash me-2"></i>Sin comentarios aún
+                                    </p>
                                 }
                             </div>
-                        </div>
-                        <div class="card-footer bg-light" onclick="event.stopPropagation();">
-                            <div class="input-group input-group-sm">
+                            
+                            <!-- Input para nuevo comentario -->
+                            <div class="input-group" onclick="event.stopPropagation();">
                                 <input type="text"
                                        class="form-control"
                                        id="nuevoComentarioReceta"
                                        name="nuevoComentarioReceta"
-                                       placeholder="Agregar comentario..."
+                                       placeholder="Escribe tu comentario aquí..."
                                        onclick="event.stopPropagation();"
                                        onkeydown="event.stopPropagation();">
                                 <button class="btn btn-primary" type="button"
-                                        onclick="event.stopPropagation(); agregarComentario();">
-                                    <i class="fas fa-paper-plane"></i>
+                                        onclick="event.stopPropagation(); agregarComentario();"
+                                        title="Enviar comentario">
+                                    <i class="fas fa-paper-plane me-1"></i>Enviar
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer bg-light">
                 <a href="@Url.Action("AgregarAlergia", "Usuario")" class="btn btn-warning">
                     <i class="fas fa-plus me-2"></i>Agregar nueva alergia
                 </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cerrar
+                </button>
             </div>
         </div>
     </div>
@@ -448,54 +396,79 @@
     .badge {
         font-size: 0.75rem;
     }
+
+    #listaComentariosReceta {
+        scrollbar-width: thin;
+        scrollbar-color: #e6a756 #f5f5f5;
+    }
+
+    #listaComentariosReceta::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #listaComentariosReceta::-webkit-scrollbar-track {
+        background: #f5f5f5;
+        border-radius: 10px;
+    }
+
+    #listaComentariosReceta::-webkit-scrollbar-thumb {
+        background: #e6a756;
+        border-radius: 10px;
+    }
+
+    #listaComentariosReceta::-webkit-scrollbar-thumb:hover {
+        background: #d4954a;
+    }
+
+    .modal-xl {
+        max-width: 1200px;
+    }
+
+    .alert-info {
+        background-color: #e7f3ff;
+        border-color: #b3d9ff;
+    }
+
+    #etiquetasPlato .badge {
+        margin-right: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+        white-space: nowrap;
+    }
+
+    #ingredientesLista li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    #ingredientesLista li:last-child {
+        border-bottom: none;
+    }
 </style>
 
 <script>
-    // Datos de los platos
-    const platosData = {
-        'Lunes': {
-            nombre: 'Pollo a la plancha con vegetales',
-            imagen: '/assets/img/FondoCarneMolida.jpeg',
-            etiquetas: ['Sin gluten', 'Alto en proteína'],
-            ingredientes: ['Pechuga de pollo', 'Brócoli', 'Zanahoria', 'Arroz integral'],
-            tipChef: 'Cocina el pollo a fuego medio para mantenerlo jugoso y tierno.'
-        },
-        'Martes': {
-            nombre: 'Salmón al horno con quinoa',
-            imagen: '/assets/img/FondoAlbondigas.jpeg',
-            etiquetas: ['Sin gluten', 'Omega-3'],
-            ingredientes: ['Salmón fresco', 'Quinoa', 'Espárragos', 'Limón'],
-            tipChef: 'El salmón debe estar rosado por dentro, no completamente cocido.'
-        },
-        'Miércoles': {
-            nombre: 'Ensalada mediterránea con atún',
-            imagen: '/assets/img/fondoReceta.jpeg',
-            etiquetas: ['Sin gluten', 'Vegetariano'],
-            ingredientes: ['Lechuga', 'Tomate', 'Pepino', 'Atún', 'Aceite de oliva'],
-            tipChef: 'Agrega un toque de limón fresco justo antes de servir.'
-        },
-        'Jueves': {
-            nombre: 'Pasta integral con vegetales',
-            imagen: '/assets/img/FondoRecipientes.jpeg',
-            etiquetas: ['Integral', 'Bajo en grasa'],
-            ingredientes: ['Pasta integral', 'Calabacín', 'Champiñones', 'Salsa de tomate'],
-            tipChef: 'Cocina la pasta al dente para mejor textura y digestión.'
-        },
-        'Viernes': {
-            nombre: 'Carne magra con puré de papa',
-            imagen: '/assets/img/FondoCarneMolida.jpeg',
-            etiquetas: ['Sin gluten', 'Alto en hierro'],
-            ingredientes: ['Carne de res magra', 'Papa', 'Leche', 'Mantequilla'],
-            tipChef: 'Deja reposar la carne 5 minutos antes de cortarla.'
-        },
-        'Sábado': {
-            nombre: 'Sopa de vegetales con pollo',
-            imagen: '/assets/img/fondoReceta.jpeg',
-            etiquetas: ['Sin gluten', 'Bajo en calorías'],
-            ingredientes: ['Pollo', 'Zanahoria', 'Apio', 'Cebolla', 'Caldo de pollo'],
-            tipChef: 'Cocina a fuego lento para extraer todos los sabores.'
-        }
-    };
+    // Datos de los platos desde el servidor
+    const platosData = {};
+    @{
+        var menusData = ViewBag.MenusSemanal as List<Abstract_CR.Models.MenuSemanalViewModel> ?? new List<Abstract_CR.Models.MenuSemanalViewModel>();
+    }
+    @foreach (var menu in menusData)
+    {
+        var caracteristicasList = menu.Caracteristicas ?? new List<string>();
+        var ingredientesList = menu.IngredientesPrincipales ?? new List<string>();
+        <text>
+        platosData['@menu.DiaSemana'] = {
+            nombre: '@Html.Raw(menu.NombrePlatillo.Replace("'", "\\'").Replace("\"", "&quot;").Replace("\r", "").Replace("\n", " "))',
+            imagen: '@(menu.RutaImagen ?? "/assets/img/fondoReceta.jpeg")',
+            etiquetas: @Html.Raw(Json.Serialize(caracteristicasList)),
+            ingredientes: @Html.Raw(Json.Serialize(ingredientesList)),
+            tipChef: '@Html.Raw((menu.TipChef ?? "").Replace("'", "\\'").Replace("\"", "&quot;").Replace("\r", "").Replace("\n", " "))',
+            descripcion: '@Html.Raw((menu.Descripcion ?? "").Replace("'", "\\'").Replace("\"", "&quot;").Replace("\r", "").Replace("\n", " "))'
+        };
+        </text>
+    }
+    
+    // Debug: mostrar todos los datos cargados
+    console.log('PlatosData completo:', platosData);
 
     // Función para mostrar detalles del día
     document.addEventListener('DOMContentLoaded', function () {
@@ -506,23 +479,105 @@
             const plato = platosData[dia];
 
             document.getElementById('diaSeleccionado').textContent = dia;
-            document.getElementById('nombrePlato').textContent = plato.nombre;
-            document.getElementById('imagenPlato').src = plato.imagen;
+            
+            if (plato) {
+                document.getElementById('nombrePlato').textContent = plato.nombre || 'Sin platillo asignado';
+                document.getElementById('imagenPlato').src = plato.imagen || '/assets/img/fondoReceta.jpeg';
 
-            // Mostrar etiquetas
-            const etiquetasHtml = plato.etiquetas.map(etiqueta =>
-                `<span class="badge bg-success me-1">${etiqueta}</span>`
-            ).join('');
-            document.getElementById('etiquetasPlato').innerHTML = etiquetasHtml;
+                // Mostrar etiquetas
+                let caracteristicas = plato.etiquetas;
+                console.log('Características para', dia, ':', caracteristicas, 'Tipo:', typeof caracteristicas);
+                
+                // Asegurar que sea un array
+                if (!Array.isArray(caracteristicas)) {
+                    if (typeof caracteristicas === 'string') {
+                        try {
+                            caracteristicas = JSON.parse(caracteristicas);
+                        } catch (e) {
+                            caracteristicas = caracteristicas.split(',').map(c => c.trim()).filter(c => c);
+                        }
+                    } else {
+                        caracteristicas = [];
+                    }
+                }
+                
+                const etiquetasContainer = document.getElementById('etiquetasPlato');
+                etiquetasContainer.innerHTML = ''; // Limpiar primero
+                
+                if (Array.isArray(caracteristicas) && caracteristicas.length > 0) {
+                    caracteristicas.forEach(function(etiqueta) {
+                        if (etiqueta && etiqueta.trim && etiqueta.trim() !== '') {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge bg-success px-3 py-2 mb-2 me-2';
+                            badge.style.cssText = 'font-size: 0.85rem; display: inline-block;';
+                            badge.textContent = etiqueta.trim();
+                            etiquetasContainer.appendChild(badge);
+                        }
+                    });
+                    
+                    if (etiquetasContainer.children.length === 0) {
+                        etiquetasContainer.innerHTML = '<span class="text-muted">Sin características especificadas</span>';
+                    }
+                } else {
+                    etiquetasContainer.innerHTML = '<span class="text-muted">Sin características especificadas</span>';
+                }
 
-            // Mostrar ingredientes
-            const ingredientesHtml = plato.ingredientes.map(ingrediente =>
-                `<li><i class="fas fa-check text-success me-2"></i>${ingrediente}</li>`
-            ).join('');
-            document.getElementById('ingredientesLista').innerHTML = ingredientesHtml;
+                // Mostrar ingredientes
+                let ingredientes = plato.ingredientes;
+                console.log('Ingredientes para', dia, ':', ingredientes, 'Tipo:', typeof ingredientes);
+                
+                // Asegurar que sea un array
+                if (!Array.isArray(ingredientes)) {
+                    if (typeof ingredientes === 'string') {
+                        try {
+                            ingredientes = JSON.parse(ingredientes);
+                        } catch (e) {
+                            ingredientes = ingredientes.split(',').map(i => i.trim()).filter(i => i);
+                        }
+                    } else {
+                        ingredientes = [];
+                    }
+                }
+                
+                const ingredientesContainer = document.getElementById('ingredientesLista');
+                ingredientesContainer.innerHTML = ''; // Limpiar primero
+                
+                if (Array.isArray(ingredientes) && ingredientes.length > 0) {
+                    ingredientes.forEach(function(ingrediente) {
+                        if (ingrediente && ingrediente.trim && ingrediente.trim() !== '') {
+                            const li = document.createElement('li');
+                            li.className = 'mb-2';
+                            li.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i><span class="text-dark">' + ingrediente.trim() + '</span>';
+                            ingredientesContainer.appendChild(li);
+                        }
+                    });
+                    
+                    if (ingredientesContainer.children.length === 0) {
+                        ingredientesContainer.innerHTML = '<li class="text-muted"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</li>';
+                    }
+                } else {
+                    ingredientesContainer.innerHTML = '<li class="text-muted"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</li>';
+                }
 
-            // Mostrar tip del chef
-            document.getElementById('tipChef').textContent = plato.tipChef;
+                // Mostrar tip del chef
+                const tipChef = plato.tipChef || 'Sin tip disponible';
+                document.getElementById('tipChef').textContent = tipChef;
+                
+                // Mostrar descripción si existe
+                if (plato.descripcion && plato.descripcion.trim() !== '') {
+                    document.getElementById('descripcionPlato').textContent = plato.descripcion;
+                    document.getElementById('descripcionContainer').style.display = 'block';
+                } else {
+                    document.getElementById('descripcionContainer').style.display = 'none';
+                }
+            } else {
+                document.getElementById('nombrePlato').textContent = 'Sin platillo asignado';
+                document.getElementById('imagenPlato').src = '/assets/img/fondoReceta.jpeg';
+                document.getElementById('etiquetasPlato').innerHTML = '';
+                document.getElementById('ingredientesLista').innerHTML = '<li class="text-muted"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</li>';
+                document.getElementById('tipChef').textContent = 'Sin tip disponible';
+                document.getElementById('descripcionContainer').style.display = 'none';
+            }
         });
     });
 

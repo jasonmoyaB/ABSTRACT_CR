@@ -25,6 +25,7 @@ namespace Abstract_CR.Data
         public DbSet<RecetaPorUsuario> RecetasPorUsuario { get; set; }
         public DbSet<MensajeInteraccion> MensajesInteraccion { get; set; }
         public DbSet<PuntosUsuario> PuntosUsuarios { get; set; }
+        public DbSet<MenuSemanal> MenuSemanal { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -147,6 +148,21 @@ namespace Abstract_CR.Data
                       .WithMany()
                       .HasForeignKey(e => e.AsignadoPorId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MenuSemanal>(entity =>
+            {
+                entity.ToTable("MenusSemanales");
+                entity.HasKey(e => e.MenuSemanalID);
+                entity.Property(e => e.TipoMenuID).IsRequired();
+                entity.Property(e => e.SemanaDel).IsRequired().HasColumnType("date");
+                entity.Property(e => e.NombrePlatillo).HasMaxLength(200);
+                entity.Property(e => e.DiaSemana).HasMaxLength(20);
+                entity.Property(e => e.Caracteristicas).HasMaxLength(500);
+                entity.Property(e => e.IngredientesPrincipales).HasMaxLength(1000);
+                entity.Property(e => e.TipChef).HasMaxLength(500);
+                entity.Property(e => e.RutaImagen).HasMaxLength(500);
+                entity.Ignore(e => e.RowVer); // RowVer ya existe en la tabla, se ignora en el modelo
             });
         }
     }

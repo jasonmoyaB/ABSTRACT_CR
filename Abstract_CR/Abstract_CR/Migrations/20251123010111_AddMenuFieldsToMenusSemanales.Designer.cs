@@ -4,6 +4,7 @@ using Abstract_CR.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Abstract_CR.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251123010111_AddMenuFieldsToMenusSemanales")]
+    partial class AddMenuFieldsToMenusSemanales
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -231,7 +234,7 @@ namespace Abstract_CR.Migrations
 
                     b.HasIndex("UsuarioID");
 
-                    b.ToTable("Notificacion", (string)null);
+                    b.ToTable("Notificacion");
                 });
 
             modelBuilder.Entity("Abstract_CR.Models.PassResetTokens", b =>
@@ -256,7 +259,7 @@ namespace Abstract_CR.Migrations
 
                     b.HasIndex("UsuarioID");
 
-                    b.ToTable("Tokens", (string)null);
+                    b.ToTable("Tokens");
                 });
 
             modelBuilder.Entity("Abstract_CR.Models.PlanNutricional", b =>
@@ -319,7 +322,7 @@ namespace Abstract_CR.Migrations
 
                     b.HasIndex("UsuarioID");
 
-                    b.ToTable("PlanNutricional", (string)null);
+                    b.ToTable("PlanNutricional");
                 });
 
             modelBuilder.Entity("Abstract_CR.Models.PuntosUsuario", b =>
@@ -398,7 +401,7 @@ namespace Abstract_CR.Migrations
 
                     b.HasKey("RecetaID");
 
-                    b.ToTable("Recetas", (string)null);
+                    b.ToTable("Recetas");
                 });
 
             modelBuilder.Entity("Abstract_CR.Models.RecetaPorUsuario", b =>
@@ -443,7 +446,7 @@ namespace Abstract_CR.Migrations
                     b.HasIndex("NombreRol")
                         .IsUnique();
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
 
                     b.HasData(
                         new
@@ -495,7 +498,7 @@ namespace Abstract_CR.Migrations
 
                     b.HasIndex("UsuarioID");
 
-                    b.ToTable("Suscripciones", (string)null);
+                    b.ToTable("Suscripciones");
                 });
 
             modelBuilder.Entity("Abstract_CR.Models.Usuario", b =>
@@ -563,7 +566,7 @@ namespace Abstract_CR.Migrations
 
                     b.HasIndex("RolID");
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("Abstract_CR.Models.MensajeInteraccion", b =>

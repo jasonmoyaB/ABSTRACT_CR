@@ -35,6 +35,7 @@ builder.Services.AddScoped<SuscripcionesHelper>();
 builder.Services.AddScoped<CometarioRecetaHelper>();
 builder.Services.AddScoped<InteraccionHelper>();
 builder.Services.AddScoped<RecetasHelper>();
+builder.Services.AddScoped<MenuSemanalHelper>();
 
 //  email
 builder.Services.AddScoped<IEmailService, EmailService>();

@@ -2,6 +2,7 @@
 using Abstract_CR.Models;
 using Abstract_CR.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Abstract_CR.Controllers
 {
@@ -11,13 +12,17 @@ namespace Abstract_CR.Controllers
         private readonly IEmailService _emailService;
         private readonly UserHelper _userHelper;
         private readonly RecetasHelper _recetasHelper;
+        private readonly MenuSemanalHelper _menuSemanalHelper;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public RecetasController(CometarioRecetaHelper cometarioRecetaHelper, IEmailService emailService, UserHelper userHelper, RecetasHelper recetasHelper)
+        public RecetasController(CometarioRecetaHelper cometarioRecetaHelper, IEmailService emailService, UserHelper userHelper, RecetasHelper recetasHelper, MenuSemanalHelper menuSemanalHelper, IWebHostEnvironment webHostEnvironment)
         {
             _cometarioRecetaHelper = cometarioRecetaHelper;
             _emailService = emailService;
             _userHelper = userHelper;
             _recetasHelper = recetasHelper;
+            _menuSemanalHelper = menuSemanalHelper;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
@@ -117,6 +122,70 @@ namespace Abstract_CR.Controllers
         public IActionResult AsignarMenu()
         {
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult MenuSemanal()
+        {
+            ViewData["Title"] = "Menú Semanal";
+            var menus = _menuSemanalHelper.ObtenerTodosLosMenusViewModel();
+            ViewBag.Menus = menus;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GuardarMenuSemanal(MenuSemanalViewModel model, IFormFile? Imagen)
+        {
+            try
+            {
+                string? rutaImagen = null;
+
+                // Guardar imagen si se proporciona
+                if (Imagen != null && Imagen.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "menu-semanal");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    var fileName = $"{Guid.NewGuid()}_{Imagen.FileName}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await Imagen.CopyToAsync(stream);
+                    }
+
+                    rutaImagen = $"/uploads/menu-semanal/{fileName}";
+                }
+
+                var guardado = _menuSemanalHelper.GuardarMenu(model, rutaImagen);
+
+                if (guardado)
+                {
+                    return Json(new { success = true, message = "Menú guardado correctamente" });
+                }
+
+                return Json(new { success = false, message = "Error al guardar el menú" });
+            }
+            catch (Exception ex)
+            {
+                // Incluir más detalles del error para debugging
+                var errorMessage = $"Error: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" | InnerException: {ex.InnerException.Message}";
+                }
+                return Json(new { success = false, message = errorMessage });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ObtenerMenuPorDia(string diaSemana)
+        {
+            var menu = _menuSemanalHelper.ObtenerMenuViewModelPorDia(diaSemana);
+            return Json(new { success = true, menu = menu });
         }
 
         [HttpPost]

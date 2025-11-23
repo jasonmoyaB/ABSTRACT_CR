@@ -9,11 +9,13 @@ namespace Abstract_CR.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly CometarioRecetaHelper _cometarioRecetaHelper;
+        private readonly MenuSemanalHelper _menuSemanalHelper;
 
-        public HomeController(ILogger<HomeController> logger, CometarioRecetaHelper cometarioRecetaHelper)
+        public HomeController(ILogger<HomeController> logger, CometarioRecetaHelper cometarioRecetaHelper, MenuSemanalHelper menuSemanalHelper)
         {
             _logger = logger;
             _cometarioRecetaHelper = cometarioRecetaHelper;
+            _menuSemanalHelper = menuSemanalHelper;
         }
 
         public IActionResult Index()
@@ -50,6 +52,11 @@ namespace Abstract_CR.Controllers
         {
             var comentarios = _cometarioRecetaHelper.ObtenerComentariosPorReceta(1);
             ViewBag.ComentariosReceta = comentarios;
+            
+            // Cargar menús semanales
+            var menus = _menuSemanalHelper.ObtenerTodosLosMenusViewModel();
+            ViewBag.MenusSemanal = menus;
+            
             return View();
         }
     }

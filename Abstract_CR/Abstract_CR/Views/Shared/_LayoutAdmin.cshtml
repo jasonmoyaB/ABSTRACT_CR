@@ -108,8 +108,8 @@
                                 </a>
 
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
-                                   href='@Url.Action("ObtenerRecetas", "Recetas")'>
-                                    <i class="fa-solid fa-cutlery me-2"></i> Asignar recetas
+                                   href='@Url.Action("MenuSemanal", "Recetas")'>
+                                    <i class="fa-solid fa-calendar-week me-2"></i> Menú semanal
                                 </a>
 
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("Ebooks", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
@@ -272,8 +272,8 @@
                                         <i class="fa-solid fa-clipboard-list me-2"></i> Planes
                                     </a>
                                     <a class="nav-link text-light mb-1 @(currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-                                       href='@Url.Action("ObtenerRecetas", "Recetas")'>
-                                        <i class="fa-solid fa-cutlery me-2"></i> Asignar recetas
+                                       href='@Url.Action("MenuSemanal", "Recetas")'>
+                                        <i class="fa-solid fa-calendar-week me-2"></i> Menú semanal
                                     </a>
                                     <a class="nav-link text-light mb-1 @(currentController.Equals("Ebooks", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                                        href='@Url.Action("SubirArchivo", "Ebooks")'>

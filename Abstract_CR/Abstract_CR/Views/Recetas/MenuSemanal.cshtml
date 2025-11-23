@@ -1,0 +1,365 @@
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Menú Semanal";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fa-solid fa-calendar-week me-2"></i>Menú Semanal
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de días de la semana -->
+    <div class="row g-3 mb-4">
+        @{
+            var diasSemana = new[] { "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo" };
+        }
+        @foreach (var dia in diasSemana)
+        {
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="card h-100 shadow-sm border-0" style="cursor: pointer; transition: all 0.3s ease;" 
+                     onclick="abrirModalMenu('@dia')" 
+                     onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)'" 
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-calendar-day fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-2">@dia</h5>
+                        <p class="text-muted small mb-0" id="platillo-@dia">
+                            @{
+                                var menuDia = (ViewBag.Menus as List<Abstract_CR.Models.MenuSemanalViewModel>)?.FirstOrDefault(m => m.DiaSemana == dia);
+                            }
+                            @if (menuDia != null)
+                            {
+                                <strong>@menuDia.NombrePlatillo</strong>
+                            }
+                            else
+                            {
+                                <em>Sin platillo asignado</em>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal para editar/crear menú del día -->
+<div class="modal fade" id="modalMenuDia" tabindex="-1" aria-labelledby="modalMenuDiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalMenuDiaLabel">
+                    <i class="fa-solid fa-calendar-day me-2"></i>Detalle del Día - <span id="diaSeleccionado"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <form id="formMenuDia">
+                    <input type="hidden" id="menuSemanalId" name="MenuSemanalID" />
+                    <input type="hidden" id="diaSemanaInput" name="DiaSemana" />
+                    
+                    <div class="row g-0">
+                        <!-- Columna izquierda: Imagen -->
+                        <div class="col-md-5">
+                            <div class="p-4 h-100 d-flex flex-column" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Imagen del Platillo</label>
+                                    <div class="border rounded p-3 text-center" style="min-height: 300px; background: white;">
+                                        <img id="previewImagen" src="" alt="Imagen del platillo" class="img-fluid rounded" style="max-height: 300px; display: none;" />
+                                        <div id="placeholderImagen" class="d-flex flex-column align-items-center justify-content-center" style="min-height: 300px;">
+                                            <i class="fa-solid fa-image fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">Sin imagen</p>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="imagenPlatillo" name="Imagen" class="form-control mt-2" accept="image/*" onchange="previewImage(this)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna derecha: Información -->
+                        <div class="col-md-7">
+                            <div class="p-4">
+                                <!-- Nombre del Platillo -->
+                                <div class="mb-3">
+                                    <label for="nombrePlatillo" class="form-label fw-bold small text-uppercase text-muted">Nombre del Platillo</label>
+                                    <input type="text" class="form-control form-control-lg fw-bold" id="nombrePlatillo" name="NombrePlatillo" 
+                                           required />
+                                </div>
+
+                                <!-- Características Principales -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">Características Principales</label>
+                                    <div class="d-flex flex-wrap gap-2 mb-2" id="caracteristicasContainer">
+                                        <!-- Tags se agregarán dinámicamente aquí -->
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="nuevaCaracteristica" placeholder="Ej: Sin gluten, Alto en proteína..." />
+                                        <button type="button" class="btn btn-outline-success" onclick="agregarCaracteristica()">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Ingredientes Principales -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">Ingredientes principales</label>
+                                    <div id="ingredientesContainer" class="mb-2">
+                                        <!-- Ingredientes se agregarán dinámicamente aquí -->
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="nuevoIngrediente" placeholder="Ej: Pechuga de pollo, Brócoli..." />
+                                        <button type="button" class="btn btn-outline-primary" onclick="agregarIngrediente()">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Tip del Chef -->
+                                <div class="mb-3 p-3 rounded" style="background-color: #e0f7fa;">
+                                    <label for="tipChef" class="form-label fw-bold mb-2" style="color: #0277bd;">
+                                        <i class="fa-solid fa-lightbulb me-1"></i>Tip del Chef
+                                    </label>
+                                    <textarea class="form-control border-0" id="tipChef" name="TipChef" rows="2" 
+                                              style="background-color: transparent; color: #01579b;"
+                                              placeholder="Ej: Cocina el pollo a fuego medio para mantenerlo jugoso y tierno."></textarea>
+                                </div>
+
+                                <!-- Descripción (opcional) -->
+                                <div class="mb-3">
+                                    <label for="descripcion" class="form-label fw-bold">Descripción</label>
+                                    <textarea class="form-control" id="descripcion" name="Descripcion" rows="3" 
+                                              placeholder="Descripción adicional del platillo (opcional)"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarMenuDia()">
+                    <i class="fa-solid fa-save me-1"></i>Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let caracteristicas = [];
+        let ingredientes = [];
+        let diaActual = '';
+
+        function abrirModalMenu(dia) {
+            diaActual = dia;
+            document.getElementById('diaSeleccionado').textContent = dia;
+            document.getElementById('diaSemanaInput').value = dia;
+            
+            // Limpiar formulario
+            document.getElementById('formMenuDia').reset();
+            document.getElementById('menuSemanalId').value = '';
+            caracteristicas = [];
+            ingredientes = [];
+            actualizarCaracteristicas();
+            actualizarIngredientes();
+            document.getElementById('previewImagen').style.display = 'none';
+            document.getElementById('placeholderImagen').style.display = 'flex';
+            
+            // Cargar datos existentes si hay menú para este día
+            fetch('@Url.Action("ObtenerMenuPorDia", "Recetas")?diaSemana=' + encodeURIComponent(dia))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.menu) {
+                        const menu = data.menu;
+                        document.getElementById('menuSemanalId').value = menu.menuSemanalID || '';
+                        document.getElementById('nombrePlatillo').value = menu.nombrePlatillo || '';
+                        document.getElementById('tipChef').value = menu.tipChef || '';
+                        document.getElementById('descripcion').value = menu.descripcion || '';
+                        
+                        if (menu.caracteristicas && menu.caracteristicas.length > 0) {
+                            caracteristicas = menu.caracteristicas;
+                            actualizarCaracteristicas();
+                        }
+                        
+                        if (menu.ingredientesPrincipales && menu.ingredientesPrincipales.length > 0) {
+                            ingredientes = menu.ingredientesPrincipales;
+                            actualizarIngredientes();
+                        }
+                        
+                        if (menu.rutaImagen) {
+                            document.getElementById('previewImagen').src = menu.rutaImagen;
+                            document.getElementById('previewImagen').style.display = 'block';
+                            document.getElementById('placeholderImagen').style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar menú:', error);
+                });
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalMenuDia'));
+            modal.show();
+        }
+
+        function agregarCaracteristica() {
+            const input = document.getElementById('nuevaCaracteristica');
+            const valor = input.value.trim();
+            
+            if (valor && !caracteristicas.includes(valor)) {
+                caracteristicas.push(valor);
+                input.value = '';
+                actualizarCaracteristicas();
+            }
+        }
+
+        function eliminarCaracteristica(index) {
+            caracteristicas.splice(index, 1);
+            actualizarCaracteristicas();
+        }
+
+        function actualizarCaracteristicas() {
+            const container = document.getElementById('caracteristicasContainer');
+            container.innerHTML = '';
+            
+            caracteristicas.forEach((car, index) => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-success text-white px-3 py-2';
+                badge.style.fontSize = '0.85rem';
+                badge.innerHTML = `${car} <i class="fa-solid fa-times ms-2" style="cursor: pointer; font-size: 0.75rem;" onclick="eliminarCaracteristica(${index})"></i>`;
+                container.appendChild(badge);
+            });
+        }
+
+        function agregarIngrediente() {
+            const input = document.getElementById('nuevoIngrediente');
+            const valor = input.value.trim();
+            
+            if (valor && !ingredientes.includes(valor)) {
+                ingredientes.push(valor);
+                input.value = '';
+                actualizarIngredientes();
+            }
+        }
+
+        function eliminarIngrediente(index) {
+            ingredientes.splice(index, 1);
+            actualizarIngredientes();
+        }
+
+        function actualizarIngredientes() {
+            const container = document.getElementById('ingredientesContainer');
+            container.innerHTML = '';
+            
+            ingredientes.forEach((ing, index) => {
+                const div = document.createElement('div');
+                div.className = 'd-flex align-items-center mb-2';
+                div.innerHTML = `
+                    <i class="fa-solid fa-check text-success me-2"></i>
+                    <span class="flex-grow-1">${ing}</span>
+                    <i class="fa-solid fa-times text-danger ms-2" style="cursor: pointer;" onclick="eliminarIngrediente(${index})"></i>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImagen').src = e.target.result;
+                    document.getElementById('previewImagen').style.display = 'block';
+                    document.getElementById('placeholderImagen').style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function guardarMenuDia() {
+            const form = document.getElementById('formMenuDia');
+            
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            const formData = new FormData();
+            const menuId = document.getElementById('menuSemanalId').value;
+            if (menuId) {
+                formData.append('MenuSemanalID', menuId);
+            }
+            formData.append('DiaSemana', document.getElementById('diaSemanaInput').value);
+            formData.append('NombrePlatillo', document.getElementById('nombrePlatillo').value);
+            formData.append('Caracteristicas', JSON.stringify(caracteristicas));
+            formData.append('IngredientesPrincipales', JSON.stringify(ingredientes));
+            formData.append('TipChef', document.getElementById('tipChef').value);
+            formData.append('Descripcion', document.getElementById('descripcion').value);
+            
+            const imagenInput = document.getElementById('imagenPlatillo');
+            if (imagenInput.files[0]) {
+                formData.append('Imagen', imagenInput.files[0]);
+            }
+
+            // Mostrar loading
+            const btnGuardar = event.target;
+            const textoOriginal = btnGuardar.innerHTML;
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Guardando...';
+
+            fetch('@Url.Action("GuardarMenuSemanal", "Recetas")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar la tarjeta del día
+                    const platilloElement = document.getElementById(`platillo-${diaActual}`);
+                    if (platilloElement) {
+                        platilloElement.innerHTML = `<strong>${document.getElementById('nombrePlatillo').value}</strong>`;
+                    }
+                    
+                    // Cerrar modal
+                    bootstrap.Modal.getInstance(document.getElementById('modalMenuDia')).hide();
+                    
+                    // Mostrar mensaje de éxito
+                    alert('Menú guardado correctamente');
+                } else {
+                    alert('Error al guardar: ' + (data.message || 'Error desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al procesar la solicitud');
+            })
+            .finally(() => {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = textoOriginal;
+            });
+        }
+
+        // Permitir agregar con Enter
+        document.getElementById('nuevaCaracteristica').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarCaracteristica();
+            }
+        });
+
+        document.getElementById('nuevoIngrediente').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarIngrediente();
+            }
+        });
+    </script>
+}
+

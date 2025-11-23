@@ -8,6 +8,7 @@ using System.Text;
 using System.ComponentModel.DataAnnotations;
 using Abstract_CR.Helpers;
 using Abstract_CR.Services;
+using System.Linq;
 
 namespace Abstract_CR.Controllers
 {
@@ -42,7 +43,6 @@ namespace Abstract_CR.Controllers
             try
             {
                 var usuario = await _context.Usuarios
-                    .Include(u => u.Rol)
                     .FirstOrDefaultAsync(u => u.CorreoElectronico == model.Email && u.Activo);
 
                 if (usuario == null)
@@ -57,16 +57,24 @@ namespace Abstract_CR.Controllers
                     return View(model);
                 }
 
+                // Cargar el rol por separado si existe
+                Rol? rolUsuario = null;
+                if (usuario.RolID.HasValue)
+                {
+                    rolUsuario = await _context.Roles.FindAsync(usuario.RolID.Value);
+                }
+
                 // Sesión
                 HttpContext.Session.SetInt32("UsuarioID", usuario.UsuarioID);
                 HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
-                HttpContext.Session.SetString("Rol", usuario.Rol?.NombreRol ?? "Cliente");
+                HttpContext.Session.SetString("Rol", rolUsuario?.NombreRol ?? "Cliente");
                 HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
 
                 _logger.LogInformation($"Usuario {usuario.CorreoElectronico} inició sesión");
 
                 // 🔀 Redirección según rol
-                if (string.Equals(usuario.Rol?.NombreRol, "Admin", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(rolUsuario?.NombreRol, "Admin", StringComparison.OrdinalIgnoreCase) || 
+                    string.Equals(rolUsuario?.NombreRol, "Administrador", StringComparison.OrdinalIgnoreCase))
                 {
                     return RedirectToAction("PanelAdministracion", "Administracion");
                 }

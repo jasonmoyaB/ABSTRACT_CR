@@ -148,6 +148,13 @@ namespace Abstract_CR.Helpers
 
             await _context.SaveChangesAsync();
         }
+        public async Task<List<RestriccionAlimentaria>> ObtenerRestriccionesPorUsuarioAsync(int usuarioId)
+        {
+            return await _context.RestriccionesAlimentarias
+                                 .Where(r => r.UsuarioID == usuarioId)
+                                 .ToListAsync();
+        }
     }
+
 }
 

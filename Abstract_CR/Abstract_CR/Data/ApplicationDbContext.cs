@@ -14,7 +14,7 @@ namespace Abstract_CR.Data
         {
         }
 
-        // DbSets para las tablas principales
+      
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<PassResetTokens> Tokens { get; set; }
@@ -27,11 +27,13 @@ namespace Abstract_CR.Data
         public DbSet<PuntosUsuario> PuntosUsuarios { get; set; }
         public DbSet<MenuSemanal> MenuSemanal { get; set; }
 
+        public DbSet<RestriccionAlimentaria> RestriccionesAlimentarias { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configuración de la tabla Usuarios
+            
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasKey(e => e.UsuarioID);
@@ -46,14 +48,14 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.Activo).HasDefaultValue(true);
                 entity.Property(e => e.PuntosTotales).HasDefaultValue(0);
 
-                // Relación con Rol
+                
                 entity.HasOne(e => e.Rol)
                       .WithMany(r => r.Usuarios)
                       .HasForeignKey(e => e.RolID)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Configuración de la tabla Roles
+            
             modelBuilder.Entity<Rol>(entity =>
             {
                 entity.HasKey(e => e.RolID);
@@ -61,7 +63,7 @@ namespace Abstract_CR.Data
                 entity.HasIndex(e => e.NombreRol).IsUnique();
             });
 
-            // Datos iniciales para roles
+            
             modelBuilder.Entity<Rol>().HasData(
                 new Rol { RolID = 1, NombreRol = "Administrador" },
                 new Rol { RolID = 2, NombreRol = "Cliente" },
@@ -74,8 +76,7 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.UsuarioID).IsRequired();
                 entity.Property(e => e.Token).IsRequired();
                 entity.Property(e => e.FechaCreacion).IsRequired();
-                
-                // Relación con Usuario
+
                 entity.HasOne(e => e.Usuario)
                       .WithMany()
                       .HasForeignKey(e => e.UsuarioID)
@@ -162,7 +163,26 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.IngredientesPrincipales).HasMaxLength(1000);
                 entity.Property(e => e.TipChef).HasMaxLength(500);
                 entity.Property(e => e.RutaImagen).HasMaxLength(500);
-                entity.Ignore(e => e.RowVer); // RowVer ya existe en la tabla, se ignora en el modelo
+                entity.Ignore(e => e.RowVer);
+            });
+
+          
+            modelBuilder.Entity<RestriccionAlimentaria>(entity =>
+            {
+                entity.ToTable("RestriccionesAlimentarias");
+
+                entity.HasKey(e => e.RestriccionID);
+
+                entity.Property(e => e.Descripcion)
+                      .HasColumnType("nvarchar(max)");
+
+                entity.Property(e => e.UsuarioID)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Usuario)
+                      .WithMany(u => u.RestriccionesAlimentarias)
+                      .HasForeignKey(e => e.UsuarioID)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

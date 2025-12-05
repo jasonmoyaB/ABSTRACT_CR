@@ -2,6 +2,7 @@
 using Abstract_CR.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Abstract_CR.Controllers
 {
@@ -16,25 +17,25 @@ namespace Abstract_CR.Controllers
             _logger = logger;
         }
 
+        // ===============================================================
+        // PANEL DE ADMINISTRACION
+        // ===============================================================
         public IActionResult PanelAdministracion()
         {
-            var rol = HttpContext.Session.GetString("Rol");
-            if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
-            {
-                // Si no es admin, lo sacamos
+            if (!EsAdmin())
                 return RedirectToAction("Index", "Home");
-            }
 
             return View();
         }
 
+        // ===============================================================
+        // INTERACCION CON USUARIOS
+        // ===============================================================
         [HttpGet]
         public async Task<IActionResult> Interaccion(int? usuarioId)
         {
             if (!EsAdmin())
-            {
                 return RedirectToAction("Index", "Home");
-            }
 
             var usuarios = await _interaccionHelper.ObtenerUsuariosAsync();
             if (!usuarios.Any())
@@ -44,8 +45,8 @@ namespace Abstract_CR.Controllers
             }
 
             var usuarioSeleccionId = usuarioId ?? usuarios.First().UsuarioId;
-
             var (usuarioSeleccionado, mensajes, historial) = await _interaccionHelper.ObtenerDetalleUsuarioAsync(usuarioSeleccionId);
+
             if (usuarioSeleccionado != null)
             {
                 await _interaccionHelper.MarcarMensajesComoLeidosAsync(usuarioSeleccionado.UsuarioID, paraChef: true);
@@ -74,9 +75,7 @@ namespace Abstract_CR.Controllers
             };
 
             if (usuarioSeleccionado == null)
-            {
                 TempData["Error"] = "El usuario seleccionado no existe.";
-            }
 
             return View(viewModel);
         }
@@ -86,9 +85,7 @@ namespace Abstract_CR.Controllers
         public async Task<IActionResult> EnviarMensajeAdmin(MensajeInteraccionInputModel model)
         {
             if (!EsAdmin())
-            {
                 return RedirectToAction("Index", "Home");
-            }
 
             if (!ModelState.IsValid)
             {
@@ -100,16 +97,11 @@ namespace Abstract_CR.Controllers
 
             var (success, error) = await _interaccionHelper.RegistrarMensajeAsync(model.UsuarioId, model.Contenido, enviadoPorChef: true, model.Tipo, adminId);
 
-            if (!success)
-            {
-                TempData["Error"] = error ?? "No se pudo enviar el mensaje.";
-            }
-            else
-            {
-                TempData["Mensaje"] = model.Tipo == TipoMensajeInteraccion.ResumenSemanal
+            TempData[success ? "Mensaje" : "Error"] = success
+                ? (model.Tipo == TipoMensajeInteraccion.ResumenSemanal
                     ? "Resumen semanal enviado al usuario."
-                    : "Mensaje enviado correctamente.";
-            }
+                    : "Mensaje enviado correctamente.")
+                : error ?? "No se pudo enviar el mensaje.";
 
             return RedirectToAction(nameof(Interaccion), new { usuarioId = model.UsuarioId });
         }
@@ -119,9 +111,7 @@ namespace Abstract_CR.Controllers
         public async Task<IActionResult> AsignarPuntos(AsignacionPuntosInputModel model)
         {
             if (!EsAdmin())
-            {
                 return RedirectToAction("Index", "Home");
-            }
 
             if (!ModelState.IsValid)
             {
@@ -132,18 +122,49 @@ namespace Abstract_CR.Controllers
             var adminId = HttpContext.Session.GetInt32("UsuarioID");
             var (success, error) = await _interaccionHelper.AsignarPuntosAsync(model.UsuarioId, model.Puntos, model.Motivo, adminId);
 
-            if (!success)
-            {
-                TempData["Error"] = error ?? "No se pudo asignar los puntos.";
-            }
-            else
-            {
-                TempData["Mensaje"] = "Los puntos se registraron correctamente.";
-            }
+            TempData[success ? "Mensaje" : "Error"] = success
+                ? "Los puntos se registraron correctamente."
+                : error ?? "No se pudo asignar los puntos.";
 
             return RedirectToAction(nameof(Interaccion), new { usuarioId = model.UsuarioId });
+        }// ===============================================================
+         // LISTAR RESTRICCIONES DE USUARIOS
+         // ===============================================================
+        [HttpGet]
+        public async Task<IActionResult> RestriccionesUsuarios(int? usuarioId)
+        {
+            if (!EsAdmin())
+                return RedirectToAction("Index", "Home");
+
+            // Obtenemos todos los usuarios
+            var usuarios = await _interaccionHelper.ObtenerUsuariosAsync();
+            if (!usuarios.Any())
+            {
+                TempData["Mensaje"] = "No hay usuarios registrados.";
+                return View(new RestriccionesUsuariosViewModel { Usuarios = usuarios });
+            }
+
+            // Seleccionamos el usuario por defecto si no se pasó ID
+            var idSeleccionado = usuarioId ?? usuarios.First().UsuarioId;
+
+            // Aquí se usan las restricciones desde tu contexto de EF (similar a UsuarioController)
+            var restricciones = await _interaccionHelper.ObtenerRestriccionesPorUsuarioAsync(idSeleccionado);
+
+            var viewModel = new RestriccionesUsuariosViewModel
+            {
+                Usuarios = usuarios,
+                UsuarioSeleccionadoId = idSeleccionado,
+                Restricciones = restricciones
+            };
+
+            return View(viewModel);
         }
 
+
+
+        // ===============================================================
+        // VERIFICAR ADMIN
+        // ===============================================================
         private bool EsAdmin()
         {
             var rol = HttpContext.Session.GetString("Rol");
@@ -152,9 +173,7 @@ namespace Abstract_CR.Controllers
                 TempData["Error"] = "No tienes permisos para acceder a esta sección.";
                 return false;
             }
-
             return true;
         }
-
     }
 }

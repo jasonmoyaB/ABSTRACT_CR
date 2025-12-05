@@ -1,0 +1,86 @@
+﻿@model Abstract_CR.Models.RestriccionesUsuariosViewModel
+
+@{
+    ViewData["Title"] = "Restricciones de Usuarios";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0 text-primary">Restricciones de Usuarios</h2>
+            <p class="text-muted mb-0">Gestiona las restricciones alimentarias de tus usuarios.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Panel de usuarios -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Usuarios</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Usuarios != null && Model.Usuarios.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var usuario in Model.Usuarios)
+                            {
+                                var esSeleccionado = usuario.UsuarioId == Model.UsuarioSeleccionadoId;
+                                <a class="list-group-item list-group-item-action @(esSeleccionado ? "bg-light text-primary fw-semibold" : "text-dark")"
+                                   href="@Url.Action("RestriccionesUsuarios", "Administracion", new { usuarioId = usuario.UsuarioId })">
+                                    <div class="fw-semibold">@usuario.NombreCompleto</div>
+                                    <small class="text-muted">@usuario.CorreoElectronico</small>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-3 text-muted text-center">No hay usuarios disponibles.</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de restricciones -->
+        <div class="col-lg-8">
+            @if (Model.UsuarioSeleccionadoId != 0)
+            {
+                <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-ban me-2"></i>Restricciones del usuario seleccionado</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Restricciones != null && Model.Restricciones.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var restriccion in Model.Restricciones)
+                                {
+                                    <li class="list-group-item">
+                                        @restriccion.Descripcion
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                Este usuario no tiene restricciones registradas.
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm text-center py-5">
+                    <i class="fas fa-user-circle fa-3x text-primary mb-3"></i>
+                    <p class="mb-0 text-muted">Selecciona un usuario para ver sus restricciones.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />

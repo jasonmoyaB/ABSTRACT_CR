@@ -77,6 +77,10 @@
                                    href='@Url.Action("Index", "Usuarios")'>
                                     <i class="fa-solid fa-user-gear me-2"></i> Gestión de usuarios
                                 </a>
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Administracion", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("RestriccionesUsuarios", "Administracion")'>
+                                    <i class="fa-solid fa-user-gear me-2"></i> Restricciones comidas de usuarios
+                                </a>
 
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("Index", "Suscripciones")'>
@@ -141,10 +145,10 @@
                                     <i class="fa-solid fa-comments-dollar me-2"></i> Interacción
                                 </a>
 
-                                <a class="nav-link text-start mb-1 @(currentController.Equals("Notificaciones", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                               @*  <a class="nav-link text-start mb-1 @(currentController.Equals("Notificaciones", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("Index", "Notificaciones")'>
                                     <i class="fa-regular fa-bell me-2"></i> Notificaciones
-                                </a>
+                                </a> *@
                             </nav>
                         </div>
                     </div>

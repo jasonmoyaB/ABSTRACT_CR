@@ -55,6 +55,8 @@ namespace Abstract_CR.Models
         public virtual ICollection<Suscripcion> Suscripciones { get; set; } = new List<Suscripcion>();
         public virtual ICollection<MensajeInteraccion> Mensajes { get; set; } = new List<MensajeInteraccion>();
         public virtual ICollection<PuntosUsuario> HistorialPuntos { get; set; } = new List<PuntosUsuario>();
+        public virtual ICollection<RestriccionAlimentaria> RestriccionesAlimentarias { get; set; } = new List<RestriccionAlimentaria>();
+
 
     }
 

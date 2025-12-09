@@ -96,7 +96,85 @@ namespace Abstract_CR.Controllers
             if (plan == null)
                 return NotFound();
 
+            // Obtener evaluaciones de este plan
+            var evaluaciones = ObtenerEvaluacionesPorPlan(id);
+            ViewBag.Evaluaciones = evaluaciones;
+
             return View("Detalles", plan);
+        }
+
+        private List<dynamic> ObtenerEvaluacionesPorPlan(int planId)
+        {
+            var evaluaciones = new List<dynamic>();
+
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+
+            var sql = @"
+SELECT 
+    e.EvaluacionID,
+    e.PlanID,
+    e.UsuarioID,
+    u.Nombre AS UsuarioNombre,
+    u.Apellido AS UsuarioApellido,
+    u.CorreoElectronico AS UsuarioCorreo,
+    r.NombreRol AS RolNombre,
+    e.Calificacion,
+    e.Comentario,
+    e.FechaRegistro
+FROM dbo.EvaluarPlanesNutricionales e
+LEFT JOIN dbo.Usuarios u ON e.UsuarioID = u.UsuarioID
+LEFT JOIN dbo.Roles r ON u.RolID = r.RolID
+WHERE e.PlanID = @PlanID
+ORDER BY e.FechaRegistro DESC";
+
+            using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@PlanID", planId);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var nombreUsuario = "(Usuario desconocido)";
+                var esAdmin = false;
+                
+                if (!reader.IsDBNull("UsuarioNombre") || !reader.IsDBNull("UsuarioApellido"))
+                {
+                    var n = reader.IsDBNull("UsuarioNombre") ? string.Empty : reader.GetString("UsuarioNombre").Trim();
+                    var a = reader.IsDBNull("UsuarioApellido") ? string.Empty : reader.GetString("UsuarioApellido").Trim();
+                    if (!string.IsNullOrEmpty(n) || !string.IsNullOrEmpty(a))
+                    {
+                        nombreUsuario = $"{n} {a}".Trim();
+                    }
+                    else if (!reader.IsDBNull("UsuarioCorreo"))
+                    {
+                        nombreUsuario = reader.GetString("UsuarioCorreo");
+                    }
+                }
+
+                // Verificar si es admin
+                if (!reader.IsDBNull("RolNombre"))
+                {
+                    var rolNombre = reader.GetString("RolNombre");
+                    esAdmin = string.Equals(rolNombre, "Admin", StringComparison.OrdinalIgnoreCase) 
+                            || string.Equals(rolNombre, "Administrador", StringComparison.OrdinalIgnoreCase);
+                    if (esAdmin)
+                    {
+                        nombreUsuario = "Chef (Administrador)";
+                    }
+                }
+
+                evaluaciones.Add(new
+                {
+                    EvaluacionID = reader.GetInt32("EvaluacionID"),
+                    UsuarioNombre = nombreUsuario,
+                    EsAdmin = esAdmin,
+                    Calificacion = reader.IsDBNull("Calificacion") ? (int?)null : reader.GetInt32("Calificacion"),
+                    Comentario = reader.IsDBNull("Comentario") ? null : reader.GetString("Comentario"),
+                    FechaRegistro = reader.IsDBNull("FechaRegistro") ? (DateTime?)null : reader.GetDateTime("FechaRegistro")
+                });
+            }
+
+            return evaluaciones;
         }
 
         // GET: PlanNutricional/Delete/{id}
@@ -574,6 +652,310 @@ namespace Abstract_CR.Controllers
         public IActionResult ConsultaEvaluaciones()
         {
             return View();
+        }
+
+        // GET: PlanNutricional/EvaluarPlanAdmin - Para admin evaluar planes de clientes
+        public IActionResult EvaluarPlanAdmin(int planId)
+        {
+            // Verificar que sea admin
+            var rol = HttpContext.Session.GetString("Rol");
+            if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "No tienes permisos para acceder a esta sección.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Obtener información del plan
+            string? nombrePlan = null;
+            int? usuarioIdPlan = null;
+            string? nombreUsuario = null;
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var sql = @"
+                    SELECT p.PlanID, p.NombrePlan, p.UsuarioID, u.Nombre, u.Apellido
+                    FROM dbo.PlanesNutricionales p
+                    INNER JOIN dbo.Usuarios u ON p.UsuarioID = u.UsuarioID
+                    WHERE p.PlanID = @PlanID";
+
+                using (var cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@PlanID", planId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            nombrePlan = reader["NombrePlan"]?.ToString() ?? "(Plan sin nombre)";
+                            usuarioIdPlan = reader.GetInt32("UsuarioID");
+                            var nombre = reader["Nombre"]?.ToString() ?? "";
+                            var apellido = reader["Apellido"]?.ToString() ?? "";
+                            nombreUsuario = $"{nombre} {apellido}".Trim();
+                            if (string.IsNullOrEmpty(nombreUsuario))
+                            {
+                                nombreUsuario = "Usuario";
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (nombrePlan == null)
+            {
+                TempData["Error"] = "El plan no existe.";
+                return RedirectToAction("VerTodosLosPlanes");
+            }
+
+            var vm = new EvaluacionPlanViewModel
+            {
+                TienePlanActivo = true,
+                PlanID = planId,
+                NombrePlanActual = $"{nombrePlan} - Cliente: {nombreUsuario}"
+            };
+
+            ViewBag.EsAdmin = true;
+            ViewBag.PlanId = planId;
+            ViewBag.NombreUsuario = nombreUsuario;
+
+            return View("EvaluarPlanAdmin", vm);
+        }
+
+        // POST: PlanNutricional/EvaluarPlanAdmin
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EvaluarPlanAdmin(EvaluacionPlanViewModel model)
+        {
+            // Verificar que sea admin
+            var rol = HttpContext.Session.GetString("Rol");
+            if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "No tienes permisos para realizar esta acción.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var adminId = HttpContext.Session.GetInt32("UsuarioID");
+            if (adminId == null)
+            {
+                TempData["Error"] = "Debes iniciar sesión para evaluar un plan.";
+                return RedirectToAction("VerTodosLosPlanes");
+            }
+
+            // Verificar que el plan existe
+            bool planExiste = false;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var sqlCheck = "SELECT COUNT(1) FROM dbo.PlanesNutricionales WHERE PlanID = @PlanID";
+                using (var cmd = new SqlCommand(sqlCheck, connection))
+                {
+                    cmd.Parameters.AddWithValue("@PlanID", model.PlanID ?? 0);
+                    planExiste = ((int)cmd.ExecuteScalar()) > 0;
+                }
+            }
+
+            if (!planExiste)
+            {
+                TempData["Error"] = "El plan no existe.";
+                return RedirectToAction("VerTodosLosPlanes");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.TienePlanActivo = true;
+                model.ErrorMensaje = "Por favor completa todos los campos obligatorios.";
+                ViewBag.EsAdmin = true;
+                return View("EvaluarPlanAdmin", model);
+            }
+
+            // Obtener el UsuarioID del plan para enviar la notificación
+            int? usuarioIdPlan = null;
+            string? nombrePlan = null;
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                
+                // Obtener información del plan
+                var sqlPlan = "SELECT UsuarioID, NombrePlan FROM dbo.PlanesNutricionales WHERE PlanID = @PlanID";
+                using (var cmdPlan = new SqlCommand(sqlPlan, connection))
+                {
+                    cmdPlan.Parameters.AddWithValue("@PlanID", model.PlanID ?? 0);
+                    using (var reader = cmdPlan.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            usuarioIdPlan = reader.GetInt32("UsuarioID");
+                            nombrePlan = reader["NombrePlan"]?.ToString() ?? "tu plan nutricional";
+                        }
+                    }
+                }
+
+                // Guardar la evaluación (el UsuarioID será el del admin que evalúa)
+                var sqlInsert = @"
+                    INSERT INTO dbo.EvaluarPlanesNutricionales
+                        (PlanID, UsuarioID, Calificacion, Comentario, FechaRegistro)
+                    VALUES
+                        (@PlanID, @UsuarioID, @Calificacion, @Comentario, SYSUTCDATETIME());";
+
+                using (var insertCmd = new SqlCommand(sqlInsert, connection))
+                {
+                    insertCmd.Parameters.AddWithValue("@PlanID", model.PlanID ?? (object)DBNull.Value);
+                    insertCmd.Parameters.AddWithValue("@UsuarioID", adminId.Value);
+                    insertCmd.Parameters.AddWithValue("@Calificacion", model.Calificacion ?? (object)DBNull.Value);
+                    insertCmd.Parameters.AddWithValue("@Comentario", (object?)model.Comentario ?? DBNull.Value);
+                    insertCmd.ExecuteNonQuery();
+                }
+
+                // Crear notificación para el usuario dueño del plan
+                if (usuarioIdPlan.HasValue)
+                {
+                    var mensajeNotificacion = $"El chef ha evaluado tu plan nutricional '{nombrePlan}' con {model.Calificacion} estrellas.";
+                    var sqlNotificacion = "EXEC spNotificacion_Enviar @UsuarioID, @Mensaje, @Tipo";
+                    using (var cmdNotif = new SqlCommand(sqlNotificacion, connection))
+                    {
+                        cmdNotif.Parameters.AddWithValue("@UsuarioID", usuarioIdPlan.Value);
+                        cmdNotif.Parameters.AddWithValue("@Mensaje", mensajeNotificacion);
+                        cmdNotif.Parameters.AddWithValue("@Tipo", "EvaluacionPlan");
+                        cmdNotif.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            TempData["Success"] = "Evaluación guardada exitosamente y notificación enviada al usuario.";
+            return RedirectToAction("VerTodosLosPlanes");
+        }
+
+        // GET: PlanNutricional/VerTodosLosPlanes - Para admin ver todos los planes subidos y evaluaciones
+        public IActionResult VerTodosLosPlanes()
+        {
+            // Verificar que sea admin
+            var rol = HttpContext.Session.GetString("Rol");
+            if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "No tienes permisos para acceder a esta sección.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var planes = ObtenerTodosLosPlanes();
+            var evaluaciones = ObtenerTodasLasEvaluaciones();
+            
+            ViewBag.Planes = planes;
+            ViewBag.Evaluaciones = evaluaciones;
+            
+            return View(planes);
+        }
+
+        private List<dynamic> ObtenerTodasLasEvaluaciones()
+        {
+            var evaluaciones = new List<dynamic>();
+
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+
+            var sql = @"
+SELECT 
+    e.EvaluacionID,
+    e.PlanID,
+    p.NombrePlan,
+    e.UsuarioID,
+    u.Nombre AS UsuarioNombre,
+    u.Apellido AS UsuarioApellido,
+    u.CorreoElectronico AS UsuarioCorreo,
+    e.Calificacion,
+    e.Comentario,
+    e.FechaRegistro
+FROM dbo.EvaluarPlanesNutricionales e
+LEFT JOIN dbo.PlanesNutricionales p ON e.PlanID = p.PlanID
+LEFT JOIN dbo.Usuarios u ON e.UsuarioID = u.UsuarioID
+ORDER BY e.FechaRegistro DESC";
+
+            using var command = new SqlCommand(sql, connection);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var nombreUsuario = "(Usuario desconocido)";
+                if (!reader.IsDBNull("UsuarioNombre") || !reader.IsDBNull("UsuarioApellido"))
+                {
+                    var n = reader.IsDBNull("UsuarioNombre") ? string.Empty : reader.GetString("UsuarioNombre").Trim();
+                    var a = reader.IsDBNull("UsuarioApellido") ? string.Empty : reader.GetString("UsuarioApellido").Trim();
+                    if (!string.IsNullOrEmpty(n) || !string.IsNullOrEmpty(a))
+                    {
+                        nombreUsuario = $"{n} {a}".Trim();
+                    }
+                    else if (!reader.IsDBNull("UsuarioCorreo"))
+                    {
+                        nombreUsuario = reader.GetString("UsuarioCorreo");
+                    }
+                }
+
+                evaluaciones.Add(new
+                {
+                    EvaluacionID = reader.GetInt32("EvaluacionID"),
+                    PlanID = reader.IsDBNull("PlanID") ? (int?)null : reader.GetInt32("PlanID"),
+                    NombrePlan = reader.IsDBNull("NombrePlan") ? "(Sin plan)" : reader.GetString("NombrePlan"),
+                    UsuarioID = reader.IsDBNull("UsuarioID") ? (int?)null : reader.GetInt32("UsuarioID"),
+                    UsuarioNombre = nombreUsuario,
+                    UsuarioCorreo = reader.IsDBNull("UsuarioCorreo") ? "" : reader.GetString("UsuarioCorreo"),
+                    Calificacion = reader.IsDBNull("Calificacion") ? (int?)null : reader.GetInt32("Calificacion"),
+                    Comentario = reader.IsDBNull("Comentario") ? null : reader.GetString("Comentario"),
+                    FechaRegistro = reader.IsDBNull("FechaRegistro") ? (DateTime?)null : reader.GetDateTime("FechaRegistro")
+                });
+            }
+
+            return evaluaciones;
+        }
+
+        private List<dynamic> ObtenerTodosLosPlanes()
+        {
+            var planes = new List<dynamic>();
+
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+
+            var sql = @"SELECT 
+                            p.PlanID, 
+                            p.UsuarioID, 
+                            p.NombrePlan, 
+                            p.Descripcion, 
+                            p.FechaCarga, 
+                            p.FechaVencimiento, 
+                            p.DocumentoURL,
+                            u.Nombre AS UsuarioNombre,
+                            u.Apellido AS UsuarioApellido,
+                            u.CorreoElectronico AS UsuarioCorreo
+                        FROM dbo.PlanesNutricionales p
+                        INNER JOIN dbo.Usuarios u ON p.UsuarioID = u.UsuarioID
+                        ORDER BY p.FechaCarga DESC";
+
+            using var command = new SqlCommand(sql, connection);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var nombreUsuario = $"{reader.GetString("UsuarioNombre")} {reader.GetString("UsuarioApellido")}".Trim();
+                if (string.IsNullOrEmpty(nombreUsuario))
+                {
+                    nombreUsuario = reader.GetString("UsuarioCorreo");
+                }
+
+                planes.Add(new
+                {
+                    PlanID = reader.GetInt32("PlanID"),
+                    UsuarioID = reader.GetInt32("UsuarioID"),
+                    Nombre = reader.GetString("NombrePlan"),
+                    Descripcion = reader.IsDBNull("Descripcion") ? null : reader.GetString("Descripcion"),
+                    FechaCarga = reader.GetDateTime("FechaCarga"),
+                    FechaVencimiento = reader.IsDBNull("FechaVencimiento") ? (DateTime?)null : reader.GetDateTime("FechaVencimiento"),
+                    DocumentoURL = reader.IsDBNull("DocumentoURL") ? null : reader.GetString("DocumentoURL"),
+                    TipoPlan = "PDF", // Valor por defecto ya que no existe en la BD
+                    Estado = "Activo", // Valor por defecto ya que no existe en la BD
+                    UsuarioNombre = nombreUsuario,
+                    UsuarioCorreo = reader.GetString("UsuarioCorreo")
+                });
+            }
+
+            return planes;
         }
         [HttpGet]
         public IActionResult GetEvaluaciones()

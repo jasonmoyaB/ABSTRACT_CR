@@ -157,13 +157,6 @@
                                             </li>
                                         }
 
-                                        <li>
-                                            <a class="dropdown-item text-warning"
-                                               href="@Url.Action("EvaluarPlan", "PlanNutricional", new { planId = plan.PlanID })">
-                                                <i class="fas fa-star-half-stroke me-2"></i>Evaluar este Plan
-                                            </a>
-                                        </li>
-
                                         <li><hr class="dropdown-divider"></li>
 
                                         <li>
@@ -225,23 +218,6 @@
                                     </div>
                                 </div>
 
-                                <div class="text-center">
-                                    @if (!isExpired)
-                                    {
-                                        <a href="@Url.Action("EvaluarPlan", "PlanNutricional", new { planId = plan.PlanID })"
-                                           class="btn btn-sm btn-outline-warning text-dark rounded-pill">
-                                            <i class="fas fa-star-half-stroke me-1"></i>
-                                            Evaluar este plan
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-sm btn-outline-secondary rounded-pill" disabled>
-                                            <i class="fas fa-ban me-1"></i>
-                                            Plan vencido
-                                        </button>
-                                    }
-                                </div>
                             </div>
                         </div>
                     </div>

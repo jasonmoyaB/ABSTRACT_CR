@@ -133,8 +133,8 @@
                                                 }
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-primary" onclick="verDetallesUsuario(@usuario.UsuarioID)">
-                                                    <i class="fas fa-eye"></i>
+                                                <button class="btn btn-sm btn-outline-success" onclick="extenderSuscripcion(@usuario.UsuarioID)" title="Extender suscripción una semana">
+                                                    <i class="fas fa-calendar-plus"></i> Extender
                                                 </button>
                                             </td>
                                             <td class="text-center">
@@ -263,9 +263,46 @@
             });
         }
 
-        function verDetallesUsuario(usuarioId) {
-            // En el futuro podés abrir modal con más info del usuario
-            mostrarMensaje('info', 'Funcionalidad de detalles de usuario en desarrollo');
+        function extenderSuscripcion(usuarioId) {
+            if (!confirm('¿Estás seguro de extender la suscripción de este usuario por una semana (lunes a domingo)?')) {
+                return;
+            }
+
+            // Obtener el token anti-forgery
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            // FormData para POST
+            const formData = new FormData();
+            formData.append('usuarioId', usuarioId);
+            formData.append('__RequestVerificationToken', token);
+
+            // Deshabilitar el botón mientras se procesa
+            const boton = event.target.closest('button');
+            const textoOriginal = boton.innerHTML;
+            boton.disabled = true;
+            boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+            fetch('@Url.Action("ExtenderSuscripcion", "Usuarios")', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarMensaje('success', data.message);
+                    } else {
+                        mostrarMensaje('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en la petición:', error);
+                    mostrarMensaje('error', 'Error al extender la suscripción');
+                })
+                .finally(() => {
+                    // Rehabilitar el botón
+                    boton.disabled = false;
+                    boton.innerHTML = textoOriginal;
+                });
         }
 
         function mostrarMensaje(tipo, mensaje) {

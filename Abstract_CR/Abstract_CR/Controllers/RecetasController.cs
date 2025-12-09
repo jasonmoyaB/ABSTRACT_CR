@@ -134,10 +134,62 @@ namespace Abstract_CR.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GuardarMenuSemanal(MenuSemanalViewModel model, IFormFile? Imagen)
+        public async Task<IActionResult> GuardarMenuSemanal(IFormFile? Imagen)
         {
             try
             {
+                // Construir el modelo manualmente desde el FormData
+                var model = new MenuSemanalViewModel();
+                
+                if (Request.Form.ContainsKey("MenuSemanalID") && int.TryParse(Request.Form["MenuSemanalID"], out int menuId))
+                {
+                    model.MenuSemanalID = menuId;
+                }
+                
+                model.DiaSemana = Request.Form["DiaSemana"].ToString();
+                model.NombrePlatillo = Request.Form["NombrePlatillo"].ToString();
+                model.TipChef = Request.Form["TipChef"].ToString();
+                model.Descripcion = Request.Form["Descripcion"].ToString();
+                
+                // Deserializar características
+                if (Request.Form.ContainsKey("Caracteristicas"))
+                {
+                    var caracteristicasJson = Request.Form["Caracteristicas"].ToString();
+                    try
+                    {
+                        model.Caracteristicas = System.Text.Json.JsonSerializer.Deserialize<List<string>>(caracteristicasJson) ?? new List<string>();
+                    }
+                    catch
+                    {
+                        model.Caracteristicas = new List<string>();
+                    }
+                }
+                
+                // Deserializar ingredientes
+                if (Request.Form.ContainsKey("IngredientesPrincipales"))
+                {
+                    var ingredientesJson = Request.Form["IngredientesPrincipales"].ToString();
+                    try
+                    {
+                        model.IngredientesPrincipales = System.Text.Json.JsonSerializer.Deserialize<List<string>>(ingredientesJson) ?? new List<string>();
+                    }
+                    catch
+                    {
+                        model.IngredientesPrincipales = new List<string>();
+                    }
+                }
+
+                // Validar datos requeridos
+                if (string.IsNullOrWhiteSpace(model.NombrePlatillo))
+                {
+                    return Json(new { success = false, message = "El nombre del platillo es obligatorio" });
+                }
+                
+                if (string.IsNullOrWhiteSpace(model.DiaSemana))
+                {
+                    return Json(new { success = false, message = "El día de la semana es obligatorio" });
+                }
+
                 string? rutaImagen = null;
 
                 // Guardar imagen si se proporciona
@@ -160,14 +212,27 @@ namespace Abstract_CR.Controllers
                     rutaImagen = $"/uploads/menu-semanal/{fileName}";
                 }
 
-                var guardado = _menuSemanalHelper.GuardarMenu(model, rutaImagen);
-
-                if (guardado)
+                try
                 {
-                    return Json(new { success = true, message = "Menú guardado correctamente" });
+                    var guardado = _menuSemanalHelper.GuardarMenu(model, rutaImagen);
+                    
+                    if (guardado)
+                    {
+                        return Json(new { success = true, message = "Menú guardado correctamente" });
+                    }
+                    
+                    return Json(new { success = false, message = "Error al guardar el menú. El método retornó false." });
                 }
-
-                return Json(new { success = false, message = "Error al guardar el menú" });
+                catch (Exception helperEx)
+                {
+                    // Capturar excepciones del helper
+                    var errorMessage = $"Error al guardar el menú: {helperEx.Message}";
+                    if (helperEx.InnerException != null)
+                    {
+                        errorMessage += $" | Detalles: {helperEx.InnerException.Message}";
+                    }
+                    return Json(new { success = false, message = errorMessage });
+                }
             }
             catch (Exception ex)
             {

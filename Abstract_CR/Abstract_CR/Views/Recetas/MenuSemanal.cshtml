@@ -330,8 +330,8 @@
                     // Cerrar modal
                     bootstrap.Modal.getInstance(document.getElementById('modalMenuDia')).hide();
                     
-                    // Mostrar mensaje de éxito
-                    alert('Menú guardado correctamente');
+                    // Recargar la página para mostrar los cambios actualizados
+                    location.reload();
                 } else {
                     alert('Error al guardar: ' + (data.message || 'Error desconocido'));
                 }

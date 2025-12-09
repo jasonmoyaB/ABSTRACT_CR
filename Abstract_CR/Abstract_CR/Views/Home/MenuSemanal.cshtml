@@ -71,26 +71,44 @@
                             <div class="card-header bg-@color text-white text-center">
                                 <h5 class="mb-0">@dia</h5>
                             </div>
-                            <div class="card-body text-center p-4">
+                            <div class="card-body text-center p-3">
                                 @if (menu != null && !string.IsNullOrEmpty(menu.RutaImagen))
                                 {
-                                    <img src="@menu.RutaImagen" alt="@menu.NombrePlatillo" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
+                                    <img src="@menu.RutaImagen" alt="@menu.NombrePlatillo" class="img-fluid rounded mb-3" style="height: 180px; object-fit: cover; width: 100%;" />
                                 }
                                 else
                                 {
-                                    <img src="~/assets/img/fondoReceta.jpeg" alt="Platillo" class="img-fluid rounded mb-3" style="height: 150px; object-fit: cover; width: 100%;" />
+                                    <img src="~/assets/img/fondoReceta.jpeg" alt="Platillo" class="img-fluid rounded mb-3" style="height: 180px; object-fit: cover; width: 100%;" />
                                 }
-                                <h6 class="card-title">@(menu?.NombrePlatillo ?? "Sin platillo asignado")</h6>
-                                <div class="mb-3 d-flex flex-wrap gap-2 justify-content-center">
-                                    @if (menu != null && menu.Caracteristicas != null && menu.Caracteristicas.Any())
+                                
+                                <h6 class="card-title fw-bold mb-3" style="font-size: 1rem; line-height: 1.3; min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">
+                                    @(menu?.NombrePlatillo ?? "Sin platillo asignado")
+                                </h6>
+                                
+                                <!-- Características - Solo mostrar si existen -->
+                                @if (menu != null && menu.Caracteristicas != null && menu.Caracteristicas.Any())
+                                {
+                                    var caracteristicasLimpias = menu.Caracteristicas
+                                        .Where(c => !string.IsNullOrWhiteSpace(c) && c != "[]" && c != "null" && !c.StartsWith("[") && !c.EndsWith("]"))
+                                        .Select(c => c.Trim().Replace("\"", "").Replace("[", "").Replace("]", ""))
+                                        .Where(c => !string.IsNullOrWhiteSpace(c))
+                                        .Take(2)
+                                        .ToList();
+                                    
+                                    @if (caracteristicasLimpias.Any())
                                     {
-                                        @foreach (var caracteristica in menu.Caracteristicas.Take(2))
-                                        {
-                                            <span class="badge bg-success px-3 py-2" style="font-size: 0.85rem; display: inline-block;">@caracteristica</span>
-                                        }
+                                        <div class="mb-3 d-flex flex-wrap gap-1 justify-content-center">
+                                            @foreach (var caracteristica in caracteristicasLimpias)
+                                            {
+                                                <span class="badge bg-success text-white" style="font-size: 0.7rem; padding: 0.35rem 0.6rem; border-radius: 6px;">
+                                                    <i class="fas fa-check-circle me-1" style="font-size: 0.6rem;"></i>@caracteristica
+                                                </span>
+                                            }
+                                        </div>
                                     }
-                                </div>
-                                <div class="d-flex justify-content-center gap-2">
+                                }
+                                
+                                <div class="d-flex justify-content-center gap-2 mt-auto">
                                     <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); calificarPlato('@dia.ToLower()', 5);">
                                         <i class="fas fa-thumbs-up"></i> Me gustó
                                     </button>
@@ -139,20 +157,22 @@
                         
                         <!-- Características -->
                         <div class="mb-4">
-                            <h6 class="text-muted mb-2">
+                            <h6 class="text-muted mb-3 fw-bold">
                                 <i class="fas fa-tags me-2 text-primary"></i>Características Principales
                             </h6>
-                            <div id="etiquetasPlato" class="d-flex flex-wrap gap-2"></div>
+                            <div id="etiquetasPlato" class="d-flex flex-wrap gap-2">
+                                <span class="text-muted">Cargando...</span>
+                            </div>
                         </div>
 
                         <!-- Ingredientes -->
                         <div class="mb-4">
-                            <h6 class="text-muted mb-3">
+                            <h6 class="text-muted mb-3 fw-bold">
                                 <i class="fas fa-list-ul me-2 text-primary"></i>Ingredientes Principales
                             </h6>
-                            <ul id="ingredientesLista" class="list-unstyled ps-3">
+                            <div id="ingredientesLista" class="row g-2">
                                 <!-- Se llenará dinámicamente -->
-                            </ul>
+                            </div>
                         </div>
 
                         <!-- Tip del Chef -->
@@ -429,19 +449,41 @@
         border-color: #b3d9ff;
     }
 
+    #etiquetasPlato {
+        min-height: 40px;
+    }
+
     #etiquetasPlato .badge {
         margin-right: 0.5rem !important;
         margin-bottom: 0.5rem !important;
         white-space: nowrap;
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
     }
 
-    #ingredientesLista li {
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f0f0f0;
+    #ingredientesLista {
+        min-height: 50px;
     }
 
-    #ingredientesLista li:last-child {
-        border-bottom: none;
+    .ingrediente-item {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .ingrediente-item:hover {
+        background: #e9ecef;
+        border-color: #007bff;
+        transform: translateX(4px);
+    }
+
+    .ingrediente-item i {
+        color: #28a745;
+        margin-right: 0.5rem;
     }
 </style>
 
@@ -453,16 +495,25 @@
     }
     @foreach (var menu in menusData)
     {
-        var caracteristicasList = menu.Caracteristicas ?? new List<string>();
-        var ingredientesList = menu.IngredientesPrincipales ?? new List<string>();
+        // Limpiar y normalizar las listas
+        var caracteristicasList = (menu.Caracteristicas ?? new List<string>())
+            .Where(c => !string.IsNullOrWhiteSpace(c) && c != "[]" && c != "null")
+            .Select(c => c.Trim())
+            .ToList();
+        
+        var ingredientesList = (menu.IngredientesPrincipales ?? new List<string>())
+            .Where(i => !string.IsNullOrWhiteSpace(i) && i != "[]" && i != "null")
+            .Select(i => i.Trim())
+            .ToList();
+        
         <text>
         platosData['@menu.DiaSemana'] = {
-            nombre: '@Html.Raw(menu.NombrePlatillo.Replace("'", "\\'").Replace("\"", "&quot;").Replace("\r", "").Replace("\n", " "))',
-            imagen: '@(menu.RutaImagen ?? "/assets/img/fondoReceta.jpeg")',
+            nombre: @Html.Raw(Json.Serialize(menu.NombrePlatillo ?? "Sin platillo asignado")),
+            imagen: @Html.Raw(Json.Serialize(menu.RutaImagen ?? "/assets/img/fondoReceta.jpeg")),
             etiquetas: @Html.Raw(Json.Serialize(caracteristicasList)),
             ingredientes: @Html.Raw(Json.Serialize(ingredientesList)),
-            tipChef: '@Html.Raw((menu.TipChef ?? "").Replace("'", "\\'").Replace("\"", "&quot;").Replace("\r", "").Replace("\n", " "))',
-            descripcion: '@Html.Raw((menu.Descripcion ?? "").Replace("'", "\\'").Replace("\"", "&quot;").Replace("\r", "").Replace("\n", " "))'
+            tipChef: @Html.Raw(Json.Serialize(menu.TipChef ?? "")),
+            descripcion: @Html.Raw(Json.Serialize(menu.Descripcion ?? ""))
         };
         </text>
     }
@@ -484,79 +535,101 @@
                 document.getElementById('nombrePlato').textContent = plato.nombre || 'Sin platillo asignado';
                 document.getElementById('imagenPlato').src = plato.imagen || '/assets/img/fondoReceta.jpeg';
 
-                // Mostrar etiquetas
-                let caracteristicas = plato.etiquetas;
-                console.log('Características para', dia, ':', caracteristicas, 'Tipo:', typeof caracteristicas);
-                
-                // Asegurar que sea un array
-                if (!Array.isArray(caracteristicas)) {
-                    if (typeof caracteristicas === 'string') {
+                // Función helper para parsear arrays de forma robusta
+                function parsearArray(datos) {
+                    if (Array.isArray(datos)) {
+                        // Si ya es un array, aplanarlo y limpiar
+                        let resultado = [];
+                        datos.forEach(function(item) {
+                            if (typeof item === 'string') {
+                                // Si el item es un string, intentar parsearlo
+                                try {
+                                    const parsed = JSON.parse(item);
+                                    if (Array.isArray(parsed)) {
+                                        resultado = resultado.concat(parsed);
+                                    } else {
+                                        resultado.push(item);
+                                    }
+                                } catch (e) {
+                                    // Si no es JSON, agregarlo directamente
+                                    if (item.trim() !== '') {
+                                        resultado.push(item.trim());
+                                    }
+                                }
+                            } else {
+                                resultado.push(item);
+                            }
+                        });
+                        return resultado.filter(item => item && item.toString().trim() !== '' && item.toString() !== '[]' && item.toString() !== 'null');
+                    } else if (typeof datos === 'string') {
                         try {
-                            caracteristicas = JSON.parse(caracteristicas);
+                            const parsed = JSON.parse(datos);
+                            if (Array.isArray(parsed)) {
+                                return parsearArray(parsed); // Recursivo para manejar arrays anidados
+                            }
+                            return [datos];
                         } catch (e) {
-                            caracteristicas = caracteristicas.split(',').map(c => c.trim()).filter(c => c);
+                            // Si no es JSON válido, intentar separar por comas
+                            return datos.split(',').map(c => c.trim()).filter(c => c && c !== '[]' && c !== 'null');
                         }
-                    } else {
-                        caracteristicas = [];
                     }
+                    return [];
                 }
                 
-                const etiquetasContainer = document.getElementById('etiquetasPlato');
-                etiquetasContainer.innerHTML = ''; // Limpiar primero
+                // Mostrar características
+                let caracteristicas = parsearArray(plato.etiquetas || []);
+                console.log('Características parseadas para', dia, ':', caracteristicas);
                 
-                if (Array.isArray(caracteristicas) && caracteristicas.length > 0) {
-                    caracteristicas.forEach(function(etiqueta) {
-                        if (etiqueta && etiqueta.trim && etiqueta.trim() !== '') {
+                const etiquetasContainer = document.getElementById('etiquetasPlato');
+                etiquetasContainer.innerHTML = '';
+                
+                if (caracteristicas.length > 0) {
+                    caracteristicas.forEach(function(car) {
+                        const texto = car.toString().trim();
+                        if (texto && texto !== '[]' && texto !== 'null' && texto.length > 0) {
                             const badge = document.createElement('span');
-                            badge.className = 'badge bg-success px-3 py-2 mb-2 me-2';
-                            badge.style.cssText = 'font-size: 0.85rem; display: inline-block;';
-                            badge.textContent = etiqueta.trim();
+                            badge.className = 'badge bg-success text-white mb-2 me-2';
+                            badge.style.cssText = 'font-size: 0.875rem; padding: 0.5rem 0.75rem; border-radius: 8px; display: inline-block; font-weight: 500;';
+                            badge.innerHTML = '<i class="fas fa-check-circle me-1"></i>' + texto;
                             etiquetasContainer.appendChild(badge);
                         }
                     });
                     
                     if (etiquetasContainer.children.length === 0) {
-                        etiquetasContainer.innerHTML = '<span class="text-muted">Sin características especificadas</span>';
+                        etiquetasContainer.innerHTML = '<p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Sin características especificadas</p>';
                     }
                 } else {
-                    etiquetasContainer.innerHTML = '<span class="text-muted">Sin características especificadas</span>';
+                    etiquetasContainer.innerHTML = '<p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Sin características especificadas</p>';
                 }
 
                 // Mostrar ingredientes
-                let ingredientes = plato.ingredientes;
-                console.log('Ingredientes para', dia, ':', ingredientes, 'Tipo:', typeof ingredientes);
-                
-                // Asegurar que sea un array
-                if (!Array.isArray(ingredientes)) {
-                    if (typeof ingredientes === 'string') {
-                        try {
-                            ingredientes = JSON.parse(ingredientes);
-                        } catch (e) {
-                            ingredientes = ingredientes.split(',').map(i => i.trim()).filter(i => i);
-                        }
-                    } else {
-                        ingredientes = [];
-                    }
-                }
+                let ingredientes = parsearArray(plato.ingredientes || []);
+                console.log('Ingredientes parseados para', dia, ':', ingredientes);
                 
                 const ingredientesContainer = document.getElementById('ingredientesLista');
-                ingredientesContainer.innerHTML = ''; // Limpiar primero
+                ingredientesContainer.innerHTML = '';
                 
-                if (Array.isArray(ingredientes) && ingredientes.length > 0) {
-                    ingredientes.forEach(function(ingrediente) {
-                        if (ingrediente && ingrediente.trim && ingrediente.trim() !== '') {
-                            const li = document.createElement('li');
-                            li.className = 'mb-2';
-                            li.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i><span class="text-dark">' + ingrediente.trim() + '</span>';
-                            ingredientesContainer.appendChild(li);
+                if (ingredientes.length > 0) {
+                    ingredientes.forEach(function(ing) {
+                        const texto = ing.toString().trim();
+                        if (texto && texto !== '[]' && texto !== 'null' && texto.length > 0) {
+                            const div = document.createElement('div');
+                            div.className = 'col-md-6 mb-2';
+                            div.innerHTML = `
+                                <div class="ingrediente-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span class="text-dark fw-semibold">${texto}</span>
+                                </div>
+                            `;
+                            ingredientesContainer.appendChild(div);
                         }
                     });
                     
                     if (ingredientesContainer.children.length === 0) {
-                        ingredientesContainer.innerHTML = '<li class="text-muted"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</li>';
+                        ingredientesContainer.innerHTML = '<div class="col-12"><p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</p></div>';
                     }
                 } else {
-                    ingredientesContainer.innerHTML = '<li class="text-muted"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</li>';
+                    ingredientesContainer.innerHTML = '<div class="col-12"><p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</p></div>';
                 }
 
                 // Mostrar tip del chef
@@ -573,8 +646,8 @@
             } else {
                 document.getElementById('nombrePlato').textContent = 'Sin platillo asignado';
                 document.getElementById('imagenPlato').src = '/assets/img/fondoReceta.jpeg';
-                document.getElementById('etiquetasPlato').innerHTML = '';
-                document.getElementById('ingredientesLista').innerHTML = '<li class="text-muted"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</li>';
+                document.getElementById('etiquetasPlato').innerHTML = '<p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Sin características especificadas</p>';
+                document.getElementById('ingredientesLista').innerHTML = '<div class="col-12"><p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Sin ingredientes especificados</p></div>';
                 document.getElementById('tipChef').textContent = 'Sin tip disponible';
                 document.getElementById('descripcionContainer').style.display = 'none';
             }

@@ -15,8 +15,7 @@
     bool openComunicacion = currentController.Equals("Administracion", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("Interaccion", StringComparison.OrdinalIgnoreCase)
                             || currentController.Equals("Notificaciones", StringComparison.OrdinalIgnoreCase);
 
-    bool openHerramientas = currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase)
-                            || (currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("ConsultaEvaluaciones", StringComparison.OrdinalIgnoreCase));
+    bool openHerramientas = currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -177,9 +176,9 @@
 
                         <div class="collapse @(openHerramientas ? "show" : "") mt-2" id="collapseHerramientas">
                             <nav class="nav nav-pills flex-column ms-2">
-                                <a class="nav-link text-start mb-1 @(currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
-                                   href='@Url.Action("ConsultaEvaluaciones", "PlanNutricional")'>
-                                    <i class="fa-solid fa-clipboard-check me-2"></i> Evaluaciones (planes)
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("VerTodosLosPlanes", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("VerTodosLosPlanes", "PlanNutricional")'>
+                                    <i class="fa-solid fa-clipboard-list me-2"></i> Planes Nutricionales
                                 </a>
                             </nav>
                         </div>
@@ -315,9 +314,6 @@
 
                             <hr class="border-secondary my-2" />
 
-                            <a class="nav-link text-light" href='@Url.Action("ConsultaEvaluaciones", "PlanNutricional")'>
-                                <i class="fa-solid fa-clipboard-check me-2"></i> Evaluaciones (planes)
-                            </a>
 
                             <hr class="border-secondary my-2" />
 

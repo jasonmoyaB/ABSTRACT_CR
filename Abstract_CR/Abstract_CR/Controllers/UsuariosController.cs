@@ -217,5 +217,104 @@ namespace Abstract_CR.Controllers
                 return Json(new { error = "Error al cargar estadísticas" });
             }
         }
+
+        // POST: Usuarios/ExtenderSuscripcion - Extender suscripción por una semana (lunes a domingo)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExtenderSuscripcion(int usuarioId)
+        {
+            try
+            {
+                _logger.LogInformation($"ExtenderSuscripcion llamado - UsuarioID: {usuarioId}");
+
+                // Verificar que el usuario sea administrador
+                var rol = HttpContext.Session.GetString("Rol");
+                if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogWarning($"Usuario no autorizado. Rol: {rol}");
+                    return Json(new { success = false, message = "No autorizado" });
+                }
+
+                // Verificar que el usuario existe
+                var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+                if (usuario == null)
+                {
+                    _logger.LogWarning($"Usuario {usuarioId} no encontrado");
+                    return Json(new { success = false, message = "Usuario no encontrado" });
+                }
+
+                // Función helper para calcular el próximo lunes desde una fecha
+                DateTime CalcularProximoLunes(DateTime desdeFecha)
+                {
+                    var diasHastaLunes = ((int)DayOfWeek.Monday - (int)desdeFecha.DayOfWeek + 7) % 7;
+                    if (diasHastaLunes == 0) diasHastaLunes = 7; // Si ya es lunes, tomar el próximo
+                    return desdeFecha.AddDays(diasHastaLunes);
+                }
+
+                // Buscar suscripción existente
+                var suscripcion = await _context.Suscripciones
+                    .FirstOrDefaultAsync(s => s.UsuarioID == usuarioId);
+
+                DateTime proximoLunes;
+                DateTime domingoSiguiente;
+
+                if (suscripcion != null && suscripcion.FechaFin.HasValue)
+                {
+                    // Si ya tiene suscripción, calcular desde la fecha fin
+                    var fechaFinActual = suscripcion.FechaFin.Value.Date;
+                    
+                    // Si la fecha fin ya pasó, calcular desde hoy
+                    // Si no, calcular desde el día siguiente a la fecha fin
+                    var fechaBase = fechaFinActual < DateTime.Now.Date 
+                        ? DateTime.Now.Date 
+                        : fechaFinActual.AddDays(1);
+                    
+                    // Calcular el próximo lunes desde la fecha base
+                    proximoLunes = CalcularProximoLunes(fechaBase);
+                    domingoSiguiente = proximoLunes.AddDays(6); // Domingo de esa semana
+
+                    // Actualizar la suscripción existente
+                    suscripcion.FechaFin = domingoSiguiente;
+                    suscripcion.Estado = "Activa";
+                    suscripcion.ProximaFacturacion = domingoSiguiente;
+                    
+                    // Si la fecha de inicio es anterior, mantenerla (no actualizar)
+                    // Solo actualizamos la fecha fin
+
+                    _logger.LogInformation($"Suscripción extendida: {proximoLunes:dd/MM/yyyy} - {domingoSiguiente:dd/MM/yyyy}");
+                }
+                else
+                {
+                    // Crear nueva suscripción desde el próximo lunes
+                    proximoLunes = CalcularProximoLunes(DateTime.Now.Date);
+                    domingoSiguiente = proximoLunes.AddDays(6); // Domingo de esa semana
+
+                    suscripcion = new Suscripcion
+                    {
+                        UsuarioID = usuarioId,
+                        Estado = "Activa",
+                        FechaInicio = proximoLunes,
+                        FechaFin = domingoSiguiente,
+                        UltimaFacturacion = DateTime.Now.Date,
+                        ProximaFacturacion = domingoSiguiente
+                    };
+
+                    _context.Suscripciones.Add(suscripcion);
+                    _logger.LogInformation($"Nueva suscripción creada: {proximoLunes:dd/MM/yyyy} - {domingoSiguiente:dd/MM/yyyy}");
+                }
+
+                await _context.SaveChangesAsync();
+
+                var mensaje = $"Suscripción extendida para {usuario.NombreCompleto} hasta el {suscripcion.FechaFin.Value:dd/MM/yyyy}";
+                _logger.LogInformation($"Admin extendió suscripción para usuario {usuario.NombreCompleto}");
+
+                return Json(new { success = true, message = mensaje });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al extender suscripción");
+                return Json(new { success = false, message = $"Error al extender la suscripción: {ex.Message}" });
+            }
+        }
     }
 }

@@ -3,87 +3,175 @@
 @{
     ViewData["Title"] = "Editar Perfil";
 }
+<link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .form-control-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control-modern:focus {
+        border-color: #007FFF;
+        box-shadow: 0 0 0 0.2rem rgba(0, 127, 255, 0.25);
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-save:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-cancel {
+        border: 2px solid #007FFF;
+        color: #007FFF;
+        background: white;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        color: #007FFF;
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-right: 0.75rem;
+    }
+</style>
 
-<section class="page-section">
+<section class="page-section" style="padding: 2rem 0;">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="position-relative mb-5">
-                    @{
-                        var enlaceAtras = Model.RolID == 1
-                        ? Url.Action("PanelAdministracion", "Administracion")
-                        : Url.Action("Perfil", "Usuario");
-                    }
-
-                    <a href="@enlaceAtras" class="btn position-absolute"
-                       style="left: 0; top: 0; background-color: #3c2313; border-color: #3c2313; color: #f6e1c5;"
-                       title="Volver">
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
-
-                    <div class="text-center">
-                        <h2 class="section-heading">
-                            <span class="section-heading-upper" style="color:#e6a756;">Editar</span>
-                            <span class="section-heading-lower" style="color:#f6e1c5;">Mi Perfil</span>
-                        </h2>
-                    </div>
+        <!-- Header -->
+        <div class="profile-section text-center mb-4 position-relative">
+            <a href="@(Model.RolID == 1 ? Url.Action("PanelAdministracion", "Administracion") : Url.Action("Perfil", "Usuario"))" 
+               class="btn position-absolute" 
+               style="left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 12px; padding: 0.5rem 1rem;"
+               title="Volver al Perfil">
+                <i class="fas fa-arrow-left me-2"></i> Volver
+            </a>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="icon-circle">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <div class="text-start ms-3">
+                    <h3 class="mb-0 fw-bold">Editar Mi Perfil</h3>
+                    <p class="mb-0 opacity-75">Actualiza tu información personal</p>
                 </div>
             </div>
         </div>
 
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Mensaje"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header" style="background-color: #3c2313; color: #f6e1c5;">
-                        <h5 class="mb-0">
+                <div class="modern-card bg-white">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0 fw-bold text-dark">
                             <i class="fas fa-user-edit me-2"></i> Información Personal
                         </h5>
                     </div>
 
-                    <div class="card-body" style="background-color: #fefaf6;">
+                    <div class="card-body p-4">
                         <form asp-action="EditarPerfil" asp-controller="Usuario" method="post">
                             @Html.AntiForgeryToken()
                             <input asp-for="UsuarioID" type="hidden" />
 
-                            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div asp-validation-summary="All" class="alert alert-danger rounded-3 mb-4"></div>
+                            }
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Nombre" class="form-label fw-bold text-dark"></label>
-                                    <input asp-for="Nombre" class="form-control border-0 shadow-sm" placeholder="Nombre"
-                                           style="background-color:#fffbea; border-radius:10px;" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Nombre" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
+                                    <input asp-for="Nombre" class="form-control form-control-modern" placeholder="Nombre" />
                                     <span asp-validation-for="Nombre" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Apellido" class="form-label fw-bold text-dark"></label>
-                                    <input asp-for="Apellido" class="form-control border-0 shadow-sm" placeholder="Apellido"
-                                           style="background-color:#fffbea; border-radius:10px;" />
+                                <div class="col-md-6">
+                                    <label asp-for="Apellido" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
+                                    <input asp-for="Apellido" class="form-control form-control-modern" placeholder="Apellido" />
                                     <span asp-validation-for="Apellido" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="CorreoElectronico" class="form-label fw-bold text-dark"></label>
-                                    <input asp-for="CorreoElectronico" class="form-control border-0 shadow-sm" type="email"
-                                           placeholder="Correo electrónico" style="background-color:#fffbea; border-radius:10px;" />
+                                <div class="col-md-6">
+                                    <label asp-for="CorreoElectronico" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
+                                    <input asp-for="CorreoElectronico" class="form-control form-control-modern" type="email"
+                                           placeholder="Correo electrónico" />
                                     <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="ContrasenaHash" class="form-label fw-bold text-dark">
+                                <div class="col-md-6">
+                                    <label asp-for="ContrasenaHash" class="form-label fw-bold text-secondary small text-uppercase mb-2">
                                         Nueva contraseña (opcional)
                                     </label>
-                                    <input asp-for="ContrasenaHash" class="form-control border-0 shadow-sm" type="password"
-                                           placeholder="Contraseña" style="background-color:#fffbea; border-radius:10px;" />
+                                    <input asp-for="ContrasenaHash" class="form-control form-control-modern" type="password"
+                                           placeholder="Contraseña" />
                                     <span asp-validation-for="ContrasenaHash" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold text-dark">Estado de la cuenta</label>
-                                    <div class="form-check form-switch">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Estado de la cuenta</label>
+                                    <div class="form-check form-switch mt-2">
                                         <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch"
-                                               style="background-color:#e6a756; border-color:#3c2313;" />
-                                        <label class="form-check-label" for="activoSwitch" style="color:#3c2313;">
+                                               style="width: 3rem; height: 1.5rem;" />
+                                        <label class="form-check-label fw-semibold" for="activoSwitch">
                                             @(Model.Activo ? "Activa" : "Inactiva")
                                         </label>
                                     </div>
@@ -91,13 +179,15 @@
                             </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-lg me-3 shadow-sm"
-                                        style="background-color:#3c2313; color:#f6e1c5; border:none;">
+                                <button type="submit" class="btn btn-save me-3">
                                     <i class="fas fa-save me-2"></i> Guardar Cambios
                                 </button>
-                                <a href="@Url.Action("Perfil", "Usuario")"
-                                   class="btn btn-lg shadow-sm"
-                                   style="border:1px solid #3c2313; color:#3c2313; background-color:#fefaf6;">
+                                @{
+                                    var enlaceAtras = Model.RolID == 1
+                                    ? Url.Action("PanelAdministracion", "Administracion")
+                                    : Url.Action("Perfil", "Usuario");
+                                }
+                                <a href="@enlaceAtras" class="btn btn-cancel">
                                     <i class="fas fa-times me-2"></i> Cancelar
                                 </a>
                             </div>

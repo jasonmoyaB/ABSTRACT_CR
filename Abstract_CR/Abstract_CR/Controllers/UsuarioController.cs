@@ -354,5 +354,123 @@ namespace Abstract_CR.Controllers
                 }
             };
         }
+
+        // ===============================================================
+        //            COMPROBANTES DE PAGO
+        // ===============================================================
+        [HttpGet]
+        public IActionResult SubirComprobante()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                TempData["Error"] = "Debes iniciar sesión para subir un comprobante.";
+                return RedirectToAction("Login", "Autenticacion");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubirComprobante(ComprobantePago model, IFormFile? archivo)
+        {
+            try
+            {
+                var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+                if (usuarioId == null)
+                {
+                    TempData["Error"] = "Debes iniciar sesión para subir un comprobante.";
+                    return RedirectToAction("Login", "Autenticacion");
+                }
+
+                if (archivo == null || archivo.Length == 0)
+                {
+                    ModelState.AddModelError("Archivo", "Debes seleccionar un archivo.");
+                    return View(model);
+                }
+
+                // Validar archivo
+                var validacion = ValidarArchivoComprobante(archivo);
+                if (!validacion.esValido)
+                {
+                    ModelState.AddModelError("Archivo", validacion.mensaje);
+                    return View(model);
+                }
+
+                // Guardar archivo
+                var rutaArchivo = await GuardarArchivoComprobante(archivo, usuarioId.Value);
+
+                // Guardar en base de datos
+                var comprobante = new ComprobantePago
+                {
+                    UsuarioID = usuarioId.Value,
+                    RutaArchivo = rutaArchivo,
+                    NombreArchivoOriginal = archivo.FileName,
+                    TipoArchivo = Path.GetExtension(archivo.FileName).ToLowerInvariant(),
+                    FechaSubida = DateTime.Now,
+                    Observaciones = model.Observaciones,
+                    Estado = "Pendiente"
+                };
+
+                _context.ComprobantesPago.Add(comprobante);
+                await _context.SaveChangesAsync();
+
+                TempData["Mensaje"] = "Comprobante de pago subido correctamente. Será revisado por el administrador.";
+                return RedirectToAction("Perfil");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al subir comprobante de pago");
+                ModelState.AddModelError("", "Error al guardar el comprobante: " + ex.Message);
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerComprobantes()
+        {
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioID");
+            if (usuarioId == null)
+            {
+                TempData["Error"] = "Debes iniciar sesión para ver tus comprobantes.";
+                return RedirectToAction("Login", "Autenticacion");
+            }
+
+            var comprobantes = await _context.ComprobantesPago
+                .Where(c => c.UsuarioID == usuarioId.Value)
+                .OrderByDescending(c => c.FechaSubida)
+                .ToListAsync();
+
+            return View(comprobantes);
+        }
+
+        private (bool esValido, string mensaje) ValidarArchivoComprobante(IFormFile archivo)
+        {
+            if (archivo.Length > 10 * 1024 * 1024)
+                return (false, "El archivo es demasiado grande. El tamaño máximo es 10MB.");
+
+            var extensionesPermitidas = new[] { ".pdf", ".jpg", ".jpeg", ".png", ".gif" };
+            var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+
+            if (!extensionesPermitidas.Contains(extension))
+                return (false, "Formato de archivo no válido. Solo se permiten archivos PDF, JPG, JPEG, PNG y GIF.");
+
+            return (true, string.Empty);
+        }
+
+        private async Task<string> GuardarArchivoComprobante(IFormFile archivo, int usuarioId)
+        {
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "comprobantes");
+            Directory.CreateDirectory(uploadsPath);
+
+            var fileName = $"{usuarioId}_{Guid.NewGuid()}{Path.GetExtension(archivo.FileName)}";
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            using var fileStream = new FileStream(filePath, FileMode.Create);
+            await archivo.CopyToAsync(fileStream);
+
+            return $"/uploads/comprobantes/{fileName}";
+        }
     }
 }

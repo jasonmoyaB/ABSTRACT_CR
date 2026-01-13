@@ -1,0 +1,226 @@
+@model List<Abstract_CR.Models.ComprobantePago>
+@{
+    ViewData["Title"] = "Mis Comprobantes de Pago";
+}
+
+<link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .comprobante-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        background: white;
+        border-left: 4px solid #007FFF;
+    }
+    .comprobante-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+        border-left-color: #00BFFF;
+    }
+    .badge-estado {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    .badge-pendiente {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: #fff;
+    }
+    .badge-aprobado {
+        background-color: #28a745;
+        color: #fff;
+    }
+    .badge-rechazado {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-outline-primary {
+        border: 2px solid #007FFF;
+        color: #007FFF;
+        background: white;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        color: #007FFF;
+        border-color: #007FFF;
+    }
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        background: white;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-secondary:hover {
+        background: #f8f9fa;
+        color: #6c757d;
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-right: 0.75rem;
+    }
+</style>
+
+<section class="page-section" style="padding: 2rem 0;">
+    <div class="container">
+        <!-- Botón Volver -->
+        <div class="mb-3">
+            <a href="@Url.Action("Perfil", "Usuario")" class="text-decoration-none" style="color: #007FFF;">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Perfil
+            </a>
+        </div>
+
+        <!-- Header -->
+        <div class="profile-section mb-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div class="icon-circle">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="text-start">
+                        <h3 class="mb-0 fw-bold">Mis Comprobantes de Pago</h3>
+                        <p class="mb-0 opacity-75">Historial de comprobantes subidos</p>
+                    </div>
+                </div>
+                <a href="@Url.Action("SubirComprobante", "Usuario")" class="btn btn-light rounded-pill px-4">
+                    <i class="fas fa-plus me-2"></i>Subir Nuevo Comprobante
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+
+                @if (TempData["Mensaje"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        @TempData["Mensaje"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (Model != null && Model.Any())
+                {
+                    <div class="row">
+                        @foreach (var comprobante in Model)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="comprobante-card p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1 text-dark">
+                                                <i class="fas fa-file-@(comprobante.TipoArchivo == ".pdf" ? "pdf text-danger" : "image text-primary") me-2"></i>
+                                                @(comprobante.NombreArchivoOriginal ?? "Comprobante")
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                @comprobante.FechaSubida.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        </div>
+                                        <span class="badge badge-estado badge-@(comprobante.Estado.ToLower()) ms-2">
+                                            @comprobante.Estado
+                                        </span>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(comprobante.Observaciones))
+                                    {
+                                        <div class="mb-3 p-2" style="background: #f8f9fa; border-radius: 8px;">
+                                            <small class="text-muted">
+                                                <i class="fas fa-comment me-1"></i>
+                                                @comprobante.Observaciones
+                                            </small>
+                                        </div>
+                                    }
+
+                                    <div class="d-flex gap-2">
+                                        <a href="@comprobante.RutaArchivo" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
+                                            <i class="fas fa-eye me-1"></i>Ver
+                                        </a>
+                                        <a href="@comprobante.RutaArchivo" download class="btn btn-sm btn-outline-secondary flex-fill">
+                                            <i class="fas fa-download me-1"></i>Descargar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="modern-card bg-white p-5">
+                        <div class="text-center py-5">
+                            <div class="icon-circle mx-auto mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-inbox fa-3x"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">No hay comprobantes subidos</h5>
+                            <p class="text-muted mb-4">Aún no has subido ningún comprobante de pago</p>
+                            <a href="@Url.Action("SubirComprobante", "Usuario")" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Subir Primer Comprobante
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+

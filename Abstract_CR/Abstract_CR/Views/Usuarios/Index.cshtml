@@ -105,6 +105,7 @@
                                     <th>Fecha Registro</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
+                                    <th class="text-center">Comprobantes</th>
                                     <th class="text-center">Permitir Descarga</th>
                                 </tr>
                             </thead>
@@ -138,6 +139,11 @@
                                                 </button>
                                             </td>
                                             <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-info" onclick="verComprobantes(@usuario.UsuarioID, '@usuario.Nombre @usuario.Apellido')" title="Ver comprobantes de pago">
+                                                    <i class="fas fa-receipt"></i> Ver
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
                                                 <div class="form-check form-switch d-inline-block">
                                                     <input class="form-check-input toggle-usuario-descarga"
                                                            type="checkbox"
@@ -151,7 +157,7 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">No hay usuarios registrados</td>
+                                        <td colspan="8" class="text-center text-muted">No hay usuarios registrados</td>
                                     </tr>
                                 }
                             </tbody>
@@ -174,8 +180,8 @@
                 lengthMenu: [5, 10, 25, 50],
                 order: [], // sin orden inicial forzado
                 columnDefs: [
-                    // "Acciones" (col 5) y "Permitir Descarga" (col 6) no ordenables
-                    { orderable: false, targets: [5, 6] }
+                    // "Acciones" (col 5), "Comprobantes" (col 6) y "Permitir Descarga" (col 7) no ordenables
+                    { orderable: false, targets: [5, 6, 7] }
                 ],
                 language: {
                     decimal: ",",
@@ -338,5 +344,191 @@
                 }
             }, 5000);
         }
+
+        function verComprobantes(usuarioId, nombreUsuario) {
+            // Limpiar el contenido del modal
+            $('#comprobantesModalBody').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando comprobantes...</p></div>');
+            
+            // Actualizar el título del modal
+            $('#comprobantesModalLabel').text('Comprobantes de Pago - ' + nombreUsuario);
+            
+            // Mostrar el modal
+            $('#comprobantesModal').modal('show');
+            
+            // Obtener el token anti-forgery
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            
+            // Cargar los comprobantes del usuario
+            fetch('@Url.Action("ObtenerComprobantesUsuario", "Usuarios")?usuarioId=' + usuarioId, {
+                method: 'GET',
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarComprobantes(data.comprobantes, nombreUsuario);
+                } else {
+                    $('#comprobantesModalBody').html(`
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${data.message || 'No se pudieron cargar los comprobantes'}
+                        </div>
+                    `);
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar comprobantes:', error);
+                $('#comprobantesModalBody').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Error al cargar los comprobantes. Por favor, intenta nuevamente.
+                    </div>
+                `);
+            });
+        }
+
+        function mostrarComprobantes(comprobantes, nombreUsuario) {
+            if (!comprobantes || comprobantes.length === 0) {
+                $('#comprobantesModalBody').html(`
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3 opacity-50"></i>
+                        <h5 class="text-muted">No hay comprobantes</h5>
+                        <p class="text-muted">${nombreUsuario} aún no ha subido ningún comprobante de pago.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '<div class="table-responsive"><table class="table table-hover align-middle">';
+            html += '<thead class="table-light"><tr>';
+            html += '<th>Archivo</th><th>Fecha de Subida</th><th>Estado</th><th>Observaciones</th><th>Acciones</th>';
+            html += '</tr></thead><tbody>';
+
+            comprobantes.forEach(function(comp) {
+                const estadoBadge = comp.estado === 'Aprobado' 
+                    ? '<span class="badge bg-success">Aprobado</span>'
+                    : comp.estado === 'Rechazado'
+                    ? '<span class="badge bg-danger">Rechazado</span>'
+                    : '<span class="badge" style="background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%); color: white;">Pendiente</span>';
+
+                const iconoArchivo = comp.tipoArchivo === '.pdf'
+                    ? '<i class="fas fa-file-pdf text-danger"></i>'
+                    : '<i class="fas fa-file-image text-primary"></i>';
+
+                // Botones de cambio de estado (solo si está pendiente)
+                let botonesEstado = '';
+                if (comp.estado === 'Pendiente') {
+                    botonesEstado = `
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-success" onclick="cambiarEstadoComprobante(${comp.comprobanteID}, 'Aprobado', ${comp.usuarioId})" title="Aprobar">
+                                <i class="fas fa-check"></i> Aprobar
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="cambiarEstadoComprobante(${comp.comprobanteID}, 'Rechazado', ${comp.usuarioId})" title="Rechazar">
+                                <i class="fas fa-times"></i> Rechazar
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    botonesEstado = `<small class="text-muted">Estado finalizado</small>`;
+                }
+
+                html += '<tr id="comprobante-row-' + comp.comprobanteID + '">';
+                html += `<td>${iconoArchivo} <strong>${comp.nombreArchivoOriginal || 'Comprobante'}</strong></td>`;
+                html += `<td>${new Date(comp.fechaSubida).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>`;
+                html += `<td id="estado-badge-${comp.comprobanteID}">${estadoBadge}</td>`;
+                html += `<td><small class="text-muted">${comp.observaciones || 'Sin observaciones'}</small></td>`;
+                html += `<td>
+                    <div class="d-flex gap-2 align-items-center">
+                        <a href="${comp.rutaArchivo}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="${comp.rutaArchivo}" download class="btn btn-sm btn-outline-secondary" title="Descargar">
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <div class="ms-2">
+                            ${botonesEstado}
+                        </div>
+                    </div>
+                </td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            $('#comprobantesModalBody').html(html);
+        }
+
+        function cambiarEstadoComprobante(comprobanteId, nuevoEstado, usuarioId) {
+            if (!confirm(`¿Estás seguro de cambiar el estado del comprobante a "${nuevoEstado}"?`)) {
+                return;
+            }
+
+            // Obtener el token anti-forgery
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            
+            // FormData para POST
+            const formData = new FormData();
+            formData.append('comprobanteId', comprobanteId);
+            formData.append('nuevoEstado', nuevoEstado);
+            formData.append('__RequestVerificationToken', token);
+
+            // Deshabilitar botones mientras se procesa
+            const botones = event.target.closest('.btn-group').querySelectorAll('button');
+            botones.forEach(btn => btn.disabled = true);
+
+            fetch('@Url.Action("CambiarEstadoComprobante", "Usuarios")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('success', data.message);
+                    
+                    // Actualizar el badge de estado
+                    const estadoBadge = nuevoEstado === 'Aprobado' 
+                        ? '<span class="badge bg-success">Aprobado</span>'
+                        : '<span class="badge bg-danger">Rechazado</span>';
+                    
+                    $('#estado-badge-' + comprobanteId).html(estadoBadge);
+                    
+                    // Remover los botones de acción
+                    const row = $('#comprobante-row-' + comprobanteId);
+                    const accionesCell = row.find('td:last-child');
+                    accionesCell.find('.btn-group').replaceWith('<small class="text-muted">Estado finalizado</small>');
+                } else {
+                    mostrarMensaje('error', data.message);
+                    // Rehabilitar botones
+                    botones.forEach(btn => btn.disabled = false);
+                }
+            })
+            .catch(error => {
+                console.error('Error al cambiar estado:', error);
+                mostrarMensaje('error', 'Error al cambiar el estado del comprobante');
+                // Rehabilitar botones
+                botones.forEach(btn => btn.disabled = false);
+            });
+        }
     </script>
+
+    <!-- Modal de Comprobantes -->
+    <div class="modal fade" id="comprobantesModal" tabindex="-1" aria-labelledby="comprobantesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="comprobantesModalLabel">
+                        <i class="fas fa-receipt me-2"></i>Comprobantes de Pago
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="comprobantesModalBody">
+                    <!-- El contenido se carga dinámicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

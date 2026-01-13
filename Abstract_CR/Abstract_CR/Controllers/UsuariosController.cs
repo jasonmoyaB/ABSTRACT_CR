@@ -316,5 +316,102 @@ namespace Abstract_CR.Controllers
                 return Json(new { success = false, message = $"Error al extender la suscripción: {ex.Message}" });
             }
         }
+
+        // GET: Usuarios/ObtenerComprobantesUsuario - Obtener comprobantes de pago de un usuario
+        [HttpGet]
+        public async Task<IActionResult> ObtenerComprobantesUsuario(int usuarioId)
+        {
+            try
+            {
+                // Verificar que el usuario sea administrador
+                var rol = HttpContext.Session.GetString("Rol");
+                if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "No autorizado" });
+                }
+
+                // Verificar que el usuario existe
+                var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+                if (usuario == null)
+                {
+                    return Json(new { success = false, message = "Usuario no encontrado" });
+                }
+
+                // Obtener los comprobantes del usuario
+                var comprobantes = await _context.ComprobantesPago
+                    .Where(c => c.UsuarioID == usuarioId)
+                    .OrderByDescending(c => c.FechaSubida)
+                    .Select(c => new
+                    {
+                        comprobanteID = c.ComprobanteID,
+                        usuarioId = c.UsuarioID,
+                        nombreArchivoOriginal = c.NombreArchivoOriginal,
+                        tipoArchivo = c.TipoArchivo,
+                        rutaArchivo = c.RutaArchivo,
+                        fechaSubida = c.FechaSubida,
+                        estado = c.Estado,
+                        observaciones = c.Observaciones
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, comprobantes = comprobantes });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener comprobantes del usuario");
+                return Json(new { success = false, message = $"Error al cargar los comprobantes: {ex.Message}" });
+            }
+        }
+
+        // POST: Usuarios/CambiarEstadoComprobante - Cambiar el estado de un comprobante
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarEstadoComprobante(int comprobanteId, string nuevoEstado)
+        {
+            try
+            {
+                // Verificar que el usuario sea administrador
+                var rol = HttpContext.Session.GetString("Rol");
+                if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "No autorizado" });
+                }
+
+                // Validar el nuevo estado
+                if (string.IsNullOrEmpty(nuevoEstado) || 
+                    (nuevoEstado != "Aprobado" && nuevoEstado != "Rechazado" && nuevoEstado != "Pendiente"))
+                {
+                    return Json(new { success = false, message = "Estado no válido" });
+                }
+
+                // Buscar el comprobante
+                var comprobante = await _context.ComprobantesPago
+                    .Include(c => c.Usuario)
+                    .FirstOrDefaultAsync(c => c.ComprobanteID == comprobanteId);
+
+                if (comprobante == null)
+                {
+                    return Json(new { success = false, message = "Comprobante no encontrado" });
+                }
+
+                // Guardar el estado anterior
+                var estadoAnterior = comprobante.Estado;
+                
+                // Actualizar el estado
+                comprobante.Estado = nuevoEstado;
+                
+                await _context.SaveChangesAsync();
+
+                var mensaje = $"Estado del comprobante cambiado de '{estadoAnterior}' a '{nuevoEstado}' para {comprobante.Usuario?.NombreCompleto ?? "el usuario"}";
+                _logger.LogInformation($"Admin cambió estado del comprobante {comprobanteId} de {estadoAnterior} a {nuevoEstado}");
+
+                return Json(new { success = true, message = mensaje });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cambiar estado del comprobante");
+                return Json(new { success = false, message = $"Error al cambiar el estado: {ex.Message}" });
+            }
+        }
     }
 }

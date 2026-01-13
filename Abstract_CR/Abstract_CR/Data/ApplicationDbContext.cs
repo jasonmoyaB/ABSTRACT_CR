@@ -29,6 +29,8 @@ namespace Abstract_CR.Data
 
         public DbSet<RestriccionAlimentaria> RestriccionesAlimentarias { get; set; }
 
+        public DbSet<ComprobantePago> ComprobantesPago { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -181,6 +183,42 @@ namespace Abstract_CR.Data
 
                 entity.HasOne(e => e.Usuario)
                       .WithMany(u => u.RestriccionesAlimentarias)
+                      .HasForeignKey(e => e.UsuarioID)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ComprobantePago>(entity =>
+            {
+                entity.ToTable("ComprobantesPago");
+
+                entity.HasKey(e => e.ComprobanteID);
+
+                entity.Property(e => e.UsuarioID)
+                      .IsRequired();
+
+                entity.Property(e => e.RutaArchivo)
+                      .IsRequired()
+                      .HasMaxLength(500);
+
+                entity.Property(e => e.NombreArchivoOriginal)
+                      .HasMaxLength(255);
+
+                entity.Property(e => e.TipoArchivo)
+                      .HasMaxLength(50);
+
+                entity.Property(e => e.FechaSubida)
+                      .IsRequired()
+                      .HasDefaultValueSql("sysutcdatetime()");
+
+                entity.Property(e => e.Observaciones)
+                      .HasMaxLength(500);
+
+                entity.Property(e => e.Estado)
+                      .HasMaxLength(50)
+                      .HasDefaultValue("Pendiente");
+
+                entity.HasOne(e => e.Usuario)
+                      .WithMany()
                       .HasForeignKey(e => e.UsuarioID)
                       .OnDelete(DeleteBehavior.Cascade);
             });

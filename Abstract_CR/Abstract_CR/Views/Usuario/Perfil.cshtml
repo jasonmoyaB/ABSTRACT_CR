@@ -183,6 +183,34 @@
         color: white;
         margin-right: 0.75rem;
     }
+    .btn-comprobante-primary {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-comprobante-primary:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-comprobante-outline {
+        border: 2px solid #007FFF;
+        color: #007FFF;
+        background: white;
+        border-radius: 20px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-comprobante-outline:hover {
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        color: #007FFF;
+        border-color: #007FFF;
+    }
 </style>
 
 <section class="page-section" style="padding: 2rem 0;">
@@ -522,7 +550,7 @@
                                     </div>
                                 </div>
 
-                                <div>
+                                <div class="mb-4">
                                     <label class="form-label fw-bold text-secondary small text-uppercase mb-3">Últimas asignaciones</label>
                                     @if (Model.HistorialPuntos.Any())
                                     {
@@ -554,6 +582,23 @@
                                             <p class="mb-0">Aún no tienes puntos asignados</p>
                                         </div>
                                     }
+                                </div>
+
+                                <div class="border-top pt-4">
+                                    <h6 class="fw-bold text-secondary small text-uppercase mb-3">
+                                        <i class="fas fa-receipt me-2"></i>Comprobantes de Pago
+                                    </h6>
+                                    <p class="text-muted small mb-3">
+                                        Sube el comprobante de tu pago para que sea revisado por el administrador
+                                    </p>
+                                    <div class="d-flex gap-2">
+                                        <a href="@Url.Action("SubirComprobante", "Usuario")" class="btn btn-comprobante-primary flex-fill">
+                                            <i class="fas fa-upload me-2"></i>Subir Comprobante
+                                        </a>
+                                        <a href="@Url.Action("VerComprobantes", "Usuario")" class="btn btn-comprobante-outline">
+                                            <i class="fas fa-list me-2"></i>Ver Mis Comprobantes
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -8,8 +8,8 @@
     bool openUsuarios = currentController.Equals("Usuarios", StringComparison.OrdinalIgnoreCase)
                         || currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase);
 
-    bool openContenido = currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase)
-                         || currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase)
+    bool openContenido = // currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase) || // Comentado: no funcional
+                         currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase)
                          || currentController.Equals("Ebooks", StringComparison.OrdinalIgnoreCase);
 
     bool openComunicacion = currentController.Equals("Administracion", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("Interaccion", StringComparison.OrdinalIgnoreCase)
@@ -105,10 +105,12 @@
 
                         <div class="collapse @(openContenido ? "show" : "") mt-2" id="collapseContenido">
                             <nav class="nav nav-pills flex-column ms-2">
+                                @* Comentado: Planes no funcional
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("Index", "Planes")'>
                                     <i class="fa-solid fa-clipboard-list me-2"></i> Planes
                                 </a>
+                                *@
 
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("MenuSemanal", "Recetas")'>
@@ -270,10 +272,12 @@
                             </button>
                             <div class="collapse @(openContenido ? "show" : "") mt-2" id="mCollapseContenido">
                                 <nav class="nav nav-pills flex-column ms-2">
+                                    @* Comentado: Planes no funcional
                                     <a class="nav-link text-light mb-1 @(currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                                        href='@Url.Action("Index", "Planes")'>
                                         <i class="fa-solid fa-clipboard-list me-2"></i> Planes
                                     </a>
+                                    *@
                                     <a class="nav-link text-light mb-1 @(currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                                        href='@Url.Action("MenuSemanal", "Recetas")'>
                                         <i class="fa-solid fa-calendar-week me-2"></i> Menú semanal

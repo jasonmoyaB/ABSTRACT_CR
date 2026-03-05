@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Abstract_CR.Models
 {
-    public class PlanNutricional
+    public class PlanNutricional : IValidatableObject
     {
         [Key] // <-- Indica a EF Core que esta es la clave primaria
         public int PlanID { get; set; }

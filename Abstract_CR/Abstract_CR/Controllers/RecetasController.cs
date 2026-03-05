@@ -3,6 +3,7 @@ using Abstract_CR.Models;
 using Abstract_CR.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
+using System.Web;
 
 namespace Abstract_CR.Controllers
 {
@@ -91,13 +92,18 @@ namespace Abstract_CR.Controllers
                 var html = "<ul class='list-unstyled'>";
                 foreach (var item in comentarios)
                 {
-                    html += $@"<li class='d-flex justify-content-between align-items-center mb-2'>
-                        <span>
-                            <i class='fas fa-comment-dots text-secondary me-2'></i>{item.Comentario}
+                    // Codificar el comentario para prevenir XSS
+                    var comentarioCodificado = HttpUtility.HtmlEncode(item.Comentario);
+                    
+                    html += $@"<li class='d-flex justify-content-between align-items-start mb-3 p-2 bg-light rounded'>
+                        <span class='flex-grow-1'>
+                            <i class='fas fa-comment-dots text-secondary me-2'></i>
+                            <span class='text-dark'>{comentarioCodificado}</span>
                         </span>
-                        <button class='btn btn-sm btn-danger btn-eliminar-comentario' 
+                        <button class='btn btn-sm btn-outline-danger ms-2' 
                                 data-comentario-id='{item.ComentarioID}'
-                                onclick='event.stopPropagation(); eliminarComentario({item.ComentarioID});'>
+                                onclick='event.stopPropagation(); eliminarComentario({item.ComentarioID});'
+                                title='Eliminar comentario'>
                             <i class='fas fa-trash'></i>
                         </button>
                     </li>";
@@ -107,7 +113,9 @@ namespace Abstract_CR.Controllers
             }
             else
             {
-                return "<span>Sin comentarios</span>";
+                return @"<p class='text-muted text-center py-3'>
+                            <i class='fas fa-comment-slash me-2'></i>Sin comentarios aún
+                        </p>";
             }
         }
 
@@ -259,7 +267,6 @@ namespace Abstract_CR.Controllers
             try
             {
                 var recetaAsignada = _recetasHelper.AsignarRecetas(recetaId, personaId, diaSemana);
-                //var recetaAsignada = true;
                 if (recetaAsignada)
                 {
                     var usuarioAsignado = _userHelper.GetUsuarioPorId(personaId);

@@ -315,6 +315,102 @@
 
     <script>
         $(document).ready(function () {
+            // Variables para las fechas
+            const fechaInicioInput = $('#FechaInicio');
+            const fechaVencimientoInput = $('#FechaVencimiento');
+            const btnGuardar = $('#btnGuardar');
+
+            // Función para obtener la fecha de hoy en formato YYYY-MM-DD
+            function obtenerFechaHoy() {
+                const hoy = new Date();
+                return hoy.toISOString().split('T')[0];
+            }
+
+            // Establecer la fecha de carga como la fecha de hoy (FechaCarga se establece en el modelo, pero podemos usarla como referencia)
+            const fechaCarga = obtenerFechaHoy();
+
+            // Validación en tiempo real de fechas
+            function validarFechas() {
+                const fechaInicio = fechaInicioInput.val();
+                const fechaVencimiento = fechaVencimientoInput.val();
+                let errores = [];
+
+                // Limpiar errores previos
+                fechaVencimientoInput.removeClass('is-invalid');
+                fechaVencimientoInput.next('.text-danger').text('');
+
+                // Validar si fecha de vencimiento existe
+                if (fechaVencimiento) {
+                    // Validar vs fecha de carga (hoy)
+                    if (fechaVencimiento < fechaCarga) {
+                        errores.push(`La fecha de vencimiento no puede ser anterior a la fecha de carga (${new Date(fechaCarga).toLocaleDateString('es-ES')})`);
+                    }
+
+                    // Validar vs fecha de inicio
+                    if (fechaInicio && fechaVencimiento <= fechaInicio) {
+                        errores.push('La fecha de vencimiento debe ser posterior a la fecha de inicio');
+                    }
+
+                    // Validar que no sea más de 1 año en el futuro
+                    const unAñoDespues = new Date();
+                    unAñoDespues.setFullYear(unAñoDespues.getFullYear() + 1);
+                    const unAñoDespuesStr = unAñoDespues.toISOString().split('T')[0];
+                    
+                    if (fechaVencimiento > unAñoDespuesStr) {
+                        errores.push('La fecha de vencimiento no puede ser mayor a 1 año en el futuro');
+                    }
+                }
+
+                // Mostrar errores
+                if (errores.length > 0) {
+                    fechaVencimientoInput.addClass('is-invalid');
+                    fechaVencimientoInput.siblings('.text-danger').text(errores[0]);
+                    btnGuardar.prop('disabled', true);
+                    return false;
+                } else {
+                    fechaVencimientoInput.removeClass('is-invalid');
+                    btnGuardar.prop('disabled', false);
+                    return true;
+                }
+            }
+
+            // Eventos para validación en tiempo real
+            fechaInicioInput.on('change blur', validarFechas);
+            fechaVencimientoInput.on('change blur', validarFechas);
+
+            // Validación antes de enviar el formulario
+            $('#formCargarPlan').on('submit', function (e) {
+                if (!validarFechas()) {
+                    e.preventDefault();
+                    
+                    // Mostrar alerta
+                    const alertHtml = `
+                        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error de validación:</strong> Por favor, corrige los errores en las fechas antes de continuar.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                    
+                    // Insertar alerta antes del formulario
+                    $('.card-body').prepend(alertHtml);
+                    
+                    // Scroll a la alerta
+                    $('html, body').animate({
+                        scrollTop: $('.alert-danger').offset().top - 100
+                    }, 500);
+
+                    // Auto-cerrar después de 5 segundos
+                    setTimeout(function () {
+                        $('.alert-danger').fadeOut('slow', function() {
+                            $(this).remove();
+                        });
+                    }, 5000);
+
+                    return false;
+                }
+            });
+
             // Preview del archivo seleccionado
             $('#archivo').on('change', function (e) {
                 const file = e.target.files[0];
@@ -358,67 +454,10 @@
                 }
             });
 
-            // Validación de fechas
-            $('#FechaInicio, #FechaVencimiento').on('change', function () {
-                const fechaInicio = $('#FechaInicio').val();
-                const fechaVencimiento = $('#FechaVencimiento').val();
-
-                if (fechaInicio && fechaVencimiento) {
-                    const inicio = new Date(fechaInicio);
-                    const vencimiento = new Date(fechaVencimiento);
-
-                    if (vencimiento <= inicio) {
-                        alert('La fecha de vencimiento debe ser posterior a la fecha de inicio.');
-                        $('#FechaVencimiento').val('');
-                    }
-                }
-            });
-
-            // Validación del formulario antes de envío
-            $('#formCargarPlan').on('submit', function (e) {
-                const nombre = $('#Nombre').val().trim();
-                const tipoPlan = $('#TipoPlan').val();
-
-                if (!nombre) {
-                    e.preventDefault();
-                    alert('El nombre del plan es obligatorio.');
-                    $('#Nombre').focus();
-                    return false;
-                }
-
-                if (!tipoPlan) {
-                    e.preventDefault();
-                    alert('Debe seleccionar un tipo de plan.');
-                    $('#TipoPlan').focus();
-                    return false;
-                }
-
-                // Mostrar indicador de carga
-                const btnGuardar = $('#btnGuardar');
-                btnGuardar.prop('disabled', true)
-                    .html('<i class="fas fa-spinner fa-spin me-2"></i>Guardando...');
-            });
-
-            // Contador de caracteres para descripción
-            $('#Descripcion').on('input', function () {
-                const maxLength = 1000;
-                const currentLength = $(this).val().length;
-                const remaining = maxLength - currentLength;
-
-                let textClass = 'text-muted';
-                if (remaining < 100) textClass = 'text-warning';
-                if (remaining < 50) textClass = 'text-danger';
-
-                // Remover contadores anteriores
-                $(this).siblings('.form-text').not(':first').remove();
-                
-                // Agregar nuevo contador
-                if (currentLength > 0) {
-                    $(this).next('.text-danger').after(
-                        `<div class="form-text ${textClass}">Caracteres restantes: ${remaining}</div>`
-                    );
-                }
-            });
+            // Auto-cerrar alertas de TempData después de 5 segundos
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
         });
     </script>
 }

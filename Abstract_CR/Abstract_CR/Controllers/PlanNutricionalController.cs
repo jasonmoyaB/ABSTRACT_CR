@@ -61,6 +61,28 @@ namespace Abstract_CR.Controllers
                     return RedirectToAction("Login", "Autenticacion");
                 }
 
+                // Validación adicional de fechas en el servidor
+                if (plan.FechaVencimiento.HasValue)
+                {
+                    var fechaCargaSinHora = plan.FechaCarga.Date;
+                    var fechaVencimientoSinHora = plan.FechaVencimiento.Value.Date;
+
+                    if (fechaVencimientoSinHora < fechaCargaSinHora)
+                    {
+                        ModelState.AddModelError("FechaVencimiento", 
+                            $"La fecha de vencimiento ({fechaVencimientoSinHora:dd/MM/yyyy}) no puede ser anterior a la fecha de carga ({fechaCargaSinHora:dd/MM/yyyy}).");
+                    }
+                }
+
+                if (plan.FechaVencimiento.HasValue && plan.FechaInicio.HasValue)
+                {
+                    if (plan.FechaVencimiento.Value.Date <= plan.FechaInicio.Value.Date)
+                    {
+                        ModelState.AddModelError("FechaVencimiento", 
+                            "La fecha de vencimiento debe ser posterior a la fecha de inicio.");
+                    }
+                }
+
                 if (!ModelState.IsValid)
                     return View(plan);
 

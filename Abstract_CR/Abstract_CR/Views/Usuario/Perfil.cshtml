@@ -400,21 +400,34 @@
                             </div>
 
                             <div class="card-footer bg-white border-top p-4">
-                                <form asp-action="EnviarMensajeChef" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="UsuarioId" value="@Model.Usuario.UsuarioID" />
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold text-secondary small mb-2">Escribe tu mensaje</label>
-                                        <textarea class="form-control rounded-3" name="Contenido" rows="3" 
-                                                  placeholder="Comparte tus dudas, logros o comentarios..." 
-                                                  style="border: 2px solid #e9ecef; resize: none;"></textarea>
+                                @if (!Model.Usuario.Activo)
+                                {
+                                    <!-- Mostrar mensaje cuando la cuenta está inactiva -->
+                                    <div class="alert alert-warning rounded-3 mb-0" role="alert">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Cuenta Inactiva:</strong> No puedes enviar mensajes porque tu cuenta está inactiva. Contacta a un administrador para reactivarla.
                                     </div>
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-send-message rounded-pill px-4 fw-semibold">
-                                            <i class="fas fa-paper-plane me-2"></i>Enviar Mensaje
-                                        </button>
-                                    </div>
-                                </form>
+                                }
+                                else
+                                {
+                                    <!-- Formulario solo visible si el usuario está activo -->
+                                    <form asp-action="EnviarMensajeChef" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="UsuarioId" value="@Model.Usuario.UsuarioID" />
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary small mb-2">Escribe tu mensaje</label>
+                                            <textarea class="form-control rounded-3" name="Contenido" rows="3" 
+                                                      placeholder="Comparte tus dudas, logros o comentarios..." 
+                                                      style="border: 2px solid #e9ecef; resize: none;"
+                                                      required></textarea>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-send-message rounded-pill px-4 fw-semibold">
+                                                <i class="fas fa-paper-plane me-2"></i>Enviar Mensaje
+                                            </button>
+                                        </div>
+                                    </form>
+                                }
                             </div>
                         </div>
                     </div>

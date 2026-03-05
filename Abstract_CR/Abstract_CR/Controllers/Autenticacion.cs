@@ -64,15 +64,19 @@ namespace Abstract_CR.Controllers
                     rolUsuario = await _context.Roles.FindAsync(usuario.RolID.Value);
                 }
 
-                // Sesión
                 HttpContext.Session.SetInt32("UsuarioID", usuario.UsuarioID);
                 HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
                 HttpContext.Session.SetString("Rol", rolUsuario?.NombreRol ?? "Cliente");
                 HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
 
+                if (usuario.RolID.HasValue)
+                {
+                    HttpContext.Session.SetInt32("RolID", usuario.RolID.Value);
+                }
+
                 _logger.LogInformation($"Usuario {usuario.CorreoElectronico} inició sesión");
 
-                // 🔀 Redirección según rol
+                // Redirección según rol
                 if (string.Equals(rolUsuario?.NombreRol, "Admin", StringComparison.OrdinalIgnoreCase) || 
                     string.Equals(rolUsuario?.NombreRol, "Administrador", StringComparison.OrdinalIgnoreCase))
                 {

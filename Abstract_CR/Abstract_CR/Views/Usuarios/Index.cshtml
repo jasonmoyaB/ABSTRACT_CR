@@ -124,17 +124,24 @@
                                             </td>
                                             <td>@(usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "N/A")</td>
                                             <td>
-                                                @if (usuario.Activo)
-                                                {
-                                                    <span class="badge bg-success">Activo</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-danger">Inactivo</span>
-                                                }
+                                                <span class="badge @(usuario.Activo ? "bg-success" : "bg-danger")" id="estado-badge-@usuario.UsuarioID">
+                                                    @(usuario.Activo ? "Activo" : "Inactivo")
+                                                </span>
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-success" onclick="extenderSuscripcion(@usuario.UsuarioID)" title="Extender suscripción una semana">
+                                                <!-- ✅ Botón para Activar/Desactivar -->
+                                                <button class="btn btn-sm @(usuario.Activo ? "btn-outline-danger" : "btn-outline-success") me-1" 
+                                                        id="btn-toggle-@usuario.UsuarioID"
+                                                        onclick="toggleEstadoUsuario(@usuario.UsuarioID, @(usuario.Activo ? "false" : "true"), '@usuario.Nombre @usuario.Apellido')" 
+                                                        title="@(usuario.Activo ? "Desactivar cuenta" : "Activar cuenta")">
+                                                    <i class="fas @(usuario.Activo ? "fa-ban" : "fa-check-circle")"></i>
+                                                    @(usuario.Activo ? "Desactivar" : "Activar")
+                                                </button>
+                                                
+                                                <!-- Botón Extender Suscripción -->
+                                                <button class="btn btn-sm btn-outline-success" 
+                                                        onclick="extenderSuscripcion(@usuario.UsuarioID)" 
+                                                        title="Extender suscripción una semana">
                                                     <i class="fas fa-calendar-plus"></i> Extender
                                                 </button>
                                             </td>
@@ -206,6 +213,77 @@
             // Configurar los toggles de descarga después de inicializar la tabla
             configurarTogglesDescarga();
         });
+
+        // ✅ NUEVA FUNCIÓN: Toggle Estado de Usuario (Activar/Desactivar)
+        function toggleEstadoUsuario(usuarioId, activar, nombreUsuario) {
+            const accion = activar ? 'activar' : 'desactivar';
+            
+            if (!confirm(`¿Estás seguro de que deseas ${accion} la cuenta de "${nombreUsuario}"?`)) {
+                return;
+            }
+
+            // Obtener el token anti-forgery
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            
+            // Deshabilitar el botón mientras se procesa
+            const boton = document.getElementById(`btn-toggle-${usuarioId}`);
+            const htmlOriginal = boton.innerHTML;
+            boton.disabled = true;
+            boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+            // FormData para POST
+            const formData = new FormData();
+            formData.append('usuarioId', usuarioId);
+            formData.append('activar', activar);
+            formData.append('__RequestVerificationToken', token);
+
+            fetch('@Url.Action("CambiarEstadoUsuario", "Usuario")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('success', data.message);
+                    
+                    // Actualizar el badge de estado
+                    const badge = document.getElementById(`estado-badge-${usuarioId}`);
+                    if (data.nuevoEstado) {
+                        badge.className = 'badge bg-success';
+                        badge.textContent = 'Activo';
+                        
+                        // Actualizar el botón
+                        boton.className = 'btn btn-sm btn-outline-danger me-1';
+                        boton.title = 'Desactivar cuenta';
+                        boton.innerHTML = '<i class="fas fa-ban"></i> Desactivar';
+                        boton.setAttribute('onclick', `toggleEstadoUsuario(${usuarioId}, false, '${nombreUsuario}')`);
+                    } else {
+                        badge.className = 'badge bg-danger';
+                        badge.textContent = 'Inactivo';
+                        
+                        // Actualizar el botón
+                        boton.className = 'btn btn-sm btn-outline-success me-1';
+                        boton.title = 'Activar cuenta';
+                        boton.innerHTML = '<i class="fas fa-check-circle"></i> Activar';
+                        boton.setAttribute('onclick', `toggleEstadoUsuario(${usuarioId}, true, '${nombreUsuario}')`);
+                    }
+                    
+                    // Actualizar los contadores de las tarjetas superiores
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarMensaje('error', data.message);
+                    boton.innerHTML = htmlOriginal;
+                }
+            })
+            .catch(error => {
+                console.error('Error al cambiar estado:', error);
+                mostrarMensaje('error', 'Error al cambiar el estado del usuario');
+                boton.innerHTML = htmlOriginal;
+            })
+            .finally(() => {
+                boton.disabled = false;
+            });
+        }
 
         // Separamos la lógica de toggles en una función para poder llamarla
         function configurarTogglesDescarga() {

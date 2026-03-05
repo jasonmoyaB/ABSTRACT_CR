@@ -21,6 +21,7 @@ namespace Abstract_CR.Models
         public string CorreoElectronico { get; set; } = string.Empty;
         public int PuntosTotales { get; set; }
         public DateTime? UltimaActividad { get; set; }
+        public bool Activo { get; set; }
     }
 
     public class MensajeInteraccionInputModel

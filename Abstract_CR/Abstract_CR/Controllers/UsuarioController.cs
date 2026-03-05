@@ -84,6 +84,10 @@ namespace Abstract_CR.Controllers
             if (usuario == null)
                 return NotFound();
 
+            // Guardar el estado anterior de la cuenta
+            var estabaActivo = usuario.Activo;
+            var estaDesactivando = estabaActivo && !model.Activo;
+
             usuario.Nombre = model.Nombre;
             usuario.Apellido = model.Apellido;
             usuario.CorreoElectronico = model.CorreoElectronico;
@@ -102,8 +106,24 @@ namespace Abstract_CR.Controllers
             _context.Entry(usuario).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
+            // Si el usuario desactivó su cuenta, cerrar sesión inmediatamente
+            if (estaDesactivando)
+            {
+                _logger.LogInformation("Usuario {UsuarioID} desactivó su cuenta y se cerrará la sesión", usuario.UsuarioID);
+                
+                // Limpiar la sesión
+                HttpContext.Session.Clear();
+                
+                // Mensaje para mostrar en login
+                TempData["Info"] = "Tu cuenta ha sido desactivada exitosamente. Contacta a un administrador si deseas reactivarla.";
+                
+                return RedirectToAction("Login", "Autenticacion");
+            }
+
+            // Actualizar la sesión con los nuevos datos
             HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
             HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
+            
             TempData["Mensaje"] = "Perfil actualizado correctamente";
 
             return RedirectToAction("Perfil");
@@ -123,6 +143,19 @@ namespace Abstract_CR.Controllers
             if (usuarioId.Value != model.UsuarioId)
             {
                 TempData["Error"] = "No tienes permisos para enviar mensajes por otro usuario.";
+                return RedirectToAction(nameof(Perfil));
+            }
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == usuarioId.Value);
+            if (usuario == null)
+            {
+                TempData["Error"] = "Usuario no encontrado.";
+                return RedirectToAction(nameof(Perfil));
+            }
+
+            if (!usuario.Activo)
+            {
+                TempData["Error"] = "No puedes enviar mensajes porque tu cuenta está inactiva. Contacta a un administrador.";
                 return RedirectToAction(nameof(Perfil));
             }
 
@@ -471,6 +504,53 @@ namespace Abstract_CR.Controllers
             await archivo.CopyToAsync(fileStream);
 
             return $"/uploads/comprobantes/{fileName}";
+        }
+
+        // ===============================================================
+        //          GESTIÓN DE USUARIOS (ADMIN/CHEF)
+        // ===============================================================
+        [HttpGet]
+        public async Task<IActionResult> GestionUsuarios()
+        {
+            var rolId = HttpContext.Session.GetInt32("RolID");
+            if (rolId == null || rolId != 1) // Solo administradores/chefs
+            {
+                TempData["Error"] = "No tienes permisos para acceder a esta sección.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var usuarios = await _interaccionHelper.ObtenerUsuariosAsync();
+            return View(usuarios);
+        }
+
+        // ===============================================================
+        //          ACTIVAR/DESACTIVAR USUARIO
+        // ===============================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarEstadoUsuario(int usuarioId, bool activar)
+        {
+            var rolId = HttpContext.Session.GetInt32("RolID");
+            if (rolId == null || rolId != 1) // Solo administradores
+            {
+                return Json(new { success = false, message = "No tienes permisos." });
+            }
+
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+            if (usuario == null)
+            {
+                return Json(new { success = false, message = "Usuario no encontrado." });
+            }
+
+            usuario.Activo = activar;
+            _context.Entry(usuario).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Json(new { 
+                success = true, 
+                message = $"Usuario {(activar ? "activado" : "desactivado")} correctamente.",
+                nuevoEstado = activar 
+            });
         }
     }
 }

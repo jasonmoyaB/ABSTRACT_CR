@@ -4,6 +4,11 @@ using Abstract_CR.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using System.Web;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Abstract_CR.Controllers
 {
@@ -15,8 +20,26 @@ namespace Abstract_CR.Controllers
         private readonly RecetasHelper _recetasHelper;
         private readonly MenuSemanalHelper _menuSemanalHelper;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<RecetasController> _logger;
 
-        public RecetasController(CometarioRecetaHelper cometarioRecetaHelper, IEmailService emailService, UserHelper userHelper, RecetasHelper recetasHelper, MenuSemanalHelper menuSemanalHelper, IWebHostEnvironment webHostEnvironment)
+        // Configuración de seguridad para archivos
+        private static readonly long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        private static readonly string[] ALLOWED_EXTENSIONS = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        private static readonly string[] ALLOWED_MIME_TYPES = { 
+            "image/jpeg", 
+            "image/png", 
+            "image/gif", 
+            "image/webp" 
+        };
+
+        public RecetasController(
+            CometarioRecetaHelper cometarioRecetaHelper, 
+            IEmailService emailService, 
+            UserHelper userHelper, 
+            RecetasHelper recetasHelper, 
+            MenuSemanalHelper menuSemanalHelper, 
+            IWebHostEnvironment webHostEnvironment,
+            ILogger<RecetasController> logger)
         {
             _cometarioRecetaHelper = cometarioRecetaHelper;
             _emailService = emailService;
@@ -24,6 +47,7 @@ namespace Abstract_CR.Controllers
             _recetasHelper = recetasHelper;
             _menuSemanalHelper = menuSemanalHelper;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
         }
 
         public IActionResult Index()
@@ -142,6 +166,8 @@ namespace Abstract_CR.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequestSizeLimit(5 * 1024 * 1024)] // Limitar a 5MB a nivel de request
         public async Task<IActionResult> GuardarMenuSemanal(IFormFile? Imagen)
         {
             try
@@ -200,24 +226,28 @@ namespace Abstract_CR.Controllers
 
                 string? rutaImagen = null;
 
-                // Guardar imagen si se proporciona
+                // VALIDACIÓN Y GUARDADO SEGURO DE IMAGEN
                 if (Imagen != null && Imagen.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "menu-semanal");
-                    if (!Directory.Exists(uploadsFolder))
+                    // Validar el archivo de forma robusta
+                    var validacionResultado = ValidarImagenPlatillo(Imagen);
+                    if (!validacionResultado.esValido)
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        _logger.LogWarning("Intento de subir archivo inválido: {FileName}. Razón: {Mensaje}", 
+                            Imagen.FileName, validacionResultado.mensaje);
+                        return Json(new { success = false, message = validacionResultado.mensaje });
                     }
 
-                    var fileName = $"{Guid.NewGuid()}_{Imagen.FileName}";
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-                    
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    // Guardar imagen de forma segura
+                    try
                     {
-                        await Imagen.CopyToAsync(stream);
+                        rutaImagen = await GuardarImagenSegura(Imagen);
                     }
-
-                    rutaImagen = $"/uploads/menu-semanal/{fileName}";
+                    catch (Exception exImg)
+                    {
+                        _logger.LogError(exImg, "Error al guardar imagen del platillo");
+                        return Json(new { success = false, message = "Error al guardar la imagen. Por favor, intenta de nuevo." });
+                    }
                 }
 
                 try
@@ -226,6 +256,7 @@ namespace Abstract_CR.Controllers
                     
                     if (guardado)
                     {
+                        _logger.LogInformation("Menú guardado correctamente para {DiaSemana}", model.DiaSemana);
                         return Json(new { success = true, message = "Menú guardado correctamente" });
                     }
                     
@@ -233,7 +264,7 @@ namespace Abstract_CR.Controllers
                 }
                 catch (Exception helperEx)
                 {
-                    // Capturar excepciones del helper
+                    _logger.LogError(helperEx, "Error al guardar el menú en el helper");
                     var errorMessage = $"Error al guardar el menú: {helperEx.Message}";
                     if (helperEx.InnerException != null)
                     {
@@ -244,7 +275,7 @@ namespace Abstract_CR.Controllers
             }
             catch (Exception ex)
             {
-                // Incluir más detalles del error para debugging
+                _logger.LogError(ex, "Error general al procesar GuardarMenuSemanal");
                 var errorMessage = $"Error: {ex.Message}";
                 if (ex.InnerException != null)
                 {
@@ -252,6 +283,110 @@ namespace Abstract_CR.Controllers
                 }
                 return Json(new { success = false, message = errorMessage });
             }
+        }
+
+        /// <summary>
+        /// Valida de forma robusta que el archivo sea una imagen válida
+        /// </summary>
+        private (bool esValido, string mensaje) ValidarImagenPlatillo(IFormFile archivo)
+        {
+            // 1. Validar que el archivo existe
+            if (archivo == null || archivo.Length == 0)
+            {
+                return (false, "El archivo está vacío o no existe.");
+            }
+
+            // 2. Validar tamaño del archivo
+            if (archivo.Length > MAX_FILE_SIZE)
+            {
+                var tamañoMB = archivo.Length / 1024.0 / 1024.0;
+                return (false, $"El archivo es demasiado grande ({tamañoMB:F2} MB). Tamaño máximo permitido: 5MB.");
+            }
+
+            // 3. Validar extensión del archivo
+            var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+            if (string.IsNullOrEmpty(extension) || !ALLOWED_EXTENSIONS.Contains(extension))
+            {
+                var extensionesPermitidas = string.Join(", ", ALLOWED_EXTENSIONS);
+                return (false, $"Formato de archivo no válido ({extension}). Solo se permiten: {extensionesPermitidas}");
+            }
+
+            // 4. Validar MIME type del archivo
+            if (!ALLOWED_MIME_TYPES.Contains(archivo.ContentType.ToLowerInvariant()))
+            {
+                _logger.LogWarning("MIME type no permitido: {MimeType} para archivo {FileName}", 
+                    archivo.ContentType, archivo.FileName);
+                return (false, $"Tipo de contenido no válido ({archivo.ContentType}). Solo se permiten imágenes.");
+            }
+
+            // 5. Validar que realmente sea una imagen leyendo los magic bytes
+            try
+            {
+                using var stream = archivo.OpenReadStream();
+                var header = new byte[8];
+                stream.Read(header, 0, 8);
+                stream.Position = 0;
+
+                // Magic bytes de formatos de imagen comunes
+                bool esImagenValida = 
+                    (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF) || // JPEG
+                    (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47) || // PNG
+                    (header[0] == 0x47 && header[1] == 0x49 && header[2] == 0x46) || // GIF
+                    (header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 && 
+                     header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50); // WEBP
+
+                if (!esImagenValida)
+                {
+                    _logger.LogWarning("Archivo {FileName} no es una imagen válida (magic bytes incorrectos)", archivo.FileName);
+                    return (false, "El archivo no es una imagen válida. El contenido no coincide con el formato esperado.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al validar el contenido del archivo {FileName}", archivo.FileName);
+                return (false, "Error al validar el archivo. Por favor, intenta con otra imagen.");
+            }
+
+            // 6. Validar que el nombre del archivo no contenga caracteres peligrosos
+            var nombreArchivo = Path.GetFileName(archivo.FileName);
+            if (nombreArchivo.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+                nombreArchivo.Contains("..") || 
+                nombreArchivo.Contains("/") || 
+                nombreArchivo.Contains("\\"))
+            {
+                return (false, "El nombre del archivo contiene caracteres no permitidos.");
+            }
+
+            return (true, string.Empty);
+        }
+
+        /// <summary>
+        /// Guarda la imagen de forma segura con nombre aleatorio y sin extensión original
+        /// </summary>
+        private async Task<string> GuardarImagenSegura(IFormFile imagen)
+        {
+            // Crear directorio si no existe
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "menu-semanal");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            // Generar nombre de archivo seguro y único
+            var extension = Path.GetExtension(imagen.FileName).ToLowerInvariant();
+            var nombreSeguro = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(uploadsFolder, nombreSeguro);
+
+            // Guardar el archivo
+            using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await imagen.CopyToAsync(stream);
+                await stream.FlushAsync();
+            }
+
+            _logger.LogInformation("Imagen guardada correctamente: {NombreArchivo}", nombreSeguro);
+
+            return $"/uploads/menu-semanal/{nombreSeguro}";
         }
 
         [HttpGet]
@@ -276,7 +411,7 @@ namespace Abstract_CR.Controllers
                                 <body style='font-family:Arial,Helvetica,sans-serif; line-height:1.5;'>
                                 <h2>El chef le ha asignado un nuevo menú para el día {diaSemana}</h2>
                                 <hr/>
-                                <p style='font-size:12px;color:#666'>Si ya revisate el menú, puedes ignorar este mensaje.</p>
+                                <p style='font-size:12px;color:#666'>Si ya revisaste el menú, puedes ignorar este mensaje.</p>
                                 </body>
                             </html>";
                     try { await _emailService.SendEmailAsync(usuarioAsignado.CorreoElectronico, subject, body); } catch { }

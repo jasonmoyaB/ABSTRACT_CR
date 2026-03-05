@@ -1,5 +1,7 @@
-﻿using Abstract_CR.Models;
+using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Abstract_CR.Models;
 
 namespace Abstract_CR.Data
 {
@@ -14,7 +16,7 @@ namespace Abstract_CR.Data
         {
         }
 
-      
+        // ✅ DbSets combinados de ambas ramas
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<PassResetTokens> Tokens { get; set; }
@@ -26,16 +28,20 @@ namespace Abstract_CR.Data
         public DbSet<MensajeInteraccion> MensajesInteraccion { get; set; }
         public DbSet<PuntosUsuario> PuntosUsuarios { get; set; }
         public DbSet<MenuSemanal> MenuSemanal { get; set; }
-
         public DbSet<RestriccionAlimentaria> RestriccionesAlimentarias { get; set; }
-
         public DbSet<ComprobantePago> ComprobantesPago { get; set; }
+        
+        // ✅ DbSets de la rama master (Pedidos)
+        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<PedidoDetalle> PedidoDetalles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            
+            // ===============================================================
+            // CONFIGURACIÓN DE USUARIO
+            // ===============================================================
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasKey(e => e.UsuarioID);
@@ -50,14 +56,15 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.Activo).HasDefaultValue(true);
                 entity.Property(e => e.PuntosTotales).HasDefaultValue(0);
 
-                
                 entity.HasOne(e => e.Rol)
                       .WithMany(r => r.Usuarios)
                       .HasForeignKey(e => e.RolID)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            
+            // ===============================================================
+            // CONFIGURACIÓN DE ROL
+            // ===============================================================
             modelBuilder.Entity<Rol>(entity =>
             {
                 entity.HasKey(e => e.RolID);
@@ -65,13 +72,16 @@ namespace Abstract_CR.Data
                 entity.HasIndex(e => e.NombreRol).IsUnique();
             });
 
-            
+            // Seed de Roles
             modelBuilder.Entity<Rol>().HasData(
                 new Rol { RolID = 1, NombreRol = "Administrador" },
                 new Rol { RolID = 2, NombreRol = "Cliente" },
                 new Rol { RolID = 3, NombreRol = "Nutricionista" }
             );
 
+            // ===============================================================
+            // CONFIGURACIÓN DE TOKENS DE RECUPERACIÓN
+            // ===============================================================
             modelBuilder.Entity<PassResetTokens>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -85,6 +95,9 @@ namespace Abstract_CR.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // ===============================================================
+            // CONFIGURACIÓN DE COMENTARIOS DE RECETAS
+            // ===============================================================
             modelBuilder.Entity<ComentarioReceta>(entity =>
             {
                 entity.ToTable("ComentariosRecetas");
@@ -95,6 +108,9 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.FechaComentario).IsRequired();
             });
 
+            // ===============================================================
+            // CONFIGURACIÓN DE RECETAS
+            // ===============================================================
             modelBuilder.Entity<Receta>(entity =>
             {
                 entity.HasKey(e => e.RecetaID);
@@ -106,6 +122,9 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.ChefID).IsRequired();
             });
 
+            // ===============================================================
+            // CONFIGURACIÓN DE RECETAS POR USUARIO
+            // ===============================================================
             modelBuilder.Entity<RecetaPorUsuario>(entity =>
             {
                 entity.ToTable("RecetasPorUsuario");
@@ -115,6 +134,9 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.Dia).IsRequired().HasMaxLength(20);
             });
 
+            // ===============================================================
+            // CONFIGURACIÓN DE MENSAJES DE INTERACCIÓN
+            // ===============================================================
             modelBuilder.Entity<MensajeInteraccion>(entity =>
             {
                 entity.ToTable("MensajesInteraccion");
@@ -134,6 +156,9 @@ namespace Abstract_CR.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+            // ===============================================================
+            // CONFIGURACIÓN DE PUNTOS DE USUARIO
+            // ===============================================================
             modelBuilder.Entity<PuntosUsuario>(entity =>
             {
                 entity.ToTable("PuntosUsuarios");
@@ -153,6 +178,9 @@ namespace Abstract_CR.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+            // ===============================================================
+            // CONFIGURACIÓN DE MENÚ SEMANAL
+            // ===============================================================
             modelBuilder.Entity<MenuSemanal>(entity =>
             {
                 entity.ToTable("MenusSemanales");
@@ -168,7 +196,9 @@ namespace Abstract_CR.Data
                 entity.Ignore(e => e.RowVer);
             });
 
-          
+            // ===============================================================
+            // CONFIGURACIÓN DE RESTRICCIONES ALIMENTARIAS
+            // ===============================================================
             modelBuilder.Entity<RestriccionAlimentaria>(entity =>
             {
                 entity.ToTable("RestriccionesAlimentarias");
@@ -187,6 +217,9 @@ namespace Abstract_CR.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // ===============================================================
+            // CONFIGURACIÓN DE COMPROBANTES DE PAGO
+            // ===============================================================
             modelBuilder.Entity<ComprobantePago>(entity =>
             {
                 entity.ToTable("ComprobantesPago");
@@ -222,6 +255,93 @@ namespace Abstract_CR.Data
                       .HasForeignKey(e => e.UsuarioID)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+            // ===============================================================
+            // CONFIGURACIÓN DE PEDIDOS
+            // ===============================================================
+            modelBuilder.Entity<Pedido>(entity =>
+            {
+                entity.HasKey(e => e.PedidoID);
+
+                entity.Property(e => e.FechaPedido)
+                      .HasDefaultValueSql("sysutcdatetime()");
+                entity.Property(e => e.Total)
+                      .HasColumnType("decimal(10,2)");
+                entity.Property(e => e.DireccionEnvio)
+                      .HasMaxLength(250);
+                entity.Property(e => e.Estado)
+                      .HasConversion<string>()
+                      .HasMaxLength(20);
+                entity.Property(e => e.MetodoPago)
+                      .HasConversion<string>()
+                      .HasMaxLength(30);
+
+                entity.HasIndex(e => e.Estado);
+                entity.HasIndex(e => e.UsuarioID);
+
+                entity.HasOne(e => e.Usuario)
+                      .WithMany(u => u.Pedidos)
+                      .HasForeignKey(e => e.UsuarioID)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ===============================================================
+            // CONFIGURACIÓN DE DETALLES DE PEDIDO
+            // ===============================================================
+            modelBuilder.Entity<PedidoDetalle>(entity =>
+            {
+                entity.HasKey(e => e.PedidoDetalleID);
+
+                entity.Property(e => e.Descripcion)
+                      .IsRequired()
+                      .HasMaxLength(200);
+                entity.Property(e => e.Cantidad)
+                      .IsRequired();
+                entity.Property(e => e.PrecioUnitario)
+                      .HasColumnType("decimal(10,2)");
+
+                entity.HasIndex(e => e.PedidoID);
+
+                entity.HasOne(e => e.Pedido)
+                      .WithMany(p => p.Detalles)
+                      .HasForeignKey(e => e.PedidoID)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ===============================================================
+            // SEED DE ESTADOS DE PEDIDOS (OPCIONAL)
+            // ===============================================================
+            var seedEstadosVariable = Environment.GetEnvironmentVariable("SEED_PEDIDOS_ESTADOS");
+            if (!string.IsNullOrWhiteSpace(seedEstadosVariable) &&
+                bool.TryParse(seedEstadosVariable, out var shouldSeedEstados) &&
+                shouldSeedEstados)
+            {
+                const int estadoSeedUsuarioId = -1;
+                modelBuilder.Entity<Usuario>().HasData(new Usuario
+                {
+                    UsuarioID = estadoSeedUsuarioId,
+                    Nombre = "Estados",
+                    Apellido = "Pedido",
+                    CorreoElectronico = "seed-estados@abstract-cr.local",
+                    ContrasenaHash = "SeedEstadosHash",
+                    FechaRegistro = DateTime.UtcNow,
+                    RolID = 2,
+                    Activo = true
+                });
+
+                var estadosSeed = Enum.GetValues<EstadoPedido>().Select((estado, index) => new Pedido
+                {
+                    PedidoID = -(index + 1),
+                    UsuarioID = estadoSeedUsuarioId,
+                    FechaPedido = DateTime.UtcNow,
+                    Total = 0m,
+                    Estado = estado,
+                    MetodoPago = MetodoPago.TarjetaCredito,
+                    DireccionEnvio = string.Empty
+                });
+
+                modelBuilder.Entity<Pedido>().HasData(estadosSeed);
+            }
         }
     }
 }

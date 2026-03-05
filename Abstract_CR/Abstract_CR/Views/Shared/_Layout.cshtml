@@ -62,12 +62,13 @@
                             </li>
                         }
                         
-                        @* Nuevo enlace de Pedidos *@
+                        @* Enlace de Pedidos *@
                         <li class="nav-item px-lg-4">
                             <a class="nav-link text-uppercase" href="@Url.Action("Index", "Pedidos")">
                                 <i class="fas fa-receipt"></i> Mis Pedidos
                             </a>
                         </li>
+                        
                         <li class="nav-item px-lg-4">
                             <a class="nav-link text-uppercase" href="@Url.Action("Perfil", "Usuario")">
                                 <i class="fas fa-user"></i> @Context.Session.GetString("NombreUsuario")

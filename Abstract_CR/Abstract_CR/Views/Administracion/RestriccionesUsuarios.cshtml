@@ -20,17 +20,48 @@
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="fas fa-users me-2"></i>Usuarios</h5>
                 </div>
-                <div class="card-body p-0">
+                
+                <!-- Buscador de usuarios -->
+                <div class="card-body border-bottom bg-light py-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0 ps-0" 
+                               id="buscarUsuario" 
+                               placeholder="Buscar por nombre o correo..." 
+                               autocomplete="off">
+                        <button class="btn btn-outline-secondary" type="button" id="limpiarBusqueda" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        <span id="contadorUsuarios">@Model.Usuarios?.Count() ?? 0</span> usuario(s) encontrado(s)
+                    </small>
+                </div>
+                
+                <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
                     @if (Model.Usuarios != null && Model.Usuarios.Any())
                     {
-                        <div class="list-group list-group-flush">
+                        <div class="list-group list-group-flush" id="listaUsuarios">
                             @foreach (var usuario in Model.Usuarios)
                             {
                                 var esSeleccionado = usuario.UsuarioId == Model.UsuarioSeleccionadoId;
-                                <a class="list-group-item list-group-item-action @(esSeleccionado ? "bg-light text-primary fw-semibold" : "text-dark")"
-                                   href="@Url.Action("RestriccionesUsuarios", "Administracion", new { usuarioId = usuario.UsuarioId })">
-                                    <div class="fw-semibold">@usuario.NombreCompleto</div>
-                                    <small class="text-muted">@usuario.CorreoElectronico</small>
+                                <a class="list-group-item list-group-item-action usuario-item @(esSeleccionado ? "bg-light text-primary fw-semibold" : "text-dark")"
+                                   href="@Url.Action("RestriccionesUsuarios", "Administracion", new { usuarioId = usuario.UsuarioId })"
+                                   data-nombre="@usuario.NombreCompleto.ToLower()"
+                                   data-correo="@usuario.CorreoElectronico.ToLower()">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold nombre-usuario">@usuario.NombreCompleto</div>
+                                            <small class="text-muted correo-usuario">@usuario.CorreoElectronico</small>
+                                        </div>
+                                        @if (esSeleccionado)
+                                        {
+                                            <i class="fas fa-check-circle text-primary"></i>
+                                        }
+                                    </div>
                                 </a>
                             }
                         </div>
@@ -39,6 +70,12 @@
                     {
                         <div class="p-3 text-muted text-center">No hay usuarios disponibles.</div>
                     }
+                    
+                    <!-- Mensaje cuando no hay resultados -->
+                    <div class="p-4 text-center text-muted d-none" id="sinResultados">
+                        <i class="fas fa-search fa-2x mb-3 opacity-50"></i>
+                        <p class="mb-0">No se encontraron usuarios que coincidan con tu búsqueda.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,8 +94,9 @@
                             <ul class="list-group list-group-flush">
                                 @foreach (var restriccion in Model.Restricciones)
                                 {
-                                    <li class="list-group-item">
-                                        @restriccion.Descripcion
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <i class="fas fa-exclamation-triangle text-warning me-3"></i>
+                                        <span>@restriccion.Descripcion</span>
                                     </li>
                                 }
                             </ul>
@@ -66,7 +104,8 @@
                         else
                         {
                             <div class="text-center text-muted py-4">
-                                Este usuario no tiene restricciones registradas.
+                                <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                                <p class="mb-0">Este usuario no tiene restricciones registradas.</p>
                             </div>
                         }
                     </div>
@@ -82,5 +121,121 @@
         </div>
     </div>
 </div>
+
+<style>
+    .usuario-item {
+        transition: all 0.2s ease;
+    }
+    
+    .usuario-item:hover {
+        background-color: #f8f9fa !important;
+        transform: translateX(5px);
+    }
+    
+    #buscarUsuario:focus {
+        box-shadow: none;
+        border-color: #0d6efd;
+    }
+    
+    .input-group-text {
+        border-right: none;
+    }
+    
+    #buscarUsuario {
+        border-left: none;
+    }
+    
+    #buscarUsuario:focus + .input-group-text {
+        border-color: #0d6efd;
+    }
+    
+    .highlight {
+        background-color: #fff3cd;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputBuscar = document.getElementById('buscarUsuario');
+        const btnLimpiar = document.getElementById('limpiarBusqueda');
+        const listaUsuarios = document.getElementById('listaUsuarios');
+        const sinResultados = document.getElementById('sinResultados');
+        const contadorUsuarios = document.getElementById('contadorUsuarios');
+        const usuariosItems = document.querySelectorAll('.usuario-item');
+        const totalUsuarios = usuariosItems.length;
+        
+        // Función para filtrar usuarios
+        function filtrarUsuarios() {
+            const textoBusqueda = inputBuscar.value.toLowerCase().trim();
+            let usuariosVisibles = 0;
+            
+            // Mostrar/ocultar botón de limpiar
+            btnLimpiar.style.display = textoBusqueda ? 'block' : 'none';
+            
+            usuariosItems.forEach(item => {
+                const nombre = item.getAttribute('data-nombre');
+                const correo = item.getAttribute('data-correo');
+                
+                // Verificar si el texto de búsqueda está en nombre o correo
+                if (nombre.includes(textoBusqueda) || correo.includes(textoBusqueda)) {
+                    item.style.display = '';
+                    usuariosVisibles++;
+                    
+                    // Resaltar texto coincidente (opcional)
+                    if (textoBusqueda) {
+                        resaltarTexto(item, textoBusqueda);
+                    } else {
+                        eliminarResaltado(item);
+                    }
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Actualizar contador
+            contadorUsuarios.textContent = usuariosVisibles;
+            
+            // Mostrar/ocultar mensaje de sin resultados
+            if (usuariosVisibles === 0) {
+                listaUsuarios.classList.add('d-none');
+                sinResultados.classList.remove('d-none');
+            } else {
+                listaUsuarios.classList.remove('d-none');
+                sinResultados.classList.add('d-none');
+            }
+        }
+        
+        // Función para resaltar texto
+        function resaltarTexto(elemento, texto) {
+            // Esta es una versión simplificada, solo marca visualmente
+            elemento.style.backgroundColor = elemento.classList.contains('bg-light') ? '#e7f3ff' : '';
+        }
+        
+        // Función para eliminar resaltado
+        function eliminarResaltado(elemento) {
+            elemento.style.backgroundColor = '';
+        }
+        
+        // Event listeners
+        inputBuscar.addEventListener('input', filtrarUsuarios);
+        inputBuscar.addEventListener('keyup', function(e) {
+            if (e.key === 'Escape') {
+                limpiarBusqueda();
+            }
+        });
+        
+        btnLimpiar.addEventListener('click', limpiarBusqueda);
+        
+        function limpiarBusqueda() {
+            inputBuscar.value = '';
+            filtrarUsuarios();
+            inputBuscar.focus();
+        }
+        
+        // Focus automático en el input al cargar
+        inputBuscar.focus();
+    });
+</script>
 
 <partial name="_ValidationScriptsPartial" />

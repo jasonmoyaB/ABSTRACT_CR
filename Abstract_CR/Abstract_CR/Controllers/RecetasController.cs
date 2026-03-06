@@ -285,9 +285,6 @@ namespace Abstract_CR.Controllers
             }
         }
 
-        /// <summary>
-        /// Valida de forma robusta que el archivo sea una imagen válida
-        /// </summary>
         private (bool esValido, string mensaje) ValidarImagenPlatillo(IFormFile archivo)
         {
             // 1. Validar que el archivo existe

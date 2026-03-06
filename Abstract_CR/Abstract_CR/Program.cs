@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Abstract_CR.Helpers;
 using Abstract_CR.Services;
-using Abstract_CR.Services.Pedidos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,9 +46,6 @@ builder.Services.AddHostedService<VencimientosNotifier>();
 
 // Servicio de  PDF para reportes
 builder.Services.AddScoped<Abstract_CR.Services.IReportePdfService, Abstract_CR.Services.ReportePdfService>();
-
-// Servicios de pedidos
-builder.Services.AddScoped<IPedidoService, PedidoService>();
 
 var app = builder.Build();
 

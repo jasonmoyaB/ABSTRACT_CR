@@ -68,6 +68,50 @@ BEGIN
 END
 GO
 
+-- Tabla para controlar ebooks y su disponibilidad de descarga
+IF OBJECT_ID('dbo.EbookEdicion','U') IS NULL
+BEGIN
+    CREATE TABLE dbo.EbookEdicion (
+        EbookEdicionID INT IDENTITY(1,1) CONSTRAINT PK_EbookEdicion PRIMARY KEY,
+        TituloHU NVARCHAR(255) NOT NULL,
+        Escenario INT NOT NULL,
+        CriterioAceptacion NVARCHAR(255) NOT NULL,
+        Contexto NVARCHAR(500) NOT NULL,
+        Evento NVARCHAR(500) NOT NULL,
+        Resultado NVARCHAR(500) NOT NULL,
+        Estado BIT NOT NULL CONSTRAINT DF_EbookEdicion_Estado DEFAULT (1),
+        FechaRegistro DATETIME2 DEFAULT SYSUTCDATETIME(),
+        Documento NVARCHAR(500) NULL,
+        PermitirDescarga BIT NOT NULL CONSTRAINT DF_EbookEdicion_PermitirDescarga DEFAULT (1),
+        NombreArchivo NVARCHAR(255) NULL,
+        RutaArchivo NVARCHAR(500) NULL,
+        TamañoArchivo BIGINT NULL,
+        TipoMime NVARCHAR(100) NULL,
+        FechaSubida DATETIME2 NULL
+    );
+END
+GO
+
+-- Agregar columna PermitirDescarga si la tabla ya existe
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.EbookEdicion') AND name = 'PermitirDescarga')
+BEGIN
+    ALTER TABLE dbo.EbookEdicion 
+    ADD PermitirDescarga BIT NOT NULL CONSTRAINT DF_EbookEdicion_PermitirDescarga_New DEFAULT (1);
+END
+GO
+
+-- Agregar columnas adicionales para manejo de archivos si no existen
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.EbookEdicion') AND name = 'NombreArchivo')
+BEGIN
+    ALTER TABLE dbo.EbookEdicion 
+    ADD NombreArchivo NVARCHAR(255) NULL,
+        RutaArchivo NVARCHAR(500) NULL,
+        TamañoArchivo BIGINT NULL,
+        TipoMime NVARCHAR(100) NULL,
+        FechaSubida DATETIME2 NULL;
+END
+GO
+
 IF OBJECT_ID('dbo.Recetas','U') IS NULL
 BEGIN
     CREATE TABLE dbo.Recetas (
@@ -378,19 +422,33 @@ END
 GO
 
 /* 
+<<<<<<< HEAD
+   SEED B�SICO
+    */
+IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Admin')
+    INSERT INTO dbo.Roles(NombreRol) VALUES (N'Admin');
+=======
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name='CK_Pedidos_Estado' AND parent_object_id=OBJECT_ID('dbo.Pedidos'))
     ADD CONSTRAINT CK_Pedidos_Estado
     CHECK (Estado IN (N'Pendiente',N'Procesando',N'Enviado',N'Entregado',N'Cancelado'));
     ALTER TABLE dbo.Pedidos CHECK CONSTRAINT CK_Pedidos_Estado;
+>>>>>>> origin/master
 IF NOT EXISTS (SELECT 1 FROM dbo.Roles WHERE NombreRol = N'Cliente')
     INSERT INTO dbo.Roles(NombreRol) VALUES (N'Cliente');
 GO
 
 /* 
+<<<<<<< HEAD
+   NORMALIZACI�N 
+   */
+
+   -- 1) Normalizaci�n de correo: columna computada + �ndice �nico
+=======
    NORMALIZACIÓN 
    */
 
    -- 1) Normalización de correo: columna computada + índice único
+>>>>>>> origin/master
 IF COL_LENGTH('dbo.Usuarios', 'CorreoNorm') IS NULL
 BEGIN
     ALTER TABLE dbo.Usuarios
@@ -433,7 +491,11 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name='CK_MenusPorPlan_D
 BEGIN
     ALTER TABLE dbo.MenusPorPlan WITH NOCHECK
     ADD CONSTRAINT CK_MenusPorPlan_DiaSemana
+<<<<<<< HEAD
+    CHECK (DiaSemana IN (N'Lunes',N'Martes',N'Mi�rcoles',N'Jueves',N'Viernes',N'S�bado',N'Domingo'));
+=======
     CHECK (DiaSemana IN (N'Lunes',N'Martes',N'Miércoles',N'Jueves',N'Viernes',N'Sábado',N'Domingo'));
+>>>>>>> origin/master
     ALTER TABLE dbo.MenusPorPlan CHECK CONSTRAINT CK_MenusPorPlan_DiaSemana;
 END
 GO
@@ -447,7 +509,11 @@ BEGIN
 END
 GO
 
+<<<<<<< HEAD
+-- 3) �nico m�todo Predeterminado por Usuario
+=======
 -- 3) Único método Predeterminado por Usuario
+>>>>>>> origin/master
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='UX_MetodosPago_DefaultPorUsuario' AND object_id=OBJECT_ID('dbo.MetodosPago'))
 BEGIN
     CREATE UNIQUE INDEX UX_MetodosPago_DefaultPorUsuario
@@ -456,8 +522,13 @@ BEGIN
 END
 GO
 
+<<<<<<< HEAD
+-- 4) �ndices de soporte adicionales
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name='IX_Pedidos_Fecha' AND object_id=OBJECT_ID('dbo.Pedidos'))
+=======
 SELECT Estado, COUNT(*) AS Cantidad, SUM(Total) AS TotalCRC
 GROUP BY Estado;
+>>>>>>> origin/master
     CREATE INDEX IX_Pedidos_Fecha ON dbo.Pedidos(FechaPedido);
 GO
 
@@ -962,11 +1033,18 @@ GO
 
 
 /* 
+<<<<<<< HEAD
+   TRIGGER DE AUDITOR�A (Pedidos)
+    */
+IF OBJECT_ID('dbo.trg_Pedidos_Audit','TR') IS NOT NULL DROP TRIGGER dbo.trg_Pedidos_Audit;
+GO
+=======
            CONCAT('Estado=', i.Estado, '; Total=', i.Total, '; MetodoPago=', i.MetodoPago)
            CONCAT('EstadoOld=', d.Estado, ' -> EstadoNew=', i.Estado,
                   '; TotalOld=', d.Total, ' -> TotalNew=', i.Total,
                   '; MetodoPagoOld=', d.MetodoPago, ' -> MetodoPagoNew=', i.MetodoPago)
            CONCAT('Estado=', d.Estado, '; Total=', d.Total, '; MetodoPago=', d.MetodoPago)
+>>>>>>> origin/master
 CREATE TRIGGER dbo.trg_Pedidos_Audit
 ON dbo.Pedidos
 AFTER INSERT, UPDATE, DELETE

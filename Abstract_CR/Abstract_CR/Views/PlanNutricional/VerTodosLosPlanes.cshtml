@@ -1,0 +1,253 @@
+@model IEnumerable<dynamic>
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Planes Nutricionales";
+    var evaluaciones = ViewBag.Evaluaciones as List<dynamic> ?? new List<dynamic>();
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0 text-primary"><i class="fa-solid fa-clipboard-list me-2"></i> Planes Nutricionales y Evaluaciones</h1>
+                <p class="text-muted mb-0">Gestiona todos los planes nutricionales y sus evaluaciones</p>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Tabs para Planes y Evaluaciones -->
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="planes-tab" data-bs-toggle="tab" data-bs-target="#planes" type="button" role="tab">
+                <i class="fa-solid fa-clipboard-list me-2"></i> Planes Nutricionales
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="evaluaciones-tab" data-bs-toggle="tab" data-bs-target="#evaluaciones" type="button" role="tab">
+                <i class="fa-solid fa-clipboard-check me-2"></i> Evaluaciones (@evaluaciones.Count)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        <!-- Tab de Planes -->
+        <div class="tab-pane fade show active" id="planes" role="tabpanel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0"><i class="fa-solid fa-table-list me-2 text-primary"></i> Lista de Planes Nutricionales</h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model != null && Model.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-bordered align-middle">
+                                        <thead class="table-light text-center align-middle">
+                                            <tr>
+                                                <th>Plan</th>
+                                                <th>Usuario</th>
+                                                <th>Tipo</th>
+                                                <th>Estado</th>
+                                                <th>Fecha Carga</th>
+                                                <th>Vencimiento</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var plan in Model)
+                                            {
+                                                var isExpired = plan.FechaVencimiento != null && plan.FechaVencimiento < DateTime.Today;
+                                                var isExpiringSoon = plan.FechaVencimiento != null && plan.FechaVencimiento <= DateTime.Today.AddDays(7) && !isExpired;
+                                                
+                                                <tr>
+                                                    <td>
+                                                        <strong>@plan.Nombre</strong>
+                                                        @if (!string.IsNullOrEmpty(plan.Descripcion))
+                                                        {
+                                                            <br />
+                                                            <small class="text-muted">@(plan.Descripcion.Length > 50 ? plan.Descripcion.Substring(0, 50) + "..." : plan.Descripcion)</small>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <div>@plan.UsuarioNombre</div>
+                                                        <small class="text-muted">@plan.UsuarioCorreo</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-info">@(plan.TipoPlan ?? "N/A")</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (isExpired)
+                                                        {
+                                                            <span class="badge bg-danger">Vencido</span>
+                                                        }
+                                                        else if (isExpiringSoon)
+                                                        {
+                                                            <span class="badge bg-warning">Por Vencer</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-success">@(plan.Estado ?? "Activo")</span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @plan.FechaCarga.ToString("dd/MM/yyyy")
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (plan.FechaVencimiento != null)
+                                                        {
+                                                            <span class="@(isExpired ? "text-danger" : isExpiringSoon ? "text-warning" : "text-success")">
+                                                                @(((DateTime)plan.FechaVencimiento).ToString("dd/MM/yyyy"))
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">No definido</span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="btn-group" role="group">
+                                                            <a href="@Url.Action("EvaluarPlanAdmin", "PlanNutricional", new { planId = plan.PlanID })" 
+                                                               class="btn btn-sm btn-outline-warning"
+                                                               title="Evaluar Plan">
+                                                                <i class="fa-solid fa-star-half-stroke"></i>
+                                                            </a>
+                                                            @if (!string.IsNullOrEmpty(plan.DocumentoURL))
+                                                            {
+                                                                <a href="@plan.DocumentoURL" 
+                                                                   target="_blank" 
+                                                                   class="btn btn-sm btn-outline-success"
+                                                                   title="Descargar">
+                                                                    <i class="fa-solid fa-download"></i>
+                                                                </a>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5">
+                                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3 opacity-50"></i>
+                                    <h4 class="text-muted mb-3">No hay planes nutricionales</h4>
+                                    <p class="text-muted">Los usuarios aún no han subido ningún plan nutricional.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab de Evaluaciones -->
+        <div class="tab-pane fade" id="evaluaciones" role="tabpanel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0"><i class="fa-solid fa-clipboard-check me-2 text-primary"></i> Lista de Evaluaciones</h5>
+                        </div>
+                        <div class="card-body">
+                            @if (evaluaciones != null && evaluaciones.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-bordered align-middle">
+                                        <thead class="table-light text-center align-middle">
+                                            <tr>
+                                                <th>Plan</th>
+                                                <th>Usuario</th>
+                                                <th>Calificación</th>
+                                                <th>Comentario</th>
+                                                <th>Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var eval in evaluaciones)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <strong>@eval.NombrePlan</strong>
+                                                    </td>
+                                                    <td>
+                                                        <div>@eval.UsuarioNombre</div>
+                                                        @if (!string.IsNullOrEmpty(eval.UsuarioCorreo))
+                                                        {
+                                                            <small class="text-muted">@eval.UsuarioCorreo</small>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (eval.Calificacion != null)
+                                                        {
+                                                            <span class="badge bg-primary">@eval.Calificacion / 5</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (!string.IsNullOrEmpty(eval.Comentario))
+                                                        {
+                                                            <span title="@eval.Comentario">
+                                                                @(eval.Comentario.Length > 60 ? eval.Comentario.Substring(0, 60) + "..." : eval.Comentario)
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Sin comentario</span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if (eval.FechaRegistro != null)
+                                                        {
+                                                            @(((DateTime)eval.FechaRegistro).ToString("dd/MM/yyyy HH:mm"))
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5">
+                                    <i class="fas fa-clipboard-check fa-3x text-muted mb-3 opacity-50"></i>
+                                    <h4 class="text-muted mb-3">No hay evaluaciones</h4>
+                                    <p class="text-muted">Los usuarios aún no han evaluado ningún plan nutricional.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,40 +6,142 @@
 
 <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
 
-<section class="page-section">
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .form-control-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control-modern:focus {
+        border-color: #007FFF;
+        box-shadow: 0 0 0 0.2rem rgba(0, 127, 255, 0.25);
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-save:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-cancel {
+        border: 2px solid #007FFF;
+        color: #007FFF;
+        background: white;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        color: #007FFF;
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-right: 0.75rem;
+    }
+    .required::after {
+        content: " *";
+        color: red;
+    }
+    .section-divider {
+        border-top: 2px solid #e9ecef;
+        margin: 2rem 0;
+        padding-top: 1.5rem;
+    }
+</style>
+
+<section class="page-section" style="padding: 2rem 0;">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="position-relative mb-5">
-                    <a href="@Url.Action("Index", "PlanNutricional")" class="btn position-absolute"
-                       style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;"
-                       title="Volver a Mis Planes">
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
-                    <div class="text-center">
-                        <h2 class="section-heading">
-                            <span class="section-heading-upper" style="color:#e6a756">Cargar</span>
-                            <span class="section-heading-lower" style="color:#f6e1c5">Plan Nutricional</span>
-                        </h2>
-                    </div>
+        <!-- Header -->
+        <div class="profile-section text-center mb-4 position-relative">
+            <a href="@Url.Action("Index", "PlanNutricional")" 
+               class="btn position-absolute" 
+               style="left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 12px; padding: 0.5rem 1rem;"
+               title="Volver a Mis Planes">
+                <i class="fas fa-arrow-left me-2"></i> Volver
+            </a>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="icon-circle">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <div class="text-start ms-3">
+                    <h3 class="mb-0 fw-bold">Cargar Plan Nutricional</h3>
+                    <p class="mb-0 opacity-75">Sube tu plan nutricional personalizado</p>
                 </div>
             </div>
         </div>
 
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-upload me-2"></i>
-                            Subir Plan Nutricional
+                <div class="modern-card bg-white">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-upload me-2"></i> Subir Plan Nutricional
                         </h5>
                     </div>
-                    <div class="card-body">
-                        @* Mostrar errores de validación *@
+
+                    <div class="card-body p-4">
                         @if (!ViewData.ModelState.IsValid)
                         {
-                            <div class="alert alert-danger" role="alert">
+                            <div class="alert alert-danger rounded-3 mb-4" role="alert">
                                 <h6><i class="fas fa-exclamation-triangle me-2"></i>Por favor, corrige los siguientes errores:</h6>
                                 <ul class="mb-0">
                                     @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
@@ -53,153 +155,135 @@
                         <form asp-action="CargarPlan" method="post" enctype="multipart/form-data" id="formCargarPlan">
                             @Html.AntiForgeryToken()
 
-                            <div class="row">
+                            <div class="row g-3">
                                 <div class="col-md-8">
-                                    <div class="mb-3">
-                                        <label asp-for="Nombre" class="form-label required">
-                                            <i class="fas fa-clipboard-list me-2"></i>Nombre del Plan *
-                                        </label>
-                                        <input asp-for="Nombre" class="form-control"
-                                               placeholder="Ej: Plan de Pérdida de Peso"
-                                               required />
-                                        <span asp-validation-for="Nombre" class="text-danger"></span>
-                                    </div>
+                                    <label asp-for="Nombre" class="form-label fw-bold text-secondary small text-uppercase mb-2 required">
+                                        <i class="fas fa-clipboard-list me-2"></i>Nombre del Plan
+                                    </label>
+                                    <input asp-for="Nombre" class="form-control form-control-modern"
+                                           placeholder="Ej: Plan de Pérdida de Peso"
+                                           required />
+                                    <span asp-validation-for="Nombre" class="text-danger"></span>
                                 </div>
+
                                 <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label asp-for="TipoPlan" class="form-label required">
-                                            <i class="fas fa-tags me-2"></i>Tipo de Plan *
-                                        </label>
-                                        <select asp-for="TipoPlan" class="form-select" required>
-                                            <option value="">Seleccionar tipo</option>
-                                            <option value="PDF">Documento PDF</option>
-                                            <option value="Imagen">Imagen/Foto</option>
-                                            <option value="Formulario">Información Manual</option>
-                                        </select>
-                                        <span asp-validation-for="TipoPlan" class="text-danger"></span>
-                                    </div>
+                                    <label asp-for="TipoPlan" class="form-label fw-bold text-secondary small text-uppercase mb-2 required">
+                                        <i class="fas fa-tags me-2"></i>Tipo de Plan
+                                    </label>
+                                    <select asp-for="TipoPlan" class="form-select form-control-modern" required>
+                                        <option value="">Seleccionar tipo</option>
+                                        <option value="PDF">Documento PDF</option>
+                                        <option value="Imagen">Imagen/Foto</option>
+                                        <option value="Formulario">Información Manual</option>
+                                    </select>
+                                    <span asp-validation-for="TipoPlan" class="text-danger"></span>
                                 </div>
-                            </div>
 
-                            <div class="mb-3">
-                                <label asp-for="Descripcion" class="form-label">
-                                    <i class="fas fa-align-left me-2"></i>Descripción
-                                </label>
-                                <textarea asp-for="Descripcion" class="form-control" rows="3"
-                                          placeholder="Describe brevemente tu plan nutricional (opcional)"></textarea>
-                                <span asp-validation-for="Descripcion" class="text-danger"></span>
-                                <div class="form-text">Máximo 1000 caracteres</div>
-                            </div>
+                                <div class="col-12">
+                                    <label asp-for="Descripcion" class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                        <i class="fas fa-align-left me-2"></i>Descripción
+                                    </label>
+                                    <textarea asp-for="Descripcion" class="form-control form-control-modern" rows="3"
+                                              placeholder="Describe brevemente tu plan nutricional (opcional)"></textarea>
+                                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                                    <div class="form-text">Máximo 1000 caracteres</div>
+                                </div>
 
-                            <div class="row">
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="FechaInicio" class="form-label">
-                                            <i class="fas fa-calendar-alt me-2"></i>Fecha de Inicio
-                                        </label>
-                                        <input asp-for="FechaInicio" class="form-control" type="date" />
-                                        <span asp-validation-for="FechaInicio" class="text-danger"></span>
-                                    </div>
+                                    <label asp-for="FechaInicio" class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                        <i class="fas fa-calendar-alt me-2"></i>Fecha de Inicio
+                                    </label>
+                                    <input asp-for="FechaInicio" class="form-control form-control-modern" type="date" />
+                                    <span asp-validation-for="FechaInicio" class="text-danger"></span>
                                 </div>
+
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="FechaVencimiento" class="form-label">
-                                            <i class="fas fa-calendar-times me-2"></i>Fecha de Vencimiento
-                                        </label>
-                                        <input asp-for="FechaVencimiento" class="form-control" type="date" />
-                                        <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
-                                        <div class="form-text">Opcional - Cuando expira el plan</div>
+                                    <label asp-for="FechaVencimiento" class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                        <i class="fas fa-calendar-times me-2"></i>Fecha de Vencimiento
+                                    </label>
+                                    <input asp-for="FechaVencimiento" class="form-control form-control-modern" type="date" />
+                                    <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
+                                    <div class="form-text">Opcional - Cuando expira el plan</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="archivo" class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                        <i class="fas fa-file-upload me-2"></i>Archivo del Plan
+                                    </label>
+                                    <input type="file" id="archivo" name="archivo" class="form-control form-control-modern"
+                                           accept=".pdf,.jpg,.jpeg,.png,.gif" />
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Formatos permitidos: PDF, JPG, JPEG, PNG, GIF. Tamaño máximo: 10MB
+                                    </div>
+                                    <div id="archivoPreview" class="mt-2 d-none">
+                                        <div class="alert alert-info rounded-3">
+                                            <i class="fas fa-file me-2"></i>
+                                            <span id="archivoNombre"></span>
+                                            <span id="archivoTamaño" class="text-muted ms-2"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="mb-4">
-                                <label for="archivo" class="form-label">
-                                    <i class="fas fa-file-upload me-2"></i>Archivo del Plan
-                                </label>
-                                <input type="file" id="archivo" name="archivo" class="form-control"
-                                       accept=".pdf,.jpg,.jpeg,.png,.gif" />
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    Formatos permitidos: PDF, JPG, JPEG, PNG, GIF. Tamaño máximo: 10MB
-                                </div>
-                                <div id="archivoPreview" class="mt-2 d-none">
-                                    <div class="alert alert-info">
-                                        <i class="fas fa-file me-2"></i>
-                                        <span id="archivoNombre"></span>
-                                        <span id="archivoTamaño" class="text-muted ms-2"></span>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="section-divider">
+                                <h6 class="mb-3 fw-bold text-secondary">
+                                    <i class="fas fa-chart-pie me-2"></i>
+                                    Información Nutricional (Opcional)
+                                </h6>
+                                <p class="text-muted mb-4">Puedes agregar esta información ahora o después</p>
 
-                            <hr class="my-4">
-
-                            <h6 class="mb-3">
-                                <i class="fas fa-chart-pie me-2"></i>
-                                Información Nutricional (Opcional)
-                            </h6>
-                            <p class="text-muted mb-4">Puedes agregar esta información ahora o después</p>
-
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label asp-for="CaloriasDiarias" class="form-label">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label asp-for="CaloriasDiarias" class="form-label fw-bold text-secondary small text-uppercase mb-2">
                                             <i class="fas fa-fire me-2"></i>Calorías Diarias
                                         </label>
-                                        <input asp-for="CaloriasDiarias" class="form-control" type="number"
+                                        <input asp-for="CaloriasDiarias" class="form-control form-control-modern" type="number"
                                                placeholder="1800" min="800" max="5000" />
                                         <span asp-validation-for="CaloriasDiarias" class="text-danger"></span>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label asp-for="Proteinas" class="form-label">
+
+                                    <div class="col-md-3">
+                                        <label asp-for="Proteinas" class="form-label fw-bold text-secondary small text-uppercase mb-2">
                                             <i class="fas fa-dumbbell me-2"></i>Proteínas (g)
                                         </label>
-                                        <input asp-for="Proteinas" class="form-control" type="number"
+                                        <input asp-for="Proteinas" class="form-control form-control-modern" type="number"
                                                step="0.1" placeholder="150" min="0" />
                                         <span asp-validation-for="Proteinas" class="text-danger"></span>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label asp-for="Carbohidratos" class="form-label">
+
+                                    <div class="col-md-3">
+                                        <label asp-for="Carbohidratos" class="form-label fw-bold text-secondary small text-uppercase mb-2">
                                             <i class="fas fa-bread-slice me-2"></i>Carbohidratos (g)
                                         </label>
-                                        <input asp-for="Carbohidratos" class="form-control" type="number"
+                                        <input asp-for="Carbohidratos" class="form-control form-control-modern" type="number"
                                                step="0.1" placeholder="200" min="0" />
                                         <span asp-validation-for="Carbohidratos" class="text-danger"></span>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label asp-for="Grasas" class="form-label">
+
+                                    <div class="col-md-3">
+                                        <label asp-for="Grasas" class="form-label fw-bold text-secondary small text-uppercase mb-2">
                                             <i class="fas fa-seedling me-2"></i>Grasas (g)
                                         </label>
-                                        <input asp-for="Grasas" class="form-control" type="number"
+                                        <input asp-for="Grasas" class="form-control form-control-modern" type="number"
                                                step="0.1" placeholder="60" min="0" />
                                         <span asp-validation-for="Grasas" class="text-danger"></span>
                                     </div>
-                                </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="Fibra" class="form-label">
+                                    <div class="col-md-6">
+                                        <label asp-for="Fibra" class="form-label fw-bold text-secondary small text-uppercase mb-2">
                                             <i class="fas fa-leaf me-2"></i>Fibra (g)
                                         </label>
-                                        <input asp-for="Fibra" class="form-control" type="number"
+                                        <input asp-for="Fibra" class="form-control form-control-modern" type="number"
                                                step="0.1" placeholder="25" min="0" max="100" />
                                         <span asp-validation-for="Fibra" class="text-danger"></span>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label asp-for="Estado" class="form-label">
+
+                                    <div class="col-md-6">
+                                        <label asp-for="Estado" class="form-label fw-bold text-secondary small text-uppercase mb-2">
                                             <i class="fas fa-toggle-on me-2"></i>Estado
                                         </label>
-                                        <select asp-for="Estado" class="form-select">
+                                        <select asp-for="Estado" class="form-select form-control-modern">
                                             <option value="Activo" selected>Activo</option>
                                             <option value="Pausado">Pausado</option>
                                         </select>
@@ -208,15 +292,13 @@
                                 </div>
                             </div>
 
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                                <a href="@Url.Action("Index", "PlanNutricional")" class="btn btn-outline-secondary me-md-2">
-                                    <i class="fas fa-times me-2"></i>
-                                    Cancelar
-                                </a>
-                                <button type="submit" class="btn btn-primary" id="btnGuardar">
-                                    <i class="fas fa-save me-2"></i>
-                                    Guardar Plan
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-save me-3" id="btnGuardar">
+                                    <i class="fas fa-save me-2"></i> Guardar Plan
                                 </button>
+                                <a href="@Url.Action("Index", "PlanNutricional")" class="btn btn-cancel">
+                                    <i class="fas fa-times me-2"></i> Cancelar
+                                </a>
                             </div>
                         </form>
                     </div>
@@ -226,21 +308,6 @@
     </div>
 </section>
 
-<style>
-    .required::after {
-        content: " *";
-        color: red;
-    }
-
-    .form-control:invalid {
-        border-color: #dc3545;
-    }
-
-    .form-control:valid {
-        border-color: #198754;
-    }
-</style>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -248,6 +315,102 @@
 
     <script>
         $(document).ready(function () {
+            // Variables para las fechas
+            const fechaInicioInput = $('#FechaInicio');
+            const fechaVencimientoInput = $('#FechaVencimiento');
+            const btnGuardar = $('#btnGuardar');
+
+            // Función para obtener la fecha de hoy en formato YYYY-MM-DD
+            function obtenerFechaHoy() {
+                const hoy = new Date();
+                return hoy.toISOString().split('T')[0];
+            }
+
+            // Establecer la fecha de carga como la fecha de hoy (FechaCarga se establece en el modelo, pero podemos usarla como referencia)
+            const fechaCarga = obtenerFechaHoy();
+
+            // Validación en tiempo real de fechas
+            function validarFechas() {
+                const fechaInicio = fechaInicioInput.val();
+                const fechaVencimiento = fechaVencimientoInput.val();
+                let errores = [];
+
+                // Limpiar errores previos
+                fechaVencimientoInput.removeClass('is-invalid');
+                fechaVencimientoInput.next('.text-danger').text('');
+
+                // Validar si fecha de vencimiento existe
+                if (fechaVencimiento) {
+                    // Validar vs fecha de carga (hoy)
+                    if (fechaVencimiento < fechaCarga) {
+                        errores.push(`La fecha de vencimiento no puede ser anterior a la fecha de carga (${new Date(fechaCarga).toLocaleDateString('es-ES')})`);
+                    }
+
+                    // Validar vs fecha de inicio
+                    if (fechaInicio && fechaVencimiento <= fechaInicio) {
+                        errores.push('La fecha de vencimiento debe ser posterior a la fecha de inicio');
+                    }
+
+                    // Validar que no sea más de 1 año en el futuro
+                    const unAñoDespues = new Date();
+                    unAñoDespues.setFullYear(unAñoDespues.getFullYear() + 1);
+                    const unAñoDespuesStr = unAñoDespues.toISOString().split('T')[0];
+                    
+                    if (fechaVencimiento > unAñoDespuesStr) {
+                        errores.push('La fecha de vencimiento no puede ser mayor a 1 año en el futuro');
+                    }
+                }
+
+                // Mostrar errores
+                if (errores.length > 0) {
+                    fechaVencimientoInput.addClass('is-invalid');
+                    fechaVencimientoInput.siblings('.text-danger').text(errores[0]);
+                    btnGuardar.prop('disabled', true);
+                    return false;
+                } else {
+                    fechaVencimientoInput.removeClass('is-invalid');
+                    btnGuardar.prop('disabled', false);
+                    return true;
+                }
+            }
+
+            // Eventos para validación en tiempo real
+            fechaInicioInput.on('change blur', validarFechas);
+            fechaVencimientoInput.on('change blur', validarFechas);
+
+            // Validación antes de enviar el formulario
+            $('#formCargarPlan').on('submit', function (e) {
+                if (!validarFechas()) {
+                    e.preventDefault();
+                    
+                    // Mostrar alerta
+                    const alertHtml = `
+                        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error de validación:</strong> Por favor, corrige los errores en las fechas antes de continuar.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                    
+                    // Insertar alerta antes del formulario
+                    $('.card-body').prepend(alertHtml);
+                    
+                    // Scroll a la alerta
+                    $('html, body').animate({
+                        scrollTop: $('.alert-danger').offset().top - 100
+                    }, 500);
+
+                    // Auto-cerrar después de 5 segundos
+                    setTimeout(function () {
+                        $('.alert-danger').fadeOut('slow', function() {
+                            $(this).remove();
+                        });
+                    }, 5000);
+
+                    return false;
+                }
+            });
+
             // Preview del archivo seleccionado
             $('#archivo').on('change', function (e) {
                 const file = e.target.files[0];
@@ -291,64 +454,10 @@
                 }
             });
 
-            // Validación de fechas
-            $('#FechaInicio, #FechaVencimiento').on('change', function () {
-                const fechaInicio = $('#FechaInicio').val();
-                const fechaVencimiento = $('#FechaVencimiento').val();
-
-                if (fechaInicio && fechaVencimiento) {
-                    const inicio = new Date(fechaInicio);
-                    const vencimiento = new Date(fechaVencimiento);
-
-                    if (vencimiento <= inicio) {
-                        alert('La fecha de vencimiento debe ser posterior a la fecha de inicio.');
-                        $('#FechaVencimiento').val('');
-                    }
-                }
-            });
-
-            // Validación del formulario antes de envío
-            $('#formCargarPlan').on('submit', function (e) {
-                const nombre = $('#Nombre').val().trim();
-                const tipoPlan = $('#TipoPlan').val();
-
-                if (!nombre) {
-                    e.preventDefault();
-                    alert('El nombre del plan es obligatorio.');
-                    $('#Nombre').focus();
-                    return false;
-                }
-
-                if (!tipoPlan) {
-                    e.preventDefault();
-                    alert('Debe seleccionar un tipo de plan.');
-                    $('#TipoPlan').focus();
-                    return false;
-                }
-
-                // Mostrar indicador de carga
-                const btnGuardar = $('#btnGuardar');
-                btnGuardar.prop('disabled', true)
-                    .html('<i class="fas fa-spinner fa-spin me-2"></i>Guardando...');
-            });
-
-            // Contador de caracteres para descripción
-            $('#Descripcion').on('input', function () {
-                const maxLength = 1000;
-                const currentLength = $(this).val().length;
-                const remaining = maxLength - currentLength;
-
-                let textClass = 'text-muted';
-                if (remaining < 100) textClass = 'text-warning';
-                if (remaining < 50) textClass = 'text-danger';
-
-                $(this).next('.text-danger').after(
-                    `<div class="form-text ${textClass}">Caracteres restantes: ${remaining}</div>`
-                );
-
-                // Remover el anterior si existe
-                $(this).siblings('.form-text').not(':first').remove();
-            });
+            // Auto-cerrar alertas de TempData después de 5 segundos
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
         });
     </script>
 }

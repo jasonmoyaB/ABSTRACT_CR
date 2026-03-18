@@ -3,90 +3,219 @@
 @{
     ViewData["Title"] = "Editar Perfil";
 }
+<link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .form-control-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control-modern:focus {
+        border-color: #007FFF;
+        box-shadow: 0 0 0 0.2rem rgba(0, 127, 255, 0.25);
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-save:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-cancel {
+        border: 2px solid #007FFF;
+        color: #007FFF;
+        background: white;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        color: #007FFF;
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-right: 0.75rem;
+    }
+    .warning-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+</style>
 
-<section class="page-section">
+<section class="page-section" style="padding: 2rem 0;">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="position-relative mb-5">
-                    <a href="@Url.Action("Perfil", "Usuario")" class="btn position-absolute"
-                       style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;"
-                       title="Volver a Mi Perfil">
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
-                    <div class="text-center">
-                        <h2 class="section-heading">
-                            <span class="section-heading-upper" style="color:#e6a756">Editar</span>
-                            <span class="section-heading-lower" style="color:#f6e1c5">Mi Perfil</span>
-                        </h2>
-                    </div>
+        <!-- Header -->
+        <div class="profile-section text-center mb-4 position-relative">
+            <a href="@(Model.RolID == 1 ? Url.Action("PanelAdministracion", "Administracion") : Url.Action("Perfil", "Usuario"))" 
+               class="btn position-absolute" 
+               style="left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 12px; padding: 0.5rem 1rem;"
+               title="Volver al Perfil">
+                <i class="fas fa-arrow-left me-2"></i> Volver
+            </a>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="icon-circle">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <div class="text-start ms-3">
+                    <h3 class="mb-0 fw-bold">Editar Mi Perfil</h3>
+                    <p class="mb-0 opacity-75">Actualiza tu información personal</p>
                 </div>
             </div>
         </div>
 
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Mensaje"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user-edit me-2"></i>
-                            Información Personal
+                <div class="modern-card bg-white">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-user-edit me-2"></i> Información Personal
                         </h5>
                     </div>
-                    <div class="card-body">
-                        <form asp-action="EditarPerfil" asp-controller="Usuario" method="post">
+
+                    <div class="card-body p-4">
+                        <form asp-action="EditarPerfil" asp-controller="Usuario" method="post" id="formEditarPerfil">
                             @Html.AntiForgeryToken()
                             <input asp-for="UsuarioID" type="hidden" />
+                            <input asp-for="RolID" type="hidden" />
+                            <input type="hidden" id="activoOriginal" value="@Model.Activo.ToString().ToLower()" />
 
-                            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div asp-validation-summary="All" class="alert alert-danger rounded-3 mb-4"></div>
+                            }
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Nombre" class="form-label"></label>
-                                    <input asp-for="Nombre" class="form-control" placeholder="Nombre" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Nombre" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
+                                    <input asp-for="Nombre" class="form-control form-control-modern" placeholder="Nombre" />
                                     <span asp-validation-for="Nombre" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="Apellido" class="form-label"></label>
-                                    <input asp-for="Apellido" class="form-control" placeholder="Apellido" />
+                                <div class="col-md-6">
+                                    <label asp-for="Apellido" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
+                                    <input asp-for="Apellido" class="form-control form-control-modern" placeholder="Apellido" />
                                     <span asp-validation-for="Apellido" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="CorreoElectronico" class="form-label"></label>
-                                    <input asp-for="CorreoElectronico" class="form-control" type="email" placeholder="Correo electrónico" />
+                                <div class="col-md-6">
+                                    <label asp-for="CorreoElectronico" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
+                                    <input asp-for="CorreoElectronico" class="form-control form-control-modern" type="email"
+                                           placeholder="Correo electrónico" />
                                     <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="ContrasenaHash" class="form-label">Nueva contraseña (opcional)</label>
-                                    <input asp-for="ContrasenaHash" class="form-control" type="password" placeholder="Contraseña" />
+                                <div class="col-md-6">
+                                    <label asp-for="ContrasenaHash" class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                        Nueva contraseña (opcional)
+                                    </label>
+                                    <input asp-for="ContrasenaHash" class="form-control form-control-modern" type="password"
+                                           placeholder="Dejar en blanco para mantener la actual" />
                                     <span asp-validation-for="ContrasenaHash" class="text-danger"></span>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Solo completa este campo si deseas cambiar tu contraseña
+                                    </small>
                                 </div>
 
-                               
+                                <div class="col-12">
+                                    <div class="warning-box" id="warningBox" style="display: none;">
+                                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                        <strong>Advertencia:</strong> Estás a punto de <strong>desactivar tu cuenta</strong>. 
+                                        No podrás acceder al sistema hasta que un administrador la reactive.
+                                    </div>
+                                </div>
 
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Estado de la cuenta</label>
-                                    <div class="form-check form-switch">
-                                        <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch" />
-                                        <label class="form-check-label" for="activoSwitch">
-                                            @(Model.Activo ? "Activa" : "Inactiva")
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                        <i class="fas fa-toggle-on me-2"></i>Estado de la cuenta
+                                    </label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch"
+                                               style="width: 3rem; height: 1.5rem;" />
+                                        <label class="form-check-label fw-semibold" for="activoSwitch" id="labelSwitch">
+                                            <span class="badge bg-success" id="estadoBadge">Activa</span>
                                         </label>
                                     </div>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Una cuenta inactiva no podrá iniciar sesión
+                                    </small>
                                 </div>
                             </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg me-3">
-                                    <i class="fas fa-save me-2"></i>
-                                    Guardar Cambios
+                                <button type="submit" class="btn btn-save me-3" id="btnGuardar">
+                                    <i class="fas fa-save me-2"></i> Guardar Cambios
                                 </button>
-                                <a href="@Url.Action("Perfil", "Usuario")" class="btn btn-outline-secondary btn-lg">
-                                    <i class="fas fa-times me-2"></i>
-                                    Cancelar
+                                @{
+                                    var enlaceAtras = Model.RolID == 1
+                                    ? Url.Action("PanelAdministracion", "Administracion")
+                                    : Url.Action("Perfil", "Usuario");
+                                }
+                                <a href="@enlaceAtras" class="btn btn-cancel">
+                                    <i class="fas fa-times me-2"></i> Cancelar
                                 </a>
                             </div>
                         </form>
@@ -97,6 +226,160 @@
     </div>
 </section>
 
+<!-- Modal de Confirmación de Desactivación -->
+<div class="modal fade" id="modalConfirmacionDesactivar" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalConfirmacionLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmar Desactivación de Cuenta
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-3">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong>¡Atención!</strong> Esta acción tiene consecuencias importantes.
+                </div>
+
+                <h6 class="fw-bold mb-3">Al desactivar tu cuenta:</h6>
+                <ul class="mb-3">
+                    <li class="mb-2">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        <strong>No podrás iniciar sesión</strong> en el sistema
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-lock text-danger me-2"></i>
+                        Tu sesión actual se <strong>cerrará inmediatamente</strong>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-user-clock text-warning me-2"></i>
+                        Necesitarás que un <strong>administrador reactive</strong> tu cuenta
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-database text-info me-2"></i>
+                        Tus datos permanecerán guardados pero <strong>inaccesibles</strong>
+                    </li>
+                </ul>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmarDesactivacion">
+                    <label class="form-check-label fw-bold" for="confirmarDesactivacion">
+                        Entiendo las consecuencias y deseo desactivar mi cuenta
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarDesactivar" disabled>
+                    <i class="fas fa-user-times me-2"></i>Sí, Desactivar Mi Cuenta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            const activoSwitch = $('#activoSwitch');
+            const warningBox = $('#warningBox');
+            const estadoBadge = $('#estadoBadge');
+            const form = $('#formEditarPerfil');
+            const activoOriginal = $('#activoOriginal').val() === 'true';
+            const modal = new bootstrap.Modal(document.getElementById('modalConfirmacionDesactivar'));
+            const checkboxConfirmar = $('#confirmarDesactivacion');
+            const btnConfirmar = $('#btnConfirmarDesactivar');
+            
+            let permitirEnvio = false;
+
+            // Actualizar UI del switch
+            function actualizarUISwitch(estaActivo) {
+                if (estaActivo) {
+                    estadoBadge.removeClass('bg-danger').addClass('bg-success').text('Activa');
+                    warningBox.slideUp();
+                } else {
+                    estadoBadge.removeClass('bg-success').addClass('bg-danger').text('Inactiva');
+                    warningBox.slideDown();
+                }
+            }
+
+            // Inicializar UI
+            actualizarUISwitch(activoSwitch.is(':checked'));
+
+            // Evento del switch
+            activoSwitch.on('change', function () {
+                const nuevoEstado = $(this).is(':checked');
+                actualizarUISwitch(nuevoEstado);
+
+                // Si está cambiando de activo a inactivo, prevenir y mostrar modal
+                if (activoOriginal && !nuevoEstado) {
+                    // Prevenir el cambio inmediato
+                    $(this).prop('checked', true);
+                    actualizarUISwitch(true);
+                    
+                    // Mostrar modal de confirmación
+                    modal.show();
+                }
+            });
+
+            // Checkbox de confirmación
+            checkboxConfirmar.on('change', function () {
+                btnConfirmar.prop('disabled', !$(this).is(':checked'));
+            });
+
+            // Botón de confirmar desactivación
+            btnConfirmar.on('click', function () {
+                // Permitir el cambio del switch
+                activoSwitch.prop('checked', false);
+                actualizarUISwitch(false);
+                
+                // Cerrar modal
+                modal.hide();
+                
+                // Permitir el envío del formulario
+                permitirEnvio = true;
+                
+                // Enviar formulario automáticamente
+                form.submit();
+            });
+
+            // Resetear checkbox cuando se cierra el modal sin confirmar
+            $('#modalConfirmacionDesactivar').on('hidden.bs.modal', function () {
+                checkboxConfirmar.prop('checked', false);
+                btnConfirmar.prop('disabled', true);
+            });
+
+            // Interceptar el envío del formulario
+            form.on('submit', function (e) {
+                const estaActivoActualmente = activoSwitch.is(':checked');
+                
+                // Si está intentando desactivar sin confirmación, prevenir
+                if (activoOriginal && !estaActivoActualmente && !permitirEnvio) {
+                    e.preventDefault();
+                    modal.show();
+                    return false;
+                }
+
+                // Si está desactivando con confirmación, mostrar mensaje de cierre de sesión
+                if (!estaActivoActualmente && permitirEnvio) {
+                    $('#btnGuardar')
+                        .prop('disabled', true)
+                        .html('<i class="fas fa-spinner fa-spin me-2"></i>Desactivando cuenta y cerrando sesión...');
+                }
+
+                return true;
+            });
+
+            // Auto-cerrar alertas
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
 }

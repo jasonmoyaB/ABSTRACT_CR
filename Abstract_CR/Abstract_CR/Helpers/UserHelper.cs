@@ -12,6 +12,19 @@ namespace Abstract_CR.Helpers
             _context = context;
         }
 
+        public Usuario GetUsuarioPorId(int id)
+        {
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.UsuarioID == id && 
+                                                                u.Activo);
+
+            if (usuario == null)
+            {
+                return new Usuario();
+            }
+
+            return usuario;
+        }
+
         public Usuario ObtenerUsuarioPorCorreo(string email)
         {
             var usuario = _context.Usuarios
@@ -44,6 +57,26 @@ namespace Abstract_CR.Helpers
             _context.Tokens.Remove(passResetToken);
             var result = _context.SaveChanges();
             return result > 0;
+        }
+
+        public List<UsuarioPorAsignar> GetUsuarioPorAsignar()
+        {
+            var usuarios = _context.Usuarios
+                                  .Where(u => u.Activo == true)
+                                  .Select(u => new UsuarioPorAsignar
+                                  {
+                                      UsuarioID = u.UsuarioID,
+                                      NombreCompleto = u.Nombre + " " + u.Apellido,
+                                      CorreoElectronico = u.CorreoElectronico
+                                  })
+                                  .ToList();
+
+            if (usuarios.Count > 0)
+            {
+                return usuarios;
+            }
+
+            return [];
         }
     }
 }

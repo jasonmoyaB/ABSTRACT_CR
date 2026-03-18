@@ -5,23 +5,94 @@
 }
 
 <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .plan-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+    .plan-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-4px);
+    }
+    .btn-add {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-add:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-right: 0.75rem;
+    }
+</style>
 
-<section class="page-section">
+<section class="page-section" style="padding: 2rem 0;">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="text-center mb-5">
-                    <h2 class="section-heading">
-                        <span class="section-heading-upper" style="color:#e6a756">Mis</span>
-                        <span class="section-heading-lower" style="color:#f6e1c5">Planes Nutricionales</span>
-                    </h2>
+        <!-- Header -->
+        <div class="profile-section text-center mb-4 position-relative">
+            <a href="@Url.Action("Perfil", "Usuario")" 
+               class="btn position-absolute" 
+               style="left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 12px; padding: 0.5rem 1rem;"
+               title="Volver al Perfil">
+                <i class="fas fa-arrow-left me-2"></i> Volver
+            </a>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="icon-circle">
+                    <i class="fas fa-apple-alt"></i>
+                </div>
+                <div class="text-start ms-3">
+                    <h3 class="mb-0 fw-bold">Mis Planes Nutricionales</h3>
+                    <p class="mb-0 opacity-75">Gestiona tus planes nutricionales personalizados</p>
                 </div>
             </div>
         </div>
 
         @if (TempData["Success"] != null)
         {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
                 @TempData["Success"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -30,7 +101,7 @@
 
         @if (TempData["Error"] != null)
         {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
                 @TempData["Error"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -39,18 +110,11 @@
 
         <div class="row mb-4">
             <div class="col-lg-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="lead mb-0" style="color:#fff">
-                            Gestiona tus planes nutricionales personalizados
-                        </p>
-                    </div>
-                    <div>
-                        <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>
-                            Nuevo Plan
-                        </a>
-                    </div>
+                <div class="d-flex justify-content-end">
+                    <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-add">
+                        <i class="fas fa-plus me-2"></i>
+                        Nuevo Plan
+                    </a>
                 </div>
             </div>
         </div>
@@ -60,24 +124,30 @@
             <div class="row">
                 @foreach (var plan in Model)
                 {
+                    var isExpired = plan.FechaVencimiento < DateTime.Today;
+                    var isExpiringSoon = plan.FechaVencimiento <= DateTime.Today.AddDays(7) && !isExpired;
+
                     <div class="col-lg-6 col-md-6 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-header bg-faded d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
+                        <div class="plan-card bg-white">
+                            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold text-dark">
                                     <i class="fas fa-clipboard-list me-2"></i>
                                     @plan.Nombre
                                 </h5>
+
                                 <div class="dropdown">
                                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
                                             data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
-                                    <ul class="dropdown-menu">
+                                    <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
-                                            <a class="dropdown-item" href="@Url.Action("Details", "PlanNutricional", new { id = plan.PlanID })">
+                                            <a class="dropdown-item"
+                                               href="@Url.Action("Details", "PlanNutricional", new { id = plan.PlanID })">
                                                 <i class="fas fa-eye me-2"></i>Ver Detalles
                                             </a>
                                         </li>
+
                                         @if (!string.IsNullOrEmpty(plan.DocumentoURL))
                                         {
                                             <li>
@@ -86,22 +156,26 @@
                                                 </a>
                                             </li>
                                         }
+
                                         <li><hr class="dropdown-divider"></li>
+
                                         <li>
-                                            <a class="dropdown-item text-danger" href="@Url.Action("Delete", "PlanNutricional", new { id = plan.PlanID })">
+                                            <a class="dropdown-item text-danger"
+                                               href="@Url.Action("Delete", "PlanNutricional", new { id = plan.PlanID })">
                                                 <i class="fas fa-trash me-2"></i>Eliminar
                                             </a>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
-                            <div class="card-body">
+
+                            <div class="card-body p-4">
                                 @if (!string.IsNullOrEmpty(plan.Descripcion))
                                 {
-                                    <p class="card-text">
-                                        @(plan.Descripcion.Length > 150 ?
-                                            plan.Descripcion.Substring(0, 150) + "..." :
-                                            plan.Descripcion)
+                                    <p class="card-text text-dark">
+                                        @(plan.Descripcion.Length > 150
+                                                                    ? plan.Descripcion.Substring(0, 150) + "..."
+                                                                    : plan.Descripcion)
                                     </p>
                                 }
                                 else
@@ -112,21 +186,21 @@
                                     </p>
                                 }
                             </div>
-                            <div class="card-footer bg-light">
-                                <div class="row text-center">
+
+                            <div class="card-footer bg-white border-top p-4">
+                                <div class="row text-center mb-3">
                                     <div class="col-6">
-                                        <small class="text-muted d-block">Fecha de Carga</small>
-                                        <strong>@plan.FechaCarga.ToString("dd/MM/yyyy")</strong>
+                                        <small class="text-muted d-block mb-1">Fecha de Carga</small>
+                                        <strong class="text-dark">@plan.FechaCarga.ToString("dd/MM/yyyy")</strong>
                                     </div>
                                     <div class="col-6">
-                                        <small class="text-muted d-block">Vencimiento</small>
+                                        <small class="text-muted d-block mb-1">Vencimiento</small>
+
                                         @if (plan.FechaVencimiento.HasValue)
                                         {
-                                            var isExpired = plan.FechaVencimiento < DateTime.Today;
-                                            var isExpiringSoon = plan.FechaVencimiento <= DateTime.Today.AddDays(7) && !isExpired;
-
                                             <strong class="@(isExpired ? "text-danger" : isExpiringSoon ? "text-warning" : "text-success")">
                                                 @plan.FechaVencimiento.Value.ToString("dd/MM/yyyy")
+
                                                 @if (isExpired)
                                                 {
                                                     <i class="fas fa-exclamation-triangle ms-1"></i>
@@ -143,34 +217,25 @@
                                         }
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
                 }
-            </div>
-
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <nav aria-label="Paginacion de planes">
-                        <ul class="pagination justify-content-center">
-                        </ul>
-                    </nav>
-                </div>
             </div>
         }
         else
         {
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="card text-center">
+                    <div class="modern-card bg-white text-center">
                         <div class="card-body py-5">
-                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                            <h4 class="text-muted">No tienes planes nutricionales</h4>
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3 opacity-50"></i>
+                            <h4 class="text-muted mb-3">No tienes planes nutricionales</h4>
                             <p class="text-muted mb-4">
                                 Carga tu primer plan nutricional para comenzar a recibir menús personalizados.
                             </p>
-                            <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-primary btn-lg">
+                            <a href="@Url.Action("CargarPlan", "PlanNutricional")" class="btn btn-add">
                                 <i class="fas fa-plus me-2"></i>
                                 Cargar Mi Primer Plan
                             </a>

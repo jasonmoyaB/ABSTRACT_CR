@@ -1,0 +1,429 @@
+@model Abstract_CR.Models.ComprobantePago
+@{
+    ViewData["Title"] = "Subir Comprobante de Pago";
+}
+
+<link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
+
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .modern-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .form-control-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .form-control-modern:focus {
+            border-color: #007FFF;
+            box-shadow: 0 0 0 0.2rem rgba(0, 127, 255, 0.25);
+        }
+
+        .form-control-modern.is-invalid {
+            border-color: #dc3545;
+        }
+
+            .form-control-modern.is-invalid:focus {
+                border-color: #dc3545;
+                box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            }
+
+    .btn-upload {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-upload:hover:not(:disabled) {
+            box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-upload:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+    .btn-cancel {
+        border: 2px solid #007FFF;
+        color: #007FFF;
+        background: white;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-cancel:hover {
+            background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+            color: #007FFF;
+        }
+
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+    }
+
+    .file-preview {
+        border: 2px dashed #e9ecef;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        background: #f8f9fa;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .file-preview:hover {
+            border-color: #007FFF;
+            background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+        }
+
+        .file-preview.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .file-preview.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+    .info-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #007FFF;
+        transition: all 0.3s ease;
+    }
+
+        .info-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+</style>
+
+<section class="page-section" style="padding: 2rem 0;">
+    <div class="container">
+        <!-- Header -->
+        <div class="profile-section text-center mb-4">
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="icon-circle">
+                    <i class="fas fa-receipt fa-2x"></i>
+                </div>
+                <div class="text-start ms-3">
+                    <h3 class="mb-0 fw-bold">Subir Comprobante de Pago</h3>
+                    <p class="mb-0 opacity-75">Adjunta el comprobante de tu pago para que sea revisado</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="modern-card bg-white">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-file-upload me-2"></i>
+                            Formulario de Comprobante
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+
+                        @if (TempData["Mensaje"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                @TempData["Mensaje"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                @TempData["Error"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <form asp-action="SubirComprobante" method="post" enctype="multipart/form-data" id="formSubirComprobante">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-4">
+                                <label for="archivo" class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                    <i class="fas fa-file-upload me-2"></i>Comprobante de Pago *
+                                </label>
+                                <input type="file" id="archivo" name="archivo" class="form-control form-control-modern"
+                                       accept=".pdf,.jpg,.jpeg,.png,.gif" required />
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Formatos permitidos: PDF, JPG, JPEG, PNG, GIF. Tamaño máximo: <strong>10MB</strong>
+                                </div>
+                                <span asp-validation-for="Archivo" class="text-danger" id="errorArchivo"></span>
+
+                                <!-- Preview del archivo -->
+                                <div id="archivoPreview" class="file-preview d-none mt-3">
+                                    <div id="previewContent">
+                                        <i class="fas fa-file fa-3x mb-2 text-primary"></i>
+                                        <p class="mb-1 fw-bold" id="nombreArchivo"></p>
+                                        <p class="mb-0 text-muted" id="tamañoArchivo"></p>
+                                        <p class="mb-0" id="estadoArchivo"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Observaciones" class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                    <i class="fas fa-comment me-2"></i>Observaciones (Opcional)
+                                </label>
+                                <textarea asp-for="Observaciones" class="form-control form-control-modern" rows="3"
+                                          placeholder="Agrega cualquier información adicional sobre el pago (número de transacción, referencia, etc.)"></textarea>
+                                <span asp-validation-for="Observaciones" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                <a href="@Url.Action("Perfil", "Usuario")" class="btn btn-cancel">
+                                    <i class="fas fa-arrow-left me-2"></i>Volver al Perfil
+                                </a>
+                                <button type="submit" class="btn btn-upload" id="btnSubir" disabled>
+                                    <i class="fas fa-upload me-2"></i>Subir Comprobante
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="modern-card bg-white mt-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-info-circle me-2 text-primary"></i>
+                            Información Importante
+                        </h6>
+                        <div class="info-item">
+                            <i class="fas fa-check-circle me-2 text-success"></i>
+                            El comprobante será revisado por un administrador en un plazo de 24-48 horas.
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-image me-2 text-info"></i>
+                            Asegúrate de que la imagen o PDF sea legible y contenga todos los datos necesarios.
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                            El tamaño máximo del archivo es de <strong>10MB</strong>. Archivos más grandes serán rechazados.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="@Url.Action("VerComprobantes", "Usuario")" class="text-decoration-none text-primary">
+                        <i class="fas fa-list me-2"></i>Ver mis comprobantes subidos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            const archivoInput = $('#archivo');
+            const preview = $('#archivoPreview');
+            const btnSubir = $('#btnSubir');
+            const form = $('#formSubirComprobante');
+
+            const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB en bytes
+            const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
+
+            let archivoValido = false;
+
+            // Función para formatear tamaño de archivo
+            function formatearTamaño(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+
+            // Función para validar archivo
+            function validarArchivo(file) {
+                const errores = [];
+
+                // Validar que existe
+                if (!file) {
+                    return { valido: false, errores: ['Debe seleccionar un archivo'] };
+                }
+
+                // Validar tamaño
+                if (file.size > MAX_FILE_SIZE) {
+                    errores.push(`El archivo es demasiado grande (${formatearTamaño(file.size)}). Tamaño máximo: 10MB`);
+                }
+
+                // Validar extensión
+                const extension = '.' + file.name.split('.').pop().toLowerCase();
+                if (!ALLOWED_EXTENSIONS.includes(extension)) {
+                    errores.push(`Formato no permitido (${extension}). Solo se aceptan: PDF, JPG, JPEG, PNG, GIF`);
+                }
+
+                return {
+                    valido: errores.length === 0,
+                    errores: errores
+                };
+            }
+
+            // Evento change del input file
+            archivoInput.on('change', function (e) {
+                const file = e.target.files[0];
+
+                // Limpiar errores previos
+                archivoInput.removeClass('is-invalid is-valid');
+                $('#errorArchivo').text('');
+                preview.removeClass('d-none error success');
+
+                if (!file) {
+                    preview.addClass('d-none');
+                    btnSubir.prop('disabled', true);
+                    archivoValido = false;
+                    return;
+                }
+
+                // Validar archivo
+                const validacion = validarArchivo(file);
+
+                // Mostrar preview
+                $('#nombreArchivo').text(file.name);
+                $('#tamañoArchivo').text(formatearTamaño(file.size));
+
+                if (validacion.valido) {
+                    // Archivo válido
+                    archivoInput.addClass('is-valid');
+                    preview.addClass('success').removeClass('error');
+                    $('#estadoArchivo').html('<span class="text-success"><i class="fas fa-check-circle me-2"></i>Archivo listo para subir</span>');
+                    $('#previewContent i').removeClass('text-danger').addClass('text-success');
+                    btnSubir.prop('disabled', false);
+                    archivoValido = true;
+                } else {
+                    // Archivo inválido
+                    archivoInput.addClass('is-invalid');
+                    preview.addClass('error').removeClass('success');
+                    $('#estadoArchivo').html('<span class="text-danger"><i class="fas fa-times-circle me-2"></i>' + validacion.errores[0] + '</span>');
+                    $('#previewContent i').removeClass('text-success').addClass('text-danger');
+                    $('#errorArchivo').text(validacion.errores.join('. '));
+                    btnSubir.prop('disabled', true);
+                    archivoValido = false;
+
+                    // Mostrar alerta
+                    mostrarAlerta('danger', 'Error de validación', validacion.errores.join('. '));
+                }
+
+                preview.removeClass('d-none');
+            });
+
+            // Validar antes de enviar el formulario
+            form.on('submit', function (e) {
+                if (!archivoValido) {
+                    e.preventDefault();
+                    mostrarAlerta('danger', 'No se puede subir el archivo', 'Por favor, selecciona un archivo válido antes de continuar.');
+
+                    // Scroll al error
+                    $('html, body').animate({
+                        scrollTop: archivoInput.offset().top - 100
+                    }, 500);
+
+                    return false;
+                }
+
+                // Deshabilitar botón para evitar doble envío
+                btnSubir.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Subiendo...');
+
+                return true;
+            });
+
+            // Función para mostrar alertas
+            function mostrarAlerta(tipo, titulo, mensaje) {
+                const iconos = {
+                    'success': 'check-circle',
+                    'danger': 'exclamation-triangle',
+                    'warning': 'exclamation-circle',
+                    'info': 'info-circle'
+                };
+
+                const alertHtml = `
+                    <div class="alert alert-${tipo} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                        <i class="fas fa-${iconos[tipo]} me-2"></i>
+                        <strong>${titulo}:</strong> ${mensaje}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+                // Insertar al inicio del card-body
+                $('.card-body').prepend(alertHtml);
+
+                // Auto-cerrar después de 5 segundos
+                setTimeout(function () {
+                    $('.alert').fadeOut('slow', function () {
+                        $(this).remove();
+                    });
+                }, 5000);
+            }
+
+            // Auto-cerrar alertas de TempData
+            setTimeout(function () {
+                $('.alert').not('.file-preview .alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}4

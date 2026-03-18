@@ -22,7 +22,6 @@
                                 <div class="card-body p-4 p-lg-5 text-black">
 
                                     <div class="d-flex align-items-center mb-3 pb-1">
-                                        <i class="fas fa-cubes fa-2x me-3" style="color: #ff6219;"></i>
                                         <img src="~/assets/img/LOGO01.jfif"
                                              alt="Logo"
                                              class="img-fluid rounded-circle"
@@ -59,7 +58,12 @@
 
                                         <div class="form-outline mb-4">
                                             <label asp-for="Password" class="form-label"></label>
-                                            <input asp-for="Password" class="form-control form-control-lg" placeholder="Tu contraseña" />
+                                            <div class="position-relative">
+                                                <input asp-for="Password" id="passwordInput" class="form-control form-control-lg" placeholder="Tu contraseña" type="password" />
+                                                <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" id="togglePassword" style="border: none; background: none; color: #6c757d; z-index: 10; outline: none; box-shadow: none; padding: 0.5rem;">
+                                                    <i class="fas fa-eye" id="eyeIcon"></i>
+                                                </button>
+                                            </div>
                                             <span asp-validation-for="Password" class="text-danger"></span>
                                         </div>
 
@@ -75,6 +79,9 @@
                                         <p class="mt-2">
                                             <a asp-action="RequestReset" asp-controller="PasswordReset" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
                                         </p>
+                                    <p class="mt-2">
+                                        <a asp-action="Index" asp-controller="Home" class="text-decoration-none">Volver</a>
+                                    </p>
                                     </div>
 
                                 </div>
@@ -89,4 +96,41 @@
 
     @section Scripts {
         @await Html.PartialAsync("_ValidationScriptsPartial")
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const togglePassword = document.getElementById('togglePassword');
+                const passwordInput = document.getElementById('passwordInput');
+                const eyeIcon = document.getElementById('eyeIcon');
+                
+                // Eliminar outline y bordes al hacer focus
+                togglePassword.addEventListener('focus', function() {
+                    this.style.outline = 'none';
+                    this.style.boxShadow = 'none';
+                });
+                
+                togglePassword.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    // Cambiar el icono
+                    if (type === 'password') {
+                        eyeIcon.classList.remove('fa-eye-slash');
+                        eyeIcon.classList.add('fa-eye');
+                    } else {
+                        eyeIcon.classList.remove('fa-eye');
+                        eyeIcon.classList.add('fa-eye-slash');
+                    }
+                });
+            });
+        </script>
+        <style>
+            #togglePassword:focus,
+            #togglePassword:active,
+            #togglePassword:hover {
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+            }
+        </style>
     }

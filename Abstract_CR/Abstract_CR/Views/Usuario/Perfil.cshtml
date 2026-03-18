@@ -1,129 +1,672 @@
-@model Abstract_CR.Models.Usuario
+@model Abstract_CR.Models.PerfilInteraccionViewModel
 @{
     ViewData["Title"] = "Mi Perfil";
 }
 <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
-<section class="page-section">
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .nav-pills .nav-link {
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        color: #000 !important;
+    }
+    .nav-pills .nav-link:not(.active) i {
+        color: #000 !important;
+    }
+    .nav-pills .nav-link:hover {
+        background-color: #f8f9fa;
+        transform: translateX(4px);
+        color: #000 !important;
+    }
+    .nav-pills .nav-link:hover:not(.active) i {
+        color: #000 !important;
+    }
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white !important;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+    }
+    .nav-pills .nav-link.active i {
+        color: white !important;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .info-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #007FFF;
+        transition: all 0.3s ease;
+    }
+    .info-item:hover {
+        background: #e9ecef;
+        transform: translateX(4px);
+    }
+    .chat-message {
+        border-radius: 18px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        max-width: 75%;
+        word-wrap: break-word;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .chat-message.chef {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+    }
+    .chat-message.user {
+        background: white;
+        border: 1px solid #e9ecef;
+        margin-right: auto;
+        border-bottom-left-radius: 4px;
+    }
+    .action-btn {
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        border: 2px solid #e9ecef;
+        background: white;
+    }
+    .action-btn:hover {
+        border-color: #007FFF;
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.3);
+    }
+    .points-badge {
+        background: #000000;
+        color: #FFD700;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .points-badge i,
+    .points-badge .fa-star,
+    .points-badge .fas {
+        color: #FFD700 !important;
+        display: inline-block;
+    }
+    .btn-send-message {
+        background-color: #28a745;
+        color: white;
+        border: none;
+    }
+    .btn-send-message:hover {
+        background-color: #218838;
+        color: white;
+    }
+    .btn-send-message i {
+        color: white !important;
+    }
+    .card-header-modern i {
+        color: #000 !important;
+    }
+    .btn-edit-profile {
+        background-color: #28a745;
+        color: white;
+        border: none;
+    }
+    .btn-edit-profile:hover {
+        background-color: #218838;
+        color: white;
+    }
+    .btn-edit-profile i {
+        color: white !important;
+    }
+    .points-history-item {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+    }
+    .points-history-item:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateX(4px);
+    }
+    .points-history-item.positive {
+        border-left-color: #10b981;
+    }
+    .points-history-item.negative {
+        border-left-color: #ef4444;
+    }
+    .summary-item {
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #007FFF;
+        transition: all 0.3s ease;
+    }
+    .summary-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.3);
+        transform: translateX(4px);
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-right: 0.75rem;
+    }
+    .btn-comprobante-primary {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-comprobante-primary:hover {
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-comprobante-outline {
+        border: 2px solid #007FFF;
+        color: #007FFF;
+        background: white;
+        border-radius: 20px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-comprobante-outline:hover {
+        background: linear-gradient(135deg, #e6f5ff 0%, #d6f0ff 100%);
+        color: #007FFF;
+        border-color: #007FFF;
+    }
+</style>
+
+<section class="page-section" style="padding: 2rem 0;">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="text-center mb-5">
-                    <h2 class="section-heading">
-                        <span class="section-heading-upper" style="color:#e6a756">Mi Perfil</span>
-                        <span class="section-heading-lower" style="color:#f6e1c5">Información Personal</span>
-                    </h2>
+        <!-- Header -->
+        <div class="profile-section text-center mb-4">
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="icon-circle">
+                    <i class="fas fa-user"></i>
                 </div>
+                <div class="text-start ms-3">
+                    <h3 class="mb-0 fw-bold">@Model.Usuario.NombreCompleto</h3>
+                    <p class="mb-0 opacity-75">@Model.Usuario.CorreoElectronico</p>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center gap-3">
+                <span class="points-badge">
+                    <i class="fas fa-star me-2"></i>@Model.Usuario.PuntosTotales puntos
+                </span>
+                <span class="badge bg-light text-dark px-3 py-2">
+                    <i class="fas fa-calendar me-2"></i>Miembro desde @(Model.Usuario.FechaRegistro?.ToString("MMM yyyy") ?? "N/A")
+                </span>
             </div>
         </div>
 
         @if (TempData["Mensaje"] != null)
         {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
                 @TempData["Mensaje"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
 
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
         <div class="row">
-            <!-- Información Personal -->
-            <div class="col-lg-8">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user me-2"></i>
-                            Información Personal
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nombre Completo</label>
-                                <p class="form-control-plaintext">@Model.NombreCompleto</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Correo Electrónico</label>
-                                <p class="form-control-plaintext">@Model.CorreoElectronico</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Fecha de Registro</label>
-                                <p class="form-control-plaintext">@(Model.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Rol</label>
-                                <p class="form-control-plaintext">@(Model.Rol?.NombreRol ?? "No especificado")</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Estado</label>
-                                <p class="form-control-plaintext">
-                                    @if (Model.Activo)
-                                    {
-                                        <span class="badge bg-success">Activo</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Inactivo</span>
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                        <div class="text-center mt-4">
-                            <a href="@Url.Action("EditarPerfil", "Usuario")" class="btn btn-primary btn-lg">
-                                <i class="fas fa-edit me-2"></i>
-                                Editar Perfil
-                            </a>
-                        </div>
+            <!-- Navegación -->
+            <div class="col-lg-3 mb-4">
+                <div class="modern-card sticky-top bg-white" style="top:20px;">
+                    <div class="card-body p-3">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3 px-2">Menú</h6>
+                        <ul class="nav nav-pills flex-column" id="perfilTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active d-flex align-items-center text-start w-100" id="info-tab" data-bs-toggle="pill" data-bs-target="#info" type="button" role="tab">
+                                    <i class="fas fa-user me-2"></i> Información
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center text-start w-100" id="chef-tab" data-bs-toggle="pill" data-bs-target="#chef" type="button" role="tab">
+                                    <i class="fas fa-comments me-2"></i> Mensajería
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center text-start w-100" id="salud-tab" data-bs-toggle="pill" data-bs-target="#salud" type="button" role="tab">
+                                    <i class="fas fa-heartbeat me-2"></i> Salud
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center text-start w-100" id="cuenta-tab" data-bs-toggle="pill" data-bs-target="#cuenta" type="button" role="tab">
+                                    <i class="fas fa-wallet me-2"></i> Cuenta
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link d-flex align-items-center text-start w-100" id="resumen-tab" data-bs-toggle="pill" data-bs-target="#resumen" type="button" role="tab">
+                                    <i class="fas fa-file-alt me-2"></i> Resúmenes
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel de Acciones Rápidas -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-cogs me-2"></i>
-                            Gestión de Salud
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-3">
-                            <a href="@Url.Action("Alergias", "Usuario")" class="btn btn-outline-primary">
-                                <i class="fas fa-allergies me-2"></i>
-                                Mis Alergias
-                            </a>
-                            <a href="@Url.Action("Restricciones", "Usuario")" class="btn btn-outline-primary">
-                                <i class="fas fa-ban me-2"></i>
-                                Mis Restricciones
-                            </a>
-                            <a href="@Url.Action("Preferencias", "Usuario")" class="btn btn-outline-primary">
-                                <i class="fas fa-heart me-2"></i>
-                                Mis Preferencias
-                            </a>
-                            <a href="@Url.Action("Index", "PlanNutricional")" class="btn btn-outline-primary">
-                                <i class="fas fa-apple-alt me-2"></i>
-                                Mi plan
-                            </a>
-                        </div>
-                    </div>
-                </div>
+            <!-- Contenido principal -->
+            <div class="col-lg-9">
+                <div class="tab-content" id="perfilTabsContent">
 
-                <!-- Información de Cuenta -->
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
-                        <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Información de Cuenta
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Miembro desde</label>
-                            <p class="form-control-plaintext">@(Model.FechaRegistro?.ToString("dd/MM/yyyy") ?? "No especificada")</p>
+                    <!-- Información Personal -->
+                    <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                        <div class="modern-card bg-white mb-4">
+                            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold text-dark">
+                                    <i class="fas fa-id-card me-2"></i>
+                                    Información Personal
+                                </h5>
+                                <a href="@Url.Action("EditarPerfil", "Usuario")"
+                                   class="btn btn-sm btn-edit-profile rounded-pill px-3">
+                                    <i class="fas fa-edit me-1"></i> Editar
+                                </a>
+                            </div>
+
+                            <div class="card-body p-4">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Nombre Completo</label>
+                                            <p class="mb-0 fw-semibold text-dark fs-6">@Model.Usuario.NombreCompleto</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Correo Electrónico</label>
+                                            <p class="mb-0 fw-semibold text-dark fs-6">@Model.Usuario.CorreoElectronico</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Fecha de Registro</label>
+                                            <p class="mb-0 fw-semibold text-dark fs-6">
+                                                @(Model.Usuario.FechaRegistro?.ToString("dd 'de' MMMM 'de' yyyy") ?? "No especificada")
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Estado</label>
+                                            <p class="mb-0">
+                                                @if (Model.Usuario.Activo)
+                                                {
+                                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                                        <i class="fas fa-check-circle me-1"></i>Activo
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                                        <i class="fas fa-times-circle me-1"></i>Inactivo
+                                                    </span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Conversación con el Chef -->
+                    <div class="tab-pane fade" id="chef" role="tabpanel" aria-labelledby="chef-tab">
+                        <div class="modern-card bg-white mb-4">
+                            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold text-dark">
+                                    <i class="fas fa-comments me-2"></i>
+                                    Conversación con el Chef
+                                </h5>
+                                <span class="points-badge">
+                                    <i class="fas fa-star me-1"></i>@Model.Usuario.PuntosTotales pts
+                                </span>
+                            </div>
+
+                            <div class="card-body p-4" style="max-height: 500px; overflow-y: auto; background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);">
+                                @if (Model.Mensajes.Any())
+                                {
+                                    foreach (var mensaje in Model.Mensajes.OrderBy(m => m.FechaEnvio))
+                                    {
+                                        var esChef = mensaje.EnviadoPorChef;
+                                        var clase = esChef ? "chef" : "user";
+                                        var alineacion = esChef ? "text-end" : "text-start";
+                                        <div class="@alineacion mb-3">
+                                            <div class="small text-muted mb-1 px-2">
+                                                @(esChef
+                                                    ? (mensaje.Tipo == Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal ? "📊 Resumen del Chef" : "👨‍🍳 Chef")
+                                                    : "👤 Tú")
+                                                · @mensaje.FechaEnvio.ToString("dd/MM/yyyy HH:mm")
+                                            </div>
+                                            <div class="chat-message @clase">
+                                                @mensaje.Contenido
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-5">
+                                        <i class="fas fa-comments fa-3x mb-3 text-secondary opacity-50"></i>
+                                        <p class="mb-0 fs-5">Aún no tienes mensajes</p>
+                                        <p class="small">Empieza la conversación con tu chef</p>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="card-footer bg-white border-top p-4">
+                                @if (!Model.Usuario.Activo)
+                                {
+                                    <!-- Mostrar mensaje cuando la cuenta está inactiva -->
+                                    <div class="alert alert-warning rounded-3 mb-0" role="alert">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Cuenta Inactiva:</strong> No puedes enviar mensajes porque tu cuenta está inactiva. Contacta a un administrador para reactivarla.
+                                    </div>
+                                }
+                                else
+                                {
+                                    <!-- Formulario solo visible si el usuario está activo -->
+                                    <form asp-action="EnviarMensajeChef" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="UsuarioId" value="@Model.Usuario.UsuarioID" />
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary small mb-2">Escribe tu mensaje</label>
+                                            <textarea class="form-control rounded-3" name="Contenido" rows="3" 
+                                                      placeholder="Comparte tus dudas, logros o comentarios..." 
+                                                      style="border: 2px solid #e9ecef; resize: none;"
+                                                      required></textarea>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-send-message rounded-pill px-4 fw-semibold">
+                                                <i class="fas fa-paper-plane me-2"></i>Enviar Mensaje
+                                            </button>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gestión de Salud -->
+                    <div class="tab-pane fade" id="salud" role="tabpanel" aria-labelledby="salud-tab">
+                        <div class="modern-card bg-white mb-4">
+                            <div class="card-header-modern">
+                                <h5 class="mb-0 fw-bold text-dark">
+                                    <i class="fas fa-heartbeat me-2"></i> Gestión de Salud
+                                </h5>
+                            </div>
+
+                            <div class="card-body p-4">
+                                <div class="row g-3">
+                                    @* <div class="col-12 col-md-6">
+                                        <a href="@Url.Action("Alergias", "Usuario")" class="action-btn d-block text-decoration-none text-dark">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-circle me-3">
+                                                        <i class="fas fa-allergies"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold">Mis Alergias</div>
+                                                        <small class="text-muted">Gestiona tus alergias</small>
+                                                    </div>
+                                                </div>
+                                                <i class="fas fa-chevron-right text-muted"></i>
+                                            </div>
+                                        </a>
+                                    </div> *@
+
+                                    <div class="col-12 col-md-6">
+                                        <a href="@Url.Action("Restricciones", "Usuario")" class="action-btn d-block text-decoration-none text-dark">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-circle me-3">
+                                                        <i class="fas fa-ban"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold">Mis Restricciones</div>
+                                                        <small class="text-muted">Restricciones dietéticas</small>
+                                                    </div>
+                                                </div>
+                                                <i class="fas fa-chevron-right text-muted"></i>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                   @*  <div class="col-12 col-md-6">
+                                        <a href="@Url.Action("Preferencias", "Usuario")" class="action-btn d-block text-decoration-none text-dark">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-circle me-3">
+                                                        <i class="fas fa-heart"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold">Mis Preferencias</div>
+                                                        <small class="text-muted">Preferencias nutricionales</small>
+                                                    </div>
+                                                </div>
+                                                <i class="fas fa-chevron-right text-muted"></i>
+                                            </div>
+                                        </a>
+                                    </div> *@
+
+                                    <div class="col-12 col-md-6">
+                                        <a href="@Url.Action("Index", "PlanNutricional")" class="action-btn d-block text-decoration-none text-dark">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-circle me-3">
+                                                        <i class="fas fa-apple-alt"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold">Mi Plan</div>
+                                                        <small class="text-muted">Plan nutricional</small>
+                                                    </div>
+                                                </div>
+                                                <i class="fas fa-chevron-right text-muted"></i>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <a href="@Url.Action("Notificaciones", "PlanNutricional")" class="action-btn d-block text-decoration-none text-dark">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-circle me-3">
+                                                        <i class="fas fa-bell"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold">Notificaciones</div>
+                                                        <small class="text-muted">Alertas y recordatorios</small>
+                                                    </div>
+                                                </div>
+                                                <i class="fas fa-chevron-right text-muted"></i>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Cuenta -->
+                    <div class="tab-pane fade" id="cuenta" role="tabpanel" aria-labelledby="cuenta-tab">
+                        <div class="modern-card bg-white mb-4">
+                            <div class="card-header-modern">
+                                <h5 class="mb-0 fw-bold text-dark">
+                                    <i class="fas fa-wallet me-2"></i> Información de Cuenta
+                                </h5>
+                            </div>
+
+                            <div class="card-body p-4">
+                                <div class="row g-4 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Miembro desde</label>
+                                            <p class="mb-0 fw-semibold text-dark fs-6">
+                                                @(Model.Usuario.FechaRegistro?.ToString("dd 'de' MMMM 'de' yyyy") ?? "No especificada")
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Puntos acumulados</label>
+                                            <p class="mb-0">
+                                                <span class="points-badge">
+                                                    <i class="fas fa-star me-2"></i>@Model.Usuario.PuntosTotales puntos
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-secondary small text-uppercase mb-3">Últimas asignaciones</label>
+                                    @if (Model.HistorialPuntos.Any())
+                                    {
+                                        <div>
+                                            @foreach (var registro in Model.HistorialPuntos.Take(5))
+                                            {
+                                                <div class="points-history-item @(registro.Puntos >= 0 ? "positive" : "negative")">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div>
+                                                            <div class="fw-bold fs-5 mb-1" style="color:@(registro.Puntos >= 0 ? "#10b981" : "#ef4444");">
+                                                                @(registro.Puntos >= 0 ? "+" : "")@registro.Puntos pts
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-calendar me-1"></i>@registro.FechaAsignacion.ToString("dd/MM/yyyy HH:mm")
+                                                            </small>
+                                                        </div>
+                                                        <div class="text-end ms-3">
+                                                            <small class="text-muted d-block">@(string.IsNullOrWhiteSpace(registro.Motivo) ? "Sin motivo" : registro.Motivo)</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="fas fa-inbox fa-2x mb-2 opacity-50"></i>
+                                            <p class="mb-0">Aún no tienes puntos asignados</p>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="border-top pt-4">
+                                    <h6 class="fw-bold text-secondary small text-uppercase mb-3">
+                                        <i class="fas fa-receipt me-2"></i>Comprobantes de Pago
+                                    </h6>
+                                    <p class="text-muted small mb-3">
+                                        Sube el comprobante de tu pago para que sea revisado por el administrador
+                                    </p>
+                                    <div class="d-flex gap-2">
+                                        <a href="@Url.Action("SubirComprobante", "Usuario")" class="btn btn-comprobante-primary flex-fill">
+                                            <i class="fas fa-upload me-2"></i>Subir Comprobante
+                                        </a>
+                                        <a href="@Url.Action("VerComprobantes", "Usuario")" class="btn btn-comprobante-outline">
+                                            <i class="fas fa-list me-2"></i>Ver Mis Comprobantes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resúmenes Semanales -->
+                    <div class="tab-pane fade" id="resumen" role="tabpanel" aria-labelledby="resumen-tab">
+                        <div class="modern-card bg-white mb-4">
+                            <div class="card-header-modern">
+                                <h5 class="mb-0 fw-bold text-dark">
+                                    <i class="fas fa-file-alt me-2"></i> Resúmenes Semanales
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                @if (Model.Mensajes.Any(m => m.Tipo == Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal))
+                                {
+                                    @foreach (var resumen in Model.Mensajes
+                                        .Where(m => m.Tipo == Abstract_CR.Models.TipoMensajeInteraccion.ResumenSemanal)
+                                        .OrderByDescending(m => m.FechaEnvio)
+                                        .Take(5))
+                                    {
+                                        <div class="summary-item">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <div class="fw-bold text-dark mb-1">
+                                                        <i class="fas fa-calendar-week me-2 text-primary"></i>
+                                                        Resumen del @resumen.FechaEnvio.ToString("dd 'de' MMMM 'de' yyyy")
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>@resumen.FechaEnvio.ToString("HH:mm")
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="text-dark mt-3" style="line-height: 1.6;">
+                                                @resumen.Contenido
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center py-5 text-muted">
+                                        <i class="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
+                                        <p class="mb-0 fs-5">No hay resúmenes aún</p>
+                                        <p class="small">Tu chef te enviará resúmenes semanales aquí</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
-</section> 
+</section>
+
+<partial name="_ValidationScriptsPartial" />

@@ -4,24 +4,23 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Abstract_CR.Helpers;
 using Abstract_CR.Services;
-using Abstract_CR.Services.Pedidos;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar límites de archivo
+
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; 
 });
 
 // Se agrega el DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+
 builder.Services.AddControllersWithViews();
 
-// Configurar sesiones
+
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -32,27 +31,33 @@ builder.Services.AddSession(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-// Registrar Helpers para inyeccion de dependencias
+// inyeccion de dependencias
 builder.Services.AddScoped<UserHelper>();
+builder.Services.AddScoped<EbooksHelper>();
+builder.Services.AddScoped<SuscripcionesHelper>();
+builder.Services.AddScoped<CometarioRecetaHelper>();
+builder.Services.AddScoped<InteraccionHelper>();
+builder.Services.AddScoped<RecetasHelper>();
+builder.Services.AddScoped<MenuSemanalHelper>();
 
-// Configurar servicios de email
+//  email
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHostedService<VencimientosNotifier>();
 
-// Servicios de pedidos
-builder.Services.AddScoped<IPedidoService, PedidoService>();
+// Servicio de  PDF para reportes
+builder.Services.AddScoped<Abstract_CR.Services.IReportePdfService, Abstract_CR.Services.ReportePdfService>();
 
 var app = builder.Build();
 
-//
-
-// CÓDIGO TEMPORAL PARA PROBAR LA CONEXION
+// CÓDIGO TEMPORAL PARA PROBAR LA CONEXIÓN
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        await context.Database.MigrateAsync();
+       await context.Database.MigrateAsync();
         Console.WriteLine("Migraciones de base de datos aplicadas correctamente.");
+        
         await context.Database.OpenConnectionAsync();
         Console.WriteLine("Conexión exitosa a la base de datos de Azure!");
         await context.Database.CloseConnectionAsync();
@@ -73,13 +78,10 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-//
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

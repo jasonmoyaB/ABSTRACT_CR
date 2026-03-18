@@ -6,46 +6,99 @@
 
 <link rel="icon" type="image/x-icon" href="~/assets/img/LOGO01.jfif" />
 
-<section class="page-section">
+<style>
+    .profile-section {
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .modern-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .card-header-modern {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);
+        color: white;
+        margin-right: 0.75rem;
+    }
+    .nutrition-card {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    .nutrition-card:hover {
+        border-color: #007FFF;
+        box-shadow: 0 4px 12px rgba(0, 127, 255, 0.15);
+        transform: translateY(-2px);
+    }
+</style>
+
+<section class="page-section" style="padding: 2rem 0;">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="position-relative mb-5">
-                    <a href="@Url.Action("Index", "PlanNutricional")" class="btn position-absolute" style="left: 0; top: 0; background-color: #2F170F; border-color: #2F170F; color: white;" title="Volver a Mis Planes">
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
-                    <div class="text-center">
-                        <h2 class="section-heading">
-                            <span class="section-heading-upper" style="color:#e6a756">Detalles del</span>
-                            <span class="section-heading-lower" style="color:#f6e1c5">Plan Nutricional</span>
-                        </h2>
-                    </div>
+        <!-- Header -->
+        <div class="profile-section text-center mb-4 position-relative">
+            <a href="@Url.Action("Index", "PlanNutricional")" 
+               class="btn position-absolute" 
+               style="left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 12px; padding: 0.5rem 1rem;"
+               title="Volver a Mis Planes">
+                <i class="fas fa-arrow-left me-2"></i> Volver
+            </a>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="icon-circle">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="text-start ms-3">
+                    <h3 class="mb-0 fw-bold">Detalles del Plan Nutricional</h3>
+                    <p class="mb-0 opacity-75">@Model.Nombre</p>
                 </div>
             </div>
         </div>
 
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-faded">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0">
-                                <i class="fas fa-clipboard-list me-2"></i>
-                                @Model.Nombre
-                            </h4>
-                            <div class="btn-group" role="group">
-                                @if (!string.IsNullOrEmpty(Model.DocumentoURL))
-                                {
-                                    <a href="@Model.DocumentoURL" target="_blank" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-download me-1"></i>
-                                        Descargar
-                                    </a>
-                                }
-                                <a href="@Url.Action("Delete", "PlanNutricional", new { id = Model.PlanID })" class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-trash me-1"></i>
-                                    Eliminar
+                <div class="modern-card bg-white">
+                    <div class="card-header-modern d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            @Model.Nombre
+                        </h4>
+                        <div class="btn-group" role="group">
+                            @if (!string.IsNullOrEmpty(Model.DocumentoURL))
+                            {
+                                <a href="@Model.DocumentoURL" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download me-1"></i>
+                                    Descargar
                                 </a>
-                            </div>
+                            }
+                            <a href="@Url.Action("Delete", "PlanNutricional", new { id = Model.PlanID })" 
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('¿Estás seguro de que deseas eliminar este plan?')">
+                                <i class="fas fa-trash me-1"></i>
+                                Eliminar
+                            </a>
                         </div>
                     </div>
 
@@ -117,10 +170,10 @@
                                         @if (Model.CaloriasDiarias.HasValue)
                                         {
                                             <div class="col-sm-6 col-lg-4 mb-3">
-                                                <div class="text-center p-3 border rounded">
+                                                <div class="nutrition-card">
                                                     <i class="fas fa-fire text-danger fa-2x mb-2"></i>
-                                                    <h6 class="mb-1">Calorías</h6>
-                                                    <strong>@Model.CaloriasDiarias kcal</strong>
+                                                    <h6 class="mb-1 fw-bold">Calorías</h6>
+                                                    <strong class="text-dark">@Model.CaloriasDiarias kcal</strong>
                                                 </div>
                                             </div>
                                         }
@@ -128,10 +181,10 @@
                                         @if (Model.Proteinas.HasValue)
                                         {
                                             <div class="col-sm-6 col-lg-4 mb-3">
-                                                <div class="text-center p-3 border rounded">
+                                                <div class="nutrition-card">
                                                     <i class="fas fa-dumbbell text-primary fa-2x mb-2"></i>
-                                                    <h6 class="mb-1">Proteínas</h6>
-                                                    <strong>@Model.Proteinas g</strong>
+                                                    <h6 class="mb-1 fw-bold">Proteínas</h6>
+                                                    <strong class="text-dark">@Model.Proteinas g</strong>
                                                 </div>
                                             </div>
                                         }
@@ -139,10 +192,10 @@
                                         @if (Model.Carbohidratos.HasValue)
                                         {
                                             <div class="col-sm-6 col-lg-4 mb-3">
-                                                <div class="text-center p-3 border rounded">
+                                                <div class="nutrition-card">
                                                     <i class="fas fa-bread-slice text-warning fa-2x mb-2"></i>
-                                                    <h6 class="mb-1">Carbohidratos</h6>
-                                                    <strong>@Model.Carbohidratos g</strong>
+                                                    <h6 class="mb-1 fw-bold">Carbohidratos</h6>
+                                                    <strong class="text-dark">@Model.Carbohidratos g</strong>
                                                 </div>
                                             </div>
                                         }
@@ -150,10 +203,10 @@
                                         @if (Model.Grasas.HasValue)
                                         {
                                             <div class="col-sm-6 col-lg-4 mb-3">
-                                                <div class="text-center p-3 border rounded">
+                                                <div class="nutrition-card">
                                                     <i class="fas fa-seedling text-success fa-2x mb-2"></i>
-                                                    <h6 class="mb-1">Grasas</h6>
-                                                    <strong>@Model.Grasas g</strong>
+                                                    <h6 class="mb-1 fw-bold">Grasas</h6>
+                                                    <strong class="text-dark">@Model.Grasas g</strong>
                                                 </div>
                                             </div>
                                         }
@@ -161,10 +214,10 @@
                                         @if (Model.Fibra.HasValue)
                                         {
                                             <div class="col-sm-6 col-lg-4 mb-3">
-                                                <div class="text-center p-3 border rounded">
+                                                <div class="nutrition-card">
                                                     <i class="fas fa-leaf text-info fa-2x mb-2"></i>
-                                                    <h6 class="mb-1">Fibra</h6>
-                                                    <strong>@Model.Fibra g</strong>
+                                                    <h6 class="mb-1 fw-bold">Fibra</h6>
+                                                    <strong class="text-dark">@Model.Fibra g</strong>
                                                 </div>
                                             </div>
                                         }
@@ -268,11 +321,6 @@
                                                 </a>
                                             }
 
-                                            <a href="@Url.Action("Index", "MenuSemanal")" class="btn btn-outline-info btn-sm">
-                                                <i class="fas fa-utensils me-2"></i>
-                                                Ver Menús
-                                            </a>
-
                                             <hr>
 
                                             <a href="@Url.Action("Delete", "PlanNutricional", new { id = Model.PlanID })"
@@ -290,5 +338,67 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sección de Evaluaciones -->
+        @{
+            var evaluaciones = ViewBag.Evaluaciones as List<dynamic> ?? new List<dynamic>();
+        }
+        @if (evaluaciones.Any())
+        {
+            <div class="row justify-content-center mt-4">
+                <div class="col-lg-10">
+                    <div class="modern-card bg-white">
+                        <div class="card-header-modern">
+                            <h5 class="mb-0 fw-bold text-dark">
+                                <i class="fas fa-star-half-stroke me-2"></i> Evaluaciones del Plan
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            @foreach (var evaluacion in evaluaciones)
+                            {
+                                <div class="border rounded-3 p-4 mb-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold">
+                                                @if (evaluacion.EsAdmin)
+                                                {
+                                                    <span class="badge bg-primary me-2">Chef</span>
+                                                }
+                                                @evaluacion.UsuarioNombre
+                                            </h6>
+                                            @if (evaluacion.FechaRegistro != null)
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    @(((DateTime)evaluacion.FechaRegistro).ToString("dd/MM/yyyy HH:mm"))
+                                                </small>
+                                            }
+                                        </div>
+                                        @if (evaluacion.Calificacion != null)
+                                        {
+                                            <div>
+                                                <span class="badge bg-warning text-dark fs-6">
+                                                    @for (int i = 0; i < evaluacion.Calificacion; i++)
+                                                    {
+                                                        <i class="fas fa-star"></i>
+                                                    }
+                                                    @evaluacion.Calificacion / 5
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(evaluacion.Comentario))
+                                    {
+                                        <div class="mt-3 p-3 rounded" style="background: white; border-left: 4px solid #007FFF;">
+                                            <p class="mb-0 text-dark">@evaluacion.Comentario</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </section>

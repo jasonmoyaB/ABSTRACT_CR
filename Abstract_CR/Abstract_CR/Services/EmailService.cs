@@ -16,7 +16,8 @@ namespace Abstract_CR.Services
 
         public async Task<bool> SendPasswordResetEmailAsync(string email, string resetToken, string userName)
         {
-            var resetUrl = $"{_configuration["AppSettings:BaseUrl"]}/PasswordReset/ResetPassword?token={resetToken}";
+            var tokenEncoded = Uri.EscapeDataString(resetToken);
+            var resetUrl = $"{_configuration["AppSettings:BaseUrl"]}/PasswordReset/ResetPassword?token={tokenEncoded}";
             
             var subject = "Recuperación de Contraseña - Abstract Healthy Food";
             var body = $@"

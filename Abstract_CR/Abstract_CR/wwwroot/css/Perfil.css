@@ -1,0 +1,248 @@
+.custom-btn {
+    color: #3c2313;
+    border: 1.5px solid #3c2313;
+    background-color: #fff;
+    border-radius: 0.6rem;
+    padding: 0.8rem 1rem;
+    font-weight: 500;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 1px 3px rgba(60, 35, 19, 0.15);
+}
+
+    .custom-btn:hover {
+        background-color: #3c2313;
+        color: #fff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(60, 35, 19, 0.3);
+    }
+
+    .custom-btn i {
+        transition: transform 0.25s ease-in-out;
+    }
+
+    .custom-btn:hover i.fa-chevron-right {
+        transform: translateX(3px);
+    }
+.card-header i {
+    transition: transform 0.3s ease;
+}
+
+.card-header:hover i {
+    transform: rotate(10deg);
+}
+
+.list-unstyled li:hover {
+    background-color: #f6e1c5 !important;
+    transition: background-color 0.3s ease;
+}
+.perfil-card {
+    border: 1px solid rgba(33,37,41,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.perfil-header {
+    background: linear-gradient(90deg, rgba(230,167,86,0.08), rgba(246,225,197,0.03));
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.perfil-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #e6a756;
+    font-size: 24px;
+    border: 2px solid rgba(230,167,86,0.18);
+    box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+}
+
+.perfil-nombre {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0;
+}
+
+.perfil-rol {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.perfil-body {
+    padding: 1.25rem;
+    background: #fff;
+}
+
+.perfil-row .form-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.perfil-row .form-control-plaintext {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.75rem;
+}
+
+.perfil-badge {
+    border-radius: 999px;
+    padding: .35rem .6rem;
+    font-weight: 600;
+    font-size: .85rem;
+}
+
+/* Botón editar más neutro y elegante */
+.btn-editar-perfil {
+    color: #212529;
+    border-color: transparent;
+    background-color: rgba(0,0,0,0.04);
+    box-shadow: none;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+    .btn-editar-perfil:hover {
+        background-color: #e6a756;
+        color: #fff;
+    }
+/* --- Estilo personalizado del mini menú --- */
+.nav-pills .nav-link {
+    color: #212529; /* negro suave */
+    font-weight: 500;
+    /* background-color: #f8f9fa; /* gris claro de fondo */ */ border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+    .nav-pills .nav-link:hover {
+        color: #000;
+        background-color: #e6a7561a; /* toque dorado al pasar el mouse */
+        transform: scale(1.02);
+    }
+
+    .nav-pills .nav-link.active {
+        color: #fff !important;
+        background-color: #3C2313 !important; /* dorado principal */
+        box-shadow: 0 0 6px rgba(230, 167, 86, 0.6);
+    }
+
+    /* Íconos del menú */
+    .nav-pills .nav-link i {
+        color: #e6a756;
+    }
+
+    .nav-pills .nav-link.active i {
+        color: #fff;
+    }
+
+.nav-pills .nav-link {
+    color: #212529; /* negro suave */
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+    .nav-pills .nav-link:hover {
+        color: #000;
+        background-color: #e6a7561a; /* toque dorado al pasar el mouse */
+        transform: scale(1.02);
+    }
+
+    .nav-pills .nav-link.active {
+        color: #fff !important;
+        background-color: #3C2313 !important; /* café oscuro principal */
+        box-shadow: 0 0 6px rgba(230, 167, 86, 0.6);
+    }
+
+    /* Íconos del menú */
+    .nav-pills .nav-link i {
+        color: #3C2313; /* color base de los íconos */
+        transition: color 0.2s ease-in-out;
+    }
+
+    /* Ícono se hace blanco al pasar el mouse o cuando está activo */
+    .nav-pills .nav-link:hover i,
+    .nav-pills .nav-link.active i {
+    }
+.card-header i {
+    transition: transform 0.3s ease;
+}
+
+.card-header:hover i {
+    transform: rotate(10deg);
+}
+
+.list-unstyled li:hover {
+    background-color: #f6e1c5 !important;
+    transition: background-color 0.3s ease;
+}
+/* --- Estilo general del card de Salud --- */
+.card-salud {
+    background: linear-gradient(135deg, #3C2313 0%, #5a3820 100%);
+    color: #fff;
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 10px rgba(60, 35, 19, 0.3);
+    overflow: hidden;
+}
+
+.card-salud .card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(230, 167, 86, 0.3);
+    padding: 1rem 1.25rem;
+}
+
+.card-salud .card-header h5 {
+    color: #E6A756;
+    font-weight: 700;
+}
+
+.card-salud .card-header i {
+    color: #E6A756;
+    transition: transform 0.3s ease;
+}
+
+.card-salud .card-header:hover i {
+    transform: rotate(10deg);
+}
+
+.card-salud .card-body {
+    background: transparent;
+}
+
+/* --- Botones dentro de Gestión de Salud --- */
+.card-salud .custom-btn {
+    color: #fff;
+    border: 1.5px solid rgba(230, 167, 86, 0.4);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.6rem;
+    padding: 0.8rem 1rem;
+    font-weight: 500;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.card-salud .custom-btn:hover {
+    background-color: #E6A756;
+    color: #3C2313 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(230, 167, 86, 0.4);
+}
+
+.card-salud .custom-btn i {
+    color: #E6A756;
+    transition: transform 0.25s ease-in-out;
+}
+
+.card-salud .custom-btn:hover i {
+    color: #3C2313;
+    transform: translateX(3px);
+}

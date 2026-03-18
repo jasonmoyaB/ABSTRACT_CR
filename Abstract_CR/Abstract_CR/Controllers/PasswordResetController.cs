@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Abstract_CR.Data;
+using Abstract_CR.Models;
 using Abstract_CR.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -9,12 +11,11 @@ namespace Abstract_CR.Controllers
 {
     public class PasswordResetController : Controller
     {
+        private const int TokenExpirationHours = 24;
+
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly ILogger<PasswordResetController> _logger;
-
-        // Diccionario temporal para almacenar tokens (en producción usar Redis o similar)
-        private static readonly Dictionary<string, PasswordResetInfo> _resetTokens = new();
 
         public PasswordResetController(ApplicationDbContext context, IEmailService emailService, ILogger<PasswordResetController> logger)
         {
@@ -52,22 +53,29 @@ namespace Abstract_CR.Controllers
                     return View();
                 }
 
-                // Generar token único
-                var token = GenerateSecureToken();
-                
-                // Almacenar token temporalmente (válido por 30 minutos)
-                _resetTokens[token] = new PasswordResetInfo
+                // Invalidar tokens previos del usuario
+                var tokensPrevios = await _context.Tokens
+                    .Where(t => t.UsuarioID == usuario.UsuarioID)
+                    .ToListAsync();
+                _context.Tokens.RemoveRange(tokensPrevios);
+                await _context.SaveChangesAsync();
+
+                // Generar token único (URL-safe para que no se corrompa en el enlace)
+                var token = GenerateUrlSafeToken();
+
+                var nuevoToken = new PassResetTokens
                 {
-                    UsuarioId = usuario.UsuarioID,
-                    Email = email,
-                    Expiration = DateTime.UtcNow.AddMinutes(30)
+                    UsuarioID = usuario.UsuarioID,
+                    Token = token,
+                    FechaCreacion = DateTime.UtcNow
                 };
+                _context.Tokens.Add(nuevoToken);
+                await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Token generado para {email}: {token.Substring(0, 8)}...");
+                _logger.LogInformation($"Token generado para {email}: {token.Substring(0, Math.Min(8, token.Length))}...");
 
-                // Enviar email
                 var emailSent = await _emailService.SendPasswordResetEmailAsync(email, token, usuario.Nombre);
-                
+
                 if (emailSent)
                 {
                     _logger.LogInformation($"Email de recuperación enviado a: {email}");
@@ -84,13 +92,18 @@ namespace Abstract_CR.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error en RequestReset para {email}");
-                TempData["Error"] = "Ocurrió un error inesperado. Inténtalo de nuevo.";
+                var mensaje = "Ocurrió un error inesperado. Inténtalo de nuevo.";
+                if (HttpContext.RequestServices.GetService<IWebHostEnvironment>()?.IsDevelopment() == true)
+                {
+                    mensaje = $"{mensaje} (Detalle: {ex.Message})";
+                }
+                TempData["Error"] = mensaje;
                 return View();
             }
         }
 
         [HttpGet]
-        public IActionResult ResetPassword(string token)
+        public async Task<IActionResult> ResetPassword(string token)
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -98,26 +111,31 @@ namespace Abstract_CR.Controllers
                 return RedirectToAction("RequestReset");
             }
 
-            if (!_resetTokens.ContainsKey(token))
+            var resetToken = await _context.Tokens
+                .Include(t => t.Usuario)
+                .FirstOrDefaultAsync(t => t.Token == token);
+
+            if (resetToken == null)
             {
                 TempData["Error"] = "Token inválido o expirado.";
                 return RedirectToAction("RequestReset");
             }
 
-            var tokenInfo = _resetTokens[token];
-            if (tokenInfo.Expiration < DateTime.UtcNow)
+            if (resetToken.FechaCreacion.AddHours(TokenExpirationHours) < DateTime.UtcNow)
             {
-                _resetTokens.Remove(token);
+                _context.Tokens.Remove(resetToken);
+                await _context.SaveChangesAsync();
                 TempData["Error"] = "Token expirado. Solicita uno nuevo.";
                 return RedirectToAction("RequestReset");
             }
 
             ViewBag.Token = token;
-            ViewBag.Email = tokenInfo.Email;
+            ViewBag.Email = resetToken.Usuario?.CorreoElectronico ?? "";
             return View();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(string token, string password, string confirmPassword)
         {
             try
@@ -128,16 +146,20 @@ namespace Abstract_CR.Controllers
                     return RedirectToAction("RequestReset");
                 }
 
-                if (!_resetTokens.ContainsKey(token))
+                var resetToken = await _context.Tokens
+                    .Include(t => t.Usuario)
+                    .FirstOrDefaultAsync(t => t.Token == token);
+
+                if (resetToken == null)
                 {
                     TempData["Error"] = "Token inválido o expirado.";
                     return RedirectToAction("RequestReset");
                 }
 
-                var tokenInfo = _resetTokens[token];
-                if (tokenInfo.Expiration < DateTime.UtcNow)
+                if (resetToken.FechaCreacion.AddHours(TokenExpirationHours) < DateTime.UtcNow)
                 {
-                    _resetTokens.Remove(token);
+                    _context.Tokens.Remove(resetToken);
+                    await _context.SaveChangesAsync();
                     TempData["Error"] = "Token expirado. Solicita uno nuevo.";
                     return RedirectToAction("RequestReset");
                 }
@@ -146,7 +168,7 @@ namespace Abstract_CR.Controllers
                 {
                     TempData["Error"] = "La contraseña debe tener al menos 6 caracteres.";
                     ViewBag.Token = token;
-                    ViewBag.Email = tokenInfo.Email;
+                    ViewBag.Email = resetToken.Usuario?.CorreoElectronico ?? "";
                     return View();
                 }
 
@@ -154,28 +176,22 @@ namespace Abstract_CR.Controllers
                 {
                     TempData["Error"] = "Las contraseñas no coinciden.";
                     ViewBag.Token = token;
-                    ViewBag.Email = tokenInfo.Email;
+                    ViewBag.Email = resetToken.Usuario?.CorreoElectronico ?? "";
                     return View();
                 }
 
-                // Buscar usuario
-                var usuario = await _context.Usuarios
-                    .FirstOrDefaultAsync(u => u.UsuarioID == tokenInfo.UsuarioId);
-
+                var usuario = resetToken.Usuario;
                 if (usuario == null)
                 {
                     TempData["Error"] = "Usuario no encontrado.";
                     return RedirectToAction("RequestReset");
                 }
 
-                // Actualizar contraseña
                 usuario.ContrasenaHash = HashPassword(password);
+                _context.Tokens.Remove(resetToken);
                 await _context.SaveChangesAsync();
 
-                // Eliminar token usado
-                _resetTokens.Remove(token);
-
-                _logger.LogInformation($"Contraseña actualizada para usuario: {tokenInfo.Email}");
+                _logger.LogInformation($"Contraseña actualizada para usuario: {resetToken.Usuario?.CorreoElectronico}");
 
                 TempData["Success"] = "Contraseña actualizada exitosamente. Ya puedes iniciar sesión.";
                 return RedirectToAction("Login", "Autenticacion");
@@ -188,12 +204,15 @@ namespace Abstract_CR.Controllers
             }
         }
 
-        private string GenerateSecureToken()
+        /// <summary>
+        /// Genera un token seguro compatible con URLs (evita +, /, = que se corrompen en enlaces)
+        /// </summary>
+        private static string GenerateUrlSafeToken()
         {
             var bytes = new byte[32];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(bytes);
-            return Convert.ToBase64String(bytes);
+            return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").TrimEnd('=');
         }
 
         private string HashPassword(string password)
@@ -201,13 +220,6 @@ namespace Abstract_CR.Controllers
             using var sha256 = SHA256.Create();
             var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             return Convert.ToBase64String(hashedBytes);
-        }
-
-        private class PasswordResetInfo
-        {
-            public int UsuarioId { get; set; }
-            public string Email { get; set; } = string.Empty;
-            public DateTime Expiration { get; set; }
         }
     }
 }

@@ -350,6 +350,18 @@
                                             </p>
                                         </div>
                                     </div>
+                                    <div class="col-12">
+                                        <div class="info-item">
+                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                                <i class="fas fa-map-marker-alt me-1"></i> Dirección
+                                            </label>
+                                            <p class="mb-0 fw-semibold text-dark fs-6">
+                                                @(string.IsNullOrWhiteSpace(Model.Usuario.Direccion)
+                                                    ? "No especificada"
+                                                    : Model.Usuario.Direccion)
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

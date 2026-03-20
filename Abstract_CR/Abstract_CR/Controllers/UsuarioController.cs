@@ -92,6 +92,7 @@ namespace Abstract_CR.Controllers
             usuario.Apellido = model.Apellido;
             usuario.CorreoElectronico = model.CorreoElectronico;
             usuario.Activo = model.Activo;
+            usuario.Direccion = model.Direccion;
 
             if (model.RolID.HasValue)
                 usuario.RolID = model.RolID.Value;

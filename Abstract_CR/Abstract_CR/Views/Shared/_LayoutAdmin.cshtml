@@ -6,7 +6,9 @@
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
 
     bool openUsuarios = currentController.Equals("Usuarios", StringComparison.OrdinalIgnoreCase)
-                        || currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase);
+                        || currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase)
+                        || currentAction.Equals("RestriccionesUsuarios", StringComparison.OrdinalIgnoreCase)
+                        || currentAction.Equals("DireccionesUsuarios", StringComparison.OrdinalIgnoreCase);
 
     bool openContenido = // currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase) || // Comentado: no funcional
                          currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase)
@@ -76,11 +78,14 @@
                                    href='@Url.Action("Index", "Usuarios")'>
                                     <i class="fa-solid fa-user-gear me-2"></i> Gestión de usuarios
                                 </a>
-                                <a class="nav-link text-start mb-1 @(currentController.Equals("Administracion", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                <a class="nav-link text-start mb-1 @(currentAction.Equals("RestriccionesUsuarios", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("RestriccionesUsuarios", "Administracion")'>
                                     <i class="fa-solid fa-user-gear me-2"></i> Restricciones comidas de usuarios
                                 </a>
-
+                                <a class="nav-link text-start mb-1 @(currentAction.Equals("DireccionesUsuarios", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("DireccionesUsuarios", "Administracion")'>
+                                    <i class="fa-solid fa-map-location-dot me-2"></i> Direcciones de usuarios
+                                </a>
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("Index", "Suscripciones")'>
                                     <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
@@ -254,6 +259,10 @@
                                     <a class="nav-link text-light mb-1 @(currentController.Equals("Usuarios", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                                        href='@Url.Action("Index", "Usuarios")'>
                                         <i class="fa-solid fa-user-gear me-2"></i> Gestión de usuarios
+                                    </a>
+                                    <a class="nav-link text-light mb-1 @(currentAction.Equals("DireccionesUsuarios", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("DireccionesUsuarios", "Administracion")'>
+                                        <i class="fa-solid fa-map-location-dot me-2"></i> Direcciones de usuarios
                                     </a>
                                     <a class="nav-link text-light mb-1 @(currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                                        href='@Url.Action("Index", "Suscripciones")'>

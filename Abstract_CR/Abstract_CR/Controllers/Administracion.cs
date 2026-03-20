@@ -160,7 +160,24 @@ namespace Abstract_CR.Controllers
             return View(viewModel);
         }
 
+        // ===============================================================
+        // DIRECCIONES DE USUARIOS
+        // ===============================================================
+        [HttpGet]
+        public async Task<IActionResult> DireccionesUsuarios()
+        {
+            if (!EsAdmin())
+                return RedirectToAction("Index", "Home");
 
+            var usuarios = await _interaccionHelper.ObtenerUsuariosConDireccionAsync();
+
+            var viewModel = new DireccionesUsuariosViewModel
+            {
+                Usuarios = usuarios
+            };
+
+            return View(viewModel);
+        }
 
         // ===============================================================
         // VERIFICAR ADMIN

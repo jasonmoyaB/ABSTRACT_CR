@@ -436,7 +436,7 @@ namespace Abstract_CR.Services
                                 {
                                     col.Item().Text("Cocina · Clientes con suscripción activa")
                                         .Style(TextStyle.Default.FontSize(16).Bold().FontColor("#2C3E50"));
-                                    col.Item().Text("Dirección de entrega y restricciones alimentarias")
+                                    col.Item().Text("Teléfono, dirección de entrega y restricciones alimentarias")
                                         .Style(TextStyle.Default.FontSize(10).FontColor(Colors.Grey.Darken1));
                                 });
                                 if (logoBytes != null)
@@ -461,11 +461,12 @@ namespace Abstract_CR.Services
                                 table.ColumnsDefinition(cols =>
                                 {
                                     cols.RelativeColumn(1.4f);
+                                    cols.RelativeColumn(1.6f);
+                                    cols.RelativeColumn(1.1f);
                                     cols.RelativeColumn(1.8f);
-                                    cols.RelativeColumn(2f);
-                                    cols.RelativeColumn(0.9f);
-                                    cols.RelativeColumn(0.9f);
-                                    cols.RelativeColumn(2f);
+                                    cols.RelativeColumn(0.85f);
+                                    cols.RelativeColumn(0.85f);
+                                    cols.RelativeColumn(1.8f);
                                 });
 
                                 static IContainer Cell(IContainer c) =>
@@ -475,6 +476,7 @@ namespace Abstract_CR.Services
                                 {
                                     h.Cell().Element(Cell).Text("Cliente").Style(TextStyle.Default.Bold());
                                     h.Cell().Element(Cell).Text("Correo").Style(TextStyle.Default.Bold());
+                                    h.Cell().Element(Cell).Text("Teléfono").Style(TextStyle.Default.Bold());
                                     h.Cell().Element(Cell).Text("Dirección entrega").Style(TextStyle.Default.Bold());
                                     h.Cell().Element(Cell).Text("Suscripción").Style(TextStyle.Default.Bold());
                                     h.Cell().Element(Cell).Text("Vence").Style(TextStyle.Default.Bold());
@@ -485,6 +487,7 @@ namespace Abstract_CR.Services
                                 {
                                     table.Cell().Element(Cell).Text(Truncar(f.NombreCompleto, 80));
                                     table.Cell().Element(Cell).Text(Truncar(f.CorreoElectronico, 60)).FontSize(7);
+                                    table.Cell().Element(Cell).Text(Truncar(f.Telefono, 40)).FontSize(7);
                                     table.Cell().Element(Cell).Text(Truncar(f.DireccionEntrega, 120)).FontSize(7);
                                     table.Cell().Element(Cell).Text(f.EstadoSuscripcion);
                                     table.Cell().Element(Cell).Text(

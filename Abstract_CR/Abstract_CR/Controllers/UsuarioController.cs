@@ -93,6 +93,7 @@ namespace Abstract_CR.Controllers
             usuario.CorreoElectronico = model.CorreoElectronico;
             usuario.Activo = model.Activo;
             usuario.Direccion = model.Direccion;
+            usuario.Telefono = string.IsNullOrWhiteSpace(model.Telefono) ? null : model.Telefono.Trim();
 
             if (model.RolID.HasValue)
                 usuario.RolID = model.RolID.Value;

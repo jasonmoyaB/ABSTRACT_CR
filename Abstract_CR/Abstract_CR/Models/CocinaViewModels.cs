@@ -8,6 +8,8 @@ namespace Abstract_CR.Models
         public int UsuarioID { get; set; }
         public string NombreCompleto { get; set; } = string.Empty;
         public string CorreoElectronico { get; set; } = string.Empty;
+        /// <summary>Teléfono de contacto (perfil del usuario).</summary>
+        public string? Telefono { get; set; }
         /// <summary>Dirección de entrega (información básica del usuario).</summary>
         public string? DireccionEntrega { get; set; }
         /// <summary>Estado de la suscripción (ej. Activa).</summary>

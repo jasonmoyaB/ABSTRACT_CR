@@ -49,6 +49,10 @@ namespace Abstract_CR.Models
         [StringLength(250)]
         public string? Direccion { get; set; }
 
+        [Display(Name = "Teléfono")]
+        [StringLength(50)]
+        public string? Telefono { get; set; }
+
         public virtual Rol? Rol { get; set; }
 
         [Display(Name = "Nombre Completo")]

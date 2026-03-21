@@ -90,6 +90,8 @@
 
                                 <th>Correo</th>
 
+                                <th>Teléfono</th>
+
                                 <th>Dirección de entrega</th>
 
                                 <th>Suscripción</th>
@@ -113,6 +115,17 @@
                                     <td class="fw-semibold">@row.NombreCompleto</td>
 
                                     <td><a href="mailto:@row.CorreoElectronico">@row.CorreoElectronico</a></td>
+
+                                    <td>
+                                        @if (string.IsNullOrWhiteSpace(row.Telefono))
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                        else
+                                        {
+                                            <a href="tel:@row.Telefono">@row.Telefono</a>
+                                        }
+                                    </td>
 
                                     <td>
 
@@ -230,7 +243,7 @@
 
                     columnDefs: [
 
-                        { orderable: false, targets: 5 }
+                        { orderable: false, targets: 6 }
 
                     ]
 

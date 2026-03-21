@@ -1,0 +1,246 @@
+@model IReadOnlyList<Abstract_CR.Models.CocinaClienteFilaViewModel>
+
+@{
+
+    ViewData["Title"] = "Cocina";
+
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+
+
+<div class="container-fluid">
+
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+
+        <div>
+
+            <h1 class="h4 mb-0"><i class="fa-solid fa-utensils me-2 text-primary"></i>Cocina</h1>
+
+            <p class="text-muted small mb-0">
+
+                Clientes con <strong>suscripción activa</strong> y vigente, restricciones alimentarias y dirección de entrega (datos básicos del usuario).
+
+            </p>
+
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+
+        {
+
+            <a class="btn btn-outline-danger" href="@Url.Action("DescargarPdf", "Cocina")" title="Generar PDF con la lista actual">
+
+                <i class="fa-solid fa-file-pdf me-2"></i>Descargar PDF
+
+            </a>
+
+        }
+
+    </div>
+
+
+
+    @if (TempData["Error"] != null)
+
+    {
+
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+            @TempData["Error"]
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+
+        </div>
+
+    }
+
+
+
+    @if (Model == null || Model.Count == 0)
+
+    {
+
+        <div class="alert alert-info">
+
+            No hay usuarios con suscripción activa y vigente en este momento, o no se pudieron cargar los datos.
+
+        </div>
+
+    }
+
+    else
+
+    {
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover table-striped align-middle mb-0" id="tablaCocina" style="width:100%">
+
+                        <thead class="table-dark">
+
+                            <tr>
+
+                                <th>Cliente</th>
+
+                                <th>Correo</th>
+
+                                <th>Dirección de entrega</th>
+
+                                <th>Suscripción</th>
+
+                                <th>Vence</th>
+
+                                <th>Restricciones</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var row in Model)
+
+                            {
+
+                                <tr>
+
+                                    <td class="fw-semibold">@row.NombreCompleto</td>
+
+                                    <td><a href="mailto:@row.CorreoElectronico">@row.CorreoElectronico</a></td>
+
+                                    <td>
+
+                                        @if (string.IsNullOrWhiteSpace(row.DireccionEntrega))
+
+                                        {
+
+                                            <span class="text-muted">—</span>
+
+                                        }
+
+                                        else
+
+                                        {
+
+                                            @row.DireccionEntrega
+
+                                        }
+
+                                    </td>
+
+                                    <td><span class="badge bg-success">@row.EstadoSuscripcion</span></td>
+
+                                    <td>
+
+                                        @if (row.FechaFinSuscripcion.HasValue)
+
+                                        {
+
+                                            @row.FechaFinSuscripcion.Value.ToString("dd/MM/yyyy")
+
+                                        }
+
+                                        else
+
+                                        {
+
+                                            <span class="text-muted">Sin fecha fin</span>
+
+                                        }
+
+                                    </td>
+
+                                    <td>
+
+                                        @if (row.Restricciones == null || row.Restricciones.Count == 0)
+
+                                        {
+
+                                            <span class="text-muted">Sin restricciones registradas</span>
+
+                                        }
+
+                                        else
+
+                                        {
+
+                                            <ul class="mb-0 ps-3 small">
+
+                                                @foreach (var r in row.Restricciones)
+
+                                                {
+
+                                                    <li>@r</li>
+
+                                                }
+
+                                            </ul>
+
+                                        }
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    }
+
+</div>
+
+
+
+@section Scripts {
+
+    @if (Model != null && Model.Count > 0)
+
+    {
+
+        <script>
+
+            $(function () {
+
+                $('#tablaCocina').DataTable({
+
+                    language: {
+
+                        url: '//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json'
+
+                    },
+
+                    order: [[0, 'asc']],
+
+                    pageLength: 25,
+
+                    columnDefs: [
+
+                        { orderable: false, targets: 5 }
+
+                    ]
+
+                });
+
+            });
+
+        </script>
+
+    }
+
+}
+

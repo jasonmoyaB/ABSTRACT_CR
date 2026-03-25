@@ -37,8 +37,13 @@ namespace Abstract_CR.Controllers
             var ebookActual = await _context.EbookEdicion
                 .FirstOrDefaultAsync();
 
+            var roles = await _context.Roles
+                .OrderBy(r => r.NombreRol)
+                .ToListAsync();
+
             ViewBag.EbookActual = ebookActual;
             ViewBag.Usuarios = usuarios;
+            ViewBag.Roles = roles;
 
             return View();
         }
@@ -360,6 +365,57 @@ namespace Abstract_CR.Controllers
             {
                 _logger.LogError(ex, "Error al obtener comprobantes del usuario");
                 return Json(new { success = false, message = $"Error al cargar los comprobantes: {ex.Message}" });
+            }
+        }
+
+        // POST: Usuarios/CambiarRol - Cambiar el rol de un usuario
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarRol(int usuarioId, int rolId)
+        {
+            try
+            {
+                var rol = HttpContext.Session.GetString("Rol");
+                if (!string.Equals(rol, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "No autorizado" });
+                }
+
+                var usuario = await _context.Usuarios
+                    .Include(u => u.Rol)
+                    .FirstOrDefaultAsync(u => u.UsuarioID == usuarioId);
+
+                if (usuario == null)
+                {
+                    return Json(new { success = false, message = "Usuario no encontrado" });
+                }
+
+                var nuevoRol = await _context.Roles.FirstOrDefaultAsync(r => r.RolID == rolId);
+                if (nuevoRol == null)
+                {
+                    return Json(new { success = false, message = "Rol no válido" });
+                }
+
+                var rolAnterior = usuario.Rol?.NombreRol ?? "Sin rol";
+                usuario.RolID = rolId;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Admin cambió rol de {Usuario} de '{RolAnterior}' a '{RolNuevo}'",
+                    usuario.NombreCompleto, rolAnterior, nuevoRol.NombreRol);
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Rol de {usuario.NombreCompleto} cambiado a '{nuevoRol.NombreRol}'",
+                    nuevoRolNombre = nuevoRol.NombreRol
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cambiar rol del usuario");
+                return Json(new { success = false, message = $"Error al cambiar el rol: {ex.Message}" });
             }
         }
 

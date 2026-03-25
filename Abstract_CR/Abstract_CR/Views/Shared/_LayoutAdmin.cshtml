@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null;
     var usuario = Context.Session.GetString("NombreUsuario") ?? "Administrador";
 
@@ -6,7 +6,9 @@
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
 
     bool openUsuarios = currentController.Equals("Usuarios", StringComparison.OrdinalIgnoreCase)
-                        || currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase);
+                        || currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase)
+                        || currentAction.Equals("RestriccionesUsuarios", StringComparison.OrdinalIgnoreCase)
+                        || currentAction.Equals("DireccionesUsuarios", StringComparison.OrdinalIgnoreCase);
 
     bool openContenido = // currentController.Equals("Planes", StringComparison.OrdinalIgnoreCase) || // Comentado: no funcional
                          currentController.Equals("Recetas", StringComparison.OrdinalIgnoreCase)
@@ -15,7 +17,8 @@
     bool openComunicacion = currentController.Equals("Administracion", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("Interaccion", StringComparison.OrdinalIgnoreCase)
                             || currentController.Equals("Notificaciones", StringComparison.OrdinalIgnoreCase);
 
-    bool openHerramientas = currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase);
+    bool openHerramientas = currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase)
+                            || currentController.Equals("Cocina", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -76,11 +79,14 @@
                                    href='@Url.Action("Index", "Usuarios")'>
                                     <i class="fa-solid fa-user-gear me-2"></i> Gestión de usuarios
                                 </a>
-                                <a class="nav-link text-start mb-1 @(currentController.Equals("Administracion", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                <a class="nav-link text-start mb-1 @(currentAction.Equals("RestriccionesUsuarios", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("RestriccionesUsuarios", "Administracion")'>
                                     <i class="fa-solid fa-user-gear me-2"></i> Restricciones comidas de usuarios
                                 </a>
-
+                                <a class="nav-link text-start mb-1 @(currentAction.Equals("DireccionesUsuarios", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("DireccionesUsuarios", "Administracion")'>
+                                    <i class="fa-solid fa-map-location-dot me-2"></i> Direcciones de usuarios
+                                </a>
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("Index", "Suscripciones")'>
                                     <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
@@ -178,6 +184,10 @@
 
                         <div class="collapse @(openHerramientas ? "show" : "") mt-2" id="collapseHerramientas">
                             <nav class="nav nav-pills flex-column ms-2">
+                                <a class="nav-link text-start mb-1 @(currentController.Equals("Cocina", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("Index", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
+                                   href='@Url.Action("Index", "Cocina")'>
+                                    <i class="fa-solid fa-utensils me-2"></i> Cocina
+                                </a>
                                 <a class="nav-link text-start mb-1 @(currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("VerTodosLosPlanes", StringComparison.OrdinalIgnoreCase) ? "active bg-primary text-white" : "text-light")"
                                    href='@Url.Action("VerTodosLosPlanes", "PlanNutricional")'>
                                     <i class="fa-solid fa-clipboard-list me-2"></i> Planes Nutricionales
@@ -255,6 +265,10 @@
                                        href='@Url.Action("Index", "Usuarios")'>
                                         <i class="fa-solid fa-user-gear me-2"></i> Gestión de usuarios
                                     </a>
+                                    <a class="nav-link text-light mb-1 @(currentAction.Equals("DireccionesUsuarios", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("DireccionesUsuarios", "Administracion")'>
+                                        <i class="fa-solid fa-map-location-dot me-2"></i> Direcciones de usuarios
+                                    </a>
                                     <a class="nav-link text-light mb-1 @(currentController.Equals("Suscripciones", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                                        href='@Url.Action("Index", "Suscripciones")'>
                                         <i class="fa-solid fa-credit-card me-2"></i> Suscripciones
@@ -318,6 +332,24 @@
 
                             <hr class="border-secondary my-2" />
 
+                            <div class="mb-2 text-uppercase small text-secondary px-2">Herramientas</div>
+                            <button class="btn btn-toggle w-100 text-start text-light d-flex align-items-center justify-content-between"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#mCollapseHerramientas" aria-expanded="@(openHerramientas.ToString().ToLower())">
+                                <span><i class="fa-solid fa-wrench me-2"></i> Herramientas</span>
+                                <i class="fa-solid fa-chevron-down small"></i>
+                            </button>
+                            <div class="collapse @(openHerramientas ? "show" : "") mt-2" id="mCollapseHerramientas">
+                                <nav class="nav nav-pills flex-column ms-2">
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("Cocina", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("Index", "Cocina")'>
+                                        <i class="fa-solid fa-utensils me-2"></i> Cocina
+                                    </a>
+                                    <a class="nav-link text-light mb-1 @(currentController.Equals("PlanNutricional", StringComparison.OrdinalIgnoreCase) && currentAction.Equals("VerTodosLosPlanes", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                                       href='@Url.Action("VerTodosLosPlanes", "PlanNutricional")'>
+                                        <i class="fa-solid fa-clipboard-list me-2"></i> Planes Nutricionales
+                                    </a>
+                                </nav>
+                            </div>
 
                             <hr class="border-secondary my-2" />
 

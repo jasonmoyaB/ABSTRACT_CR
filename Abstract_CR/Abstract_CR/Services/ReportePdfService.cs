@@ -396,5 +396,129 @@ namespace Abstract_CR.Services
                 throw;
             }
         }
+
+        /// <inheritdoc />
+        public Task<byte[]> GenerarCocinaPdfAsync(IReadOnlyList<CocinaClienteFilaViewModel> filas)
+        {
+            try
+            {
+                var logoPath = Path.Combine(_environment.WebRootPath, "images", "logo-abstract.png");
+                byte[]? logoBytes = File.Exists(logoPath) ? File.ReadAllBytes(logoPath) : null;
+
+                static string Truncar(string? texto, int max)
+                {
+                    if (string.IsNullOrEmpty(texto)) return "—";
+                    texto = texto.Trim();
+                    return texto.Length <= max ? texto : texto[..max] + "…";
+                }
+
+                static string RestriccionesTexto(CocinaClienteFilaViewModel f)
+                {
+                    if (f.Restricciones == null || f.Restricciones.Count == 0)
+                        return "Sin restricciones registradas";
+                    return string.Join("; ", f.Restricciones);
+                }
+
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape());
+                        page.Margin(1.2f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+                        page.DefaultTextStyle(x => x.FontSize(8));
+
+                        page.Header().Element(header =>
+                        {
+                            header.Row(row =>
+                            {
+                                row.RelativeItem().Column(col =>
+                                {
+                                    col.Item().Text("Cocina · Clientes con suscripción activa")
+                                        .Style(TextStyle.Default.FontSize(16).Bold().FontColor("#2C3E50"));
+                                    col.Item().Text("Teléfono, dirección de entrega y restricciones alimentarias")
+                                        .Style(TextStyle.Default.FontSize(10).FontColor(Colors.Grey.Darken1));
+                                });
+                                if (logoBytes != null)
+                                    row.ConstantItem(50).Image(logoBytes).FitArea();
+                                else
+                                    row.ConstantItem(50).AlignMiddle().Text("ABSTRACT")
+                                        .Style(TextStyle.Default.FontSize(12).Bold().FontColor("#18BC9C"));
+                            });
+                        });
+
+                        page.Content().PaddingTop(8).Element(content =>
+                        {
+                            if (filas == null || filas.Count == 0)
+                            {
+                                content.Text("No hay registros para mostrar.")
+                                    .Style(TextStyle.Default.FontSize(11).Italic().FontColor(Colors.Grey.Darken2));
+                                return;
+                            }
+
+                            content.Table(table =>
+                            {
+                                table.ColumnsDefinition(cols =>
+                                {
+                                    cols.RelativeColumn(1.4f);
+                                    cols.RelativeColumn(1.6f);
+                                    cols.RelativeColumn(1.1f);
+                                    cols.RelativeColumn(1.8f);
+                                    cols.RelativeColumn(0.85f);
+                                    cols.RelativeColumn(0.85f);
+                                    cols.RelativeColumn(1.8f);
+                                });
+
+                                static IContainer Cell(IContainer c) =>
+                                    c.BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten2).PaddingVertical(4).PaddingHorizontal(4);
+
+                                table.Header(h =>
+                                {
+                                    h.Cell().Element(Cell).Text("Cliente").Style(TextStyle.Default.Bold());
+                                    h.Cell().Element(Cell).Text("Correo").Style(TextStyle.Default.Bold());
+                                    h.Cell().Element(Cell).Text("Teléfono").Style(TextStyle.Default.Bold());
+                                    h.Cell().Element(Cell).Text("Dirección entrega").Style(TextStyle.Default.Bold());
+                                    h.Cell().Element(Cell).Text("Suscripción").Style(TextStyle.Default.Bold());
+                                    h.Cell().Element(Cell).Text("Vence").Style(TextStyle.Default.Bold());
+                                    h.Cell().Element(Cell).Text("Restricciones").Style(TextStyle.Default.Bold());
+                                });
+
+                                foreach (var f in filas)
+                                {
+                                    table.Cell().Element(Cell).Text(Truncar(f.NombreCompleto, 80));
+                                    table.Cell().Element(Cell).Text(Truncar(f.CorreoElectronico, 60)).FontSize(7);
+                                    table.Cell().Element(Cell).Text(Truncar(f.Telefono, 40)).FontSize(7);
+                                    table.Cell().Element(Cell).Text(Truncar(f.DireccionEntrega, 120)).FontSize(7);
+                                    table.Cell().Element(Cell).Text(f.EstadoSuscripcion);
+                                    table.Cell().Element(Cell).Text(
+                                        f.FechaFinSuscripcion.HasValue
+                                            ? f.FechaFinSuscripcion.Value.ToString("dd/MM/yyyy")
+                                            : "Sin fecha fin");
+                                    table.Cell().Element(Cell).Text(Truncar(RestriccionesTexto(f), 400)).FontSize(7);
+                                }
+                            });
+                        });
+
+                        page.Footer().AlignCenter().Text(t =>
+                        {
+                            t.Span("Página ");
+                            t.CurrentPageNumber();
+                            t.Span(" de ");
+                            t.TotalPages();
+                            t.Span(" | Generado ");
+                            t.Span(DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+                            t.Span(" | Abstract");
+                        });
+                    });
+                });
+
+                return Task.FromResult(document.GeneratePdf());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al generar el PDF de Cocina");
+                throw;
+            }
+        }
     }
 }

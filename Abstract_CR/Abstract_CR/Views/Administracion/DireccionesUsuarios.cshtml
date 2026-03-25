@@ -1,0 +1,251 @@
+@model Abstract_CR.Models.DireccionesUsuariosViewModel
+
+@{
+    ViewData["Title"] = "Direcciones de Usuarios";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0 text-primary">
+                <i class="fas fa-map-marker-alt me-2"></i>Direcciones de Usuarios
+            </h2>
+            <p class="text-muted mb-0">Consulta las direcciones registradas por los clientes.</p>
+        </div>
+        <span class="badge bg-primary fs-6 px-3 py-2">
+            <i class="fas fa-users me-1"></i> @Model.Usuarios.Count usuario(s)
+        </span>
+    </div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i>@TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Tabla de direcciones -->
+    <div class="card shadow-sm border-primary">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-address-book me-2"></i>Listado de Direcciones</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Usuarios.Any())
+            {
+                <table class="table table-hover align-middle mb-0" id="tablaDirecciones" style="width:100%;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 22%;">Usuario</th>
+                            <th style="width: 22%;">Correo</th>
+                            <th style="width: 36%;">Dirección</th>
+                            <th class="text-center" style="width: 15%;">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var index = 1; }
+                        @foreach (var usuario in Model.Usuarios)
+                        {
+                            var tieneDireccion = !string.IsNullOrWhiteSpace(usuario.Direccion);
+                            <tr class="fila-usuario"
+                                style="cursor: pointer;"
+                                data-modal-nombre="@usuario.NombreCompleto"
+                                data-modal-correo="@usuario.CorreoElectronico"
+                                data-modal-direccion="@(usuario.Direccion ?? "")"
+                                data-modal-activo="@usuario.Activo.ToString().ToLower()">
+                                <td class="text-muted">@index</td>
+                                <td>
+                                    <span class="fw-semibold">@usuario.NombreCompleto</span>
+                                    @if (!usuario.Activo)
+                                    {
+                                        <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">Inactivo</span>
+                                    }
+                                </td>
+                                <td class="text-muted small">@usuario.CorreoElectronico</td>
+                                <td>
+                                    @if (tieneDireccion)
+                                    {
+                                        <span>
+                                            <i class="fas fa-map-marker-alt text-success me-1"></i>
+                                            @usuario.Direccion
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">
+                                            <i class="fas fa-map-marker-alt text-warning me-1"></i>
+                                            No registrada
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (tieneDireccion)
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                            <i class="fas fa-check-circle me-1"></i>Registrada
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                            <i class="fas fa-clock me-1"></i>Pendiente
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-users fa-3x mb-3 opacity-50"></i>
+                    <p class="mb-0 fs-5">No hay usuarios registrados.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle de Dirección -->
+<div class="modal fade" id="modalDireccion" tabindex="-1" aria-labelledby="modalDireccionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header border-0 text-white" style="background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%);">
+                <h5 class="modal-title" id="modalDireccionLabel">
+                    <i class="fas fa-address-card me-2"></i>Detalle del Usuario
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <h4 class="fw-bold mb-1" id="modalNombre"></h4>
+                    <span id="modalEstadoBadge"></span>
+                </div>
+
+                <hr />
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="d-flex align-items-center p-3 rounded-3" style="background: #f8f9fa;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width: 40px; height: 40px; background: linear-gradient(135deg, #007FFF 0%, #00BFFF 100%); min-width: 40px;">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem;">Correo Electrónico</small>
+                                <span class="fw-semibold" id="modalCorreo"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="d-flex align-items-start p-3 rounded-3" id="modalDireccionContainer">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                                 style="width: 40px; height: 40px; min-width: 40px;" id="modalDireccionIconBg">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem;">Dirección</small>
+                                <span id="modalDireccionTexto"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // ==============================
+            // DataTable
+            // ==============================
+            const tabla = $('#tablaDirecciones').DataTable({
+                language: {
+                    search: "Buscar:",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ usuarios",
+                    infoEmpty: "No hay usuarios",
+                    infoFiltered: "(filtrado de _MAX_ totales)",
+                    zeroRecords: "No se encontraron resultados",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "<i class='fas fa-chevron-right'></i>",
+                        previous: "<i class='fas fa-chevron-left'></i>"
+                    }
+                },
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [[1, 'asc']],
+                columnDefs: [
+                    { orderable: false, targets: [0] }
+                ]
+            });
+
+            // ==============================
+            // Modal al hacer click en la fila
+            // ==============================
+            const modal = new bootstrap.Modal(document.getElementById('modalDireccion'));
+
+            $('#tablaDirecciones tbody').on('click', 'tr.fila-usuario', function () {
+                const fila = $(this);
+                const nombre = fila.data('modal-nombre');
+                const correo = fila.data('modal-correo');
+                const direccion = fila.data('modal-direccion');
+                const tieneDireccion = direccion && String(direccion).trim() !== '';
+
+                const rawActivo = fila.data('modal-activo');
+                const activo = rawActivo === true || rawActivo === 'true';
+
+                $('#modalNombre').text(nombre);
+                $('#modalCorreo').text(correo);
+
+                if (activo) {
+                    $('#modalEstadoBadge').html(
+                        '<span class="badge bg-success rounded-pill px-3 py-2"><i class="fas fa-circle-check me-1"></i> Activo</span>'
+                    );
+                } else {
+                    $('#modalEstadoBadge').html(
+                        '<span class="badge bg-danger rounded-pill px-3 py-2"><i class="fas fa-circle-xmark me-1"></i> Inactivo</span>'
+                    );
+                }
+
+                const container = $('#modalDireccionContainer');
+                const iconBg = $('#modalDireccionIconBg');
+                const texto = $('#modalDireccionTexto');
+
+                if (tieneDireccion) {
+                    container.css('background', '#f0fdf4');
+                    iconBg.css('background', 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)');
+                    texto.html('<span class="fw-semibold text-dark">' + $('<span>').text(direccion).html() + '</span>');
+                } else {
+                    container.css('background', '#fffbeb');
+                    iconBg.css('background', 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)');
+                    texto.html('<span class="fst-italic text-muted">El usuario aún no ha registrado su dirección</span>');
+                }
+
+                modal.show();
+            });
+
+            // Auto-cerrar alertas
+            setTimeout(function () {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

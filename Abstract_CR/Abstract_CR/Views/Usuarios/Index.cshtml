@@ -95,7 +95,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <!-- 👇 Agregamos id="tabla-usuarios" -->
+                        <!-- Agregamos id="tabla-usuarios" -->
                         <table id="tabla-usuarios" class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
@@ -129,7 +129,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <!-- ✅ Botón para Activar/Desactivar -->
+                                                <!--Botón para Activar/Desactivar -->
                                                 <button class="btn btn-sm @(usuario.Activo ? "btn-outline-danger" : "btn-outline-success") me-1" 
                                                         id="btn-toggle-@usuario.UsuarioID"
                                                         onclick="toggleEstadoUsuario(@usuario.UsuarioID, @(usuario.Activo ? "false" : "true"), '@usuario.Nombre @usuario.Apellido')" 
@@ -143,6 +143,15 @@
                                                         onclick="extenderSuscripcion(@usuario.UsuarioID)" 
                                                         title="Extender suscripción una semana">
                                                     <i class="fas fa-calendar-plus"></i> Extender
+                                                </button>
+
+                                                <!-- Botón Cambiar Rol -->
+                                                <button class="btn btn-sm btn-outline-primary btn-cambiar-rol"
+                                                        data-usuario-id="@usuario.UsuarioID"
+                                                        data-usuario-nombre="@usuario.Nombre @usuario.Apellido"
+                                                        data-rol-id="@(usuario.RolID ?? 0)"
+                                                        title="Cambiar rol del usuario">
+                                                    <i class="fas fa-user-shield"></i> Rol
                                                 </button>
                                             </td>
                                             <td class="text-center">
@@ -171,6 +180,62 @@
                         </table>
                     </div><!-- /.table-responsive -->
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Comprobantes -->
+<div class="modal fade" id="comprobantesModal" tabindex="-1" aria-labelledby="comprobantesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="comprobantesModalLabel">
+                    <i class="fas fa-receipt me-2"></i>Comprobantes de Pago
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="comprobantesModalBody">
+                <!-- El contenido se carga dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cambiar Rol -->
+<div class="modal fade" id="modalCambiarRol" tabindex="-1" aria-labelledby="modalCambiarRolLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalCambiarRolLabel">
+                    <i class="fas fa-user-shield me-2"></i>Cambiar Rol
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cambiarRol_UsuarioId" />
+                <p class="mb-3">Usuario: <strong id="cambiarRol_NombreUsuario"></strong></p>
+                <div class="mb-3">
+                    <label for="cambiarRol_Select" class="form-label fw-bold">Nuevo Rol</label>
+                    <select id="cambiarRol_Select" class="form-select">
+                        @if (ViewBag.Roles != null)
+                        {
+                            @foreach (var r in ViewBag.Roles as List<Rol>)
+                            {
+                                <option value="@r.RolID">@r.NombreRol</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarCambiarRol">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
             </div>
         </div>
     </div>
@@ -214,7 +279,7 @@
             configurarTogglesDescarga();
         });
 
-        // ✅ NUEVA FUNCIÓN: Toggle Estado de Usuario (Activar/Desactivar)
+        // NUEVA FUNCIÓN: Toggle Estado de Usuario (Activar/Desactivar)
         function toggleEstadoUsuario(usuarioId, activar, nombreUsuario) {
             const accion = activar ? 'activar' : 'desactivar';
             
@@ -388,6 +453,51 @@
                     boton.innerHTML = textoOriginal;
                 });
         }
+
+        // ---- Cambiar Rol ----
+        $(document).on('click', '.btn-cambiar-rol', function () {
+            const btn = $(this);
+            $('#cambiarRol_UsuarioId').val(btn.data('usuario-id'));
+            $('#cambiarRol_NombreUsuario').text(btn.data('usuario-nombre'));
+            $('#cambiarRol_Select').val(btn.data('rol-id'));
+            new bootstrap.Modal(document.getElementById('modalCambiarRol')).show();
+        });
+
+        $(document).on('click', '#btnConfirmarCambiarRol', function () {
+            const btn = $(this);
+            const usuarioId = $('#cambiarRol_UsuarioId').val();
+            const rolId = $('#cambiarRol_Select').val();
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Guardando...');
+
+            const formData = new FormData();
+            formData.append('usuarioId', usuarioId);
+            formData.append('rolId', rolId);
+            formData.append('__RequestVerificationToken', token);
+
+            fetch('@Url.Action("CambiarRol", "Usuarios")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('success', data.message);
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    mostrarMensaje('error', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error al cambiar rol:', error);
+                mostrarMensaje('error', 'Error al cambiar el rol del usuario');
+            })
+            .finally(() => {
+                btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i> Guardar');
+                bootstrap.Modal.getInstance(document.getElementById('modalCambiarRol')).hide();
+            });
+        });
 
         function mostrarMensaje(tipo, mensaje) {
             console.log(`Mostrando mensaje ${tipo}:`, mensaje);
@@ -589,24 +699,4 @@
             });
         }
     </script>
-
-    <!-- Modal de Comprobantes -->
-    <div class="modal fade" id="comprobantesModal" tabindex="-1" aria-labelledby="comprobantesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="comprobantesModalLabel">
-                        <i class="fas fa-receipt me-2"></i>Comprobantes de Pago
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="comprobantesModalBody">
-                    <!-- El contenido se carga dinámicamente -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 }

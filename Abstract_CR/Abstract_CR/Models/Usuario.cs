@@ -26,13 +26,13 @@ namespace Abstract_CR.Models
         [Display(Name = "Contraseña")]
         [StringLength(255)]
         [DataType(DataType.Password)]
-        public string? ContrasenaHash { get; set; } // ← Ya no es obligatorio
+        public string? ContrasenaHash { get; set; }
 
         [Display(Name = "Fecha de Registro")]
         public DateTime? FechaRegistro { get; set; }
 
         [Display(Name = "Rol")]
-        public int? RolID { get; set; } // ← Ya no es obligatorio
+        public int? RolID { get; set; }
 
         [Display(Name = "Activo")]
         public bool Activo { get; set; } = true;
@@ -45,6 +45,14 @@ namespace Abstract_CR.Models
         [Display(Name = "Puntos Acumulados")]
         public int PuntosTotales { get; set; }
 
+        [Display(Name = "Dirección")]
+        [StringLength(250)]
+        public string? Direccion { get; set; }
+
+        [Display(Name = "Teléfono")]
+        [StringLength(50)]
+        public string? Telefono { get; set; }
+
         public virtual Rol? Rol { get; set; }
 
         [Display(Name = "Nombre Completo")]
@@ -56,8 +64,6 @@ namespace Abstract_CR.Models
         public virtual ICollection<MensajeInteraccion> Mensajes { get; set; } = new List<MensajeInteraccion>();
         public virtual ICollection<PuntosUsuario> HistorialPuntos { get; set; } = new List<PuntosUsuario>();
         public virtual ICollection<RestriccionAlimentaria> RestriccionesAlimentarias { get; set; } = new List<RestriccionAlimentaria>();
-
-
     }
 
     public class UsuarioPorAsignar

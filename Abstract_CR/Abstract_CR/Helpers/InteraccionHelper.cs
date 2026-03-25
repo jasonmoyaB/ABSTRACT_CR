@@ -154,6 +154,21 @@ namespace Abstract_CR.Helpers
                                  .Where(r => r.UsuarioID == usuarioId)
                                  .ToListAsync();
         }
+        public async Task<List<DireccionUsuarioItem>> ObtenerUsuariosConDireccionAsync()
+        {
+            return await _context.Usuarios
+                .AsNoTracking()
+                .OrderBy(u => u.Nombre)
+                .Select(u => new DireccionUsuarioItem
+                {
+                    UsuarioId = u.UsuarioID,
+                    NombreCompleto = u.Nombre + " " + u.Apellido,
+                    CorreoElectronico = u.CorreoElectronico,
+                    Direccion = u.Direccion,
+                    Activo = u.Activo
+                })
+                .ToListAsync();
+        }
     }
 
 }

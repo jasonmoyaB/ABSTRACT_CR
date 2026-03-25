@@ -56,6 +56,8 @@ namespace Abstract_CR.Data
                 entity.Property(e => e.FechaRegistro).HasDefaultValueSql("sysutcdatetime()");
                 entity.Property(e => e.Activo).HasDefaultValue(true);
                 entity.Property(e => e.PuntosTotales).HasDefaultValue(0);
+                entity.Property(e => e.Direccion).HasMaxLength(250);
+                entity.Property(e => e.Telefono).HasMaxLength(50);
 
                 entity.HasOne(e => e.Rol)
                       .WithMany(r => r.Usuarios)

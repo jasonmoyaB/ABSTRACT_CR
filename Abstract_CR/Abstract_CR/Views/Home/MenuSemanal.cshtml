@@ -156,63 +156,12 @@
                             </h6>
                             <p id="descripcionPlato" class="text-muted"></p>
                         </div>
-
-                        <!-- Comentarios -->
-                        <div class="border-top pt-4">
-                            <h6 class="text-muted mb-3">
-                                <i class="fas fa-comments me-2 text-primary"></i>Comentarios
-                            </h6>
-                            <div id="listaComentariosReceta" class="mb-3" style="max-height: 200px; overflow-y: auto;">
-                                @if (ViewBag.ComentariosReceta != null && ViewBag.ComentariosReceta.Count > 0)
-                                {
-                                    <ul class="list-unstyled">
-                                        @foreach (var item in ViewBag.ComentariosReceta)
-                                        {
-                                            <li class="d-flex justify-content-between align-items-start mb-3 p-2 bg-light rounded">
-                                                <span class="flex-grow-1">
-                                                    <i class="fas fa-comment-dots text-secondary me-2"></i>
-                                                    <span class="text-dark">@item.Comentario</span>
-                                                </span>
-                                                <button class="btn btn-sm btn-outline-danger ms-2"
-                                                        data-comentario-id="@item.ComentarioID"
-                                                        onclick="event.stopPropagation(); eliminarComentario(@item.ComentarioID);"
-                                                        title="Eliminar comentario">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </li>
-                                        }
-                                    </ul>
-                                }
-                                else
-                                {
-                                    <p class="text-muted text-center py-3">
-                                        <i class="fas fa-comment-slash me-2"></i>Sin comentarios aún
-                                    </p>
-                                }
-                            </div>
-                            
-                            <!-- Input para nuevo comentario -->
-                            <div class="input-group" onclick="event.stopPropagation();">
-                                <input type="text"
-                                       class="form-control"
-                                       id="nuevoComentarioReceta"
-                                       name="nuevoComentarioReceta"
-                                       placeholder="Escribe tu comentario aquí..."
-                                       onclick="event.stopPropagation();"
-                                       onkeydown="event.stopPropagation();">
-                                <button class="btn btn-primary" type="button"
-                                        onclick="event.stopPropagation(); agregarComentario();"
-                                        title="Enviar comentario">
-                                    <i class="fas fa-paper-plane me-1"></i>Enviar
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer bg-light">
-                <a href="@Url.Action("AgregarAlergia", "Usuario")" class="btn btn-warning">
-                    <i class="fas fa-plus me-2"></i>Agregar nueva alergia
+                <a href="@Url.Action("AgregarRestriccion", "Usuario")" class="btn btn-warning">
+                    <i class="fas fa-plus me-2"></i>Agregar restricción
                 </a>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-2"></i>Cerrar
@@ -380,29 +329,6 @@
         font-size: 0.75rem;
     }
 
-    #listaComentariosReceta {
-        scrollbar-width: thin;
-        scrollbar-color: #e6a756 #f5f5f5;
-    }
-
-    #listaComentariosReceta::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    #listaComentariosReceta::-webkit-scrollbar-track {
-        background: #f5f5f5;
-        border-radius: 10px;
-    }
-
-    #listaComentariosReceta::-webkit-scrollbar-thumb {
-        background: #e6a756;
-        border-radius: 10px;
-    }
-
-    #listaComentariosReceta::-webkit-scrollbar-thumb:hover {
-        background: #d4954a;
-    }
-
     .modal-xl {
         max-width: 1200px;
     }
@@ -481,7 +407,6 @@
         </text>
     }
     
-    // Debug: mostrar todos los datos cargados
     console.log('PlatosData completo:', platosData);
 
     // Función para mostrar detalles del día
@@ -501,11 +426,9 @@
                 // Función helper para parsear arrays de forma robusta
                 function parsearArray(datos) {
                     if (Array.isArray(datos)) {
-                        // Si ya es un array, aplanarlo y limpiar
                         let resultado = [];
                         datos.forEach(function(item) {
                             if (typeof item === 'string') {
-                                // Si el item es un string, intentar parsearlo
                                 try {
                                     const parsed = JSON.parse(item);
                                     if (Array.isArray(parsed)) {
@@ -514,7 +437,6 @@
                                         resultado.push(item);
                                     }
                                 } catch (e) {
-                                    // Si no es JSON, agregarlo directamente
                                     if (item.trim() !== '') {
                                         resultado.push(item.trim());
                                     }
@@ -528,11 +450,10 @@
                         try {
                             const parsed = JSON.parse(datos);
                             if (Array.isArray(parsed)) {
-                                return parsearArray(parsed); // Recursivo para manejar arrays anidados
+                                return parsearArray(parsed);
                             }
                             return [datos];
                         } catch (e) {
-                            // Si no es JSON válido, intentar separar por comas
                             return datos.split(',').map(c => c.trim()).filter(c => c && c !== '[]' && c !== 'null');
                         }
                     }
@@ -620,98 +541,12 @@
     // Función para calificar plato
     function calificarPlato(dia, calificacion) {
         console.log(`Plato de ${dia} calificado con ${calificacion} estrellas`);
-        // Aquí se implementaría la lógica para guardar la calificación
         alert(`¡Gracias por calificar el plato del ${dia}!`);
     }
 
     // Función para marcar como favorito
     function toggleFavorito(dia) {
         console.log(`Plato de ${dia} marcado como favorito`);
-        // Aquí se implementaría la lógica para marcar como favorito
         alert(`Plato del ${dia} agregado a favoritos`);
     }
-
-    function agregarComentario() {
-        var comentario = $('#nuevoComentarioReceta').val().trim();
-
-        var recetaId = 1;
-
-        $.ajax({
-            url: '@Url.Action("AgregarComentarioReceta", "Recetas")',
-            type: 'POST',
-            data: {
-                recetaId: recetaId,
-                comentario: comentario
-            },
-            success: function (response) {
-                if (response.success) {
-                    // Actualizar la lista de comentarios
-                    $('#listaComentariosReceta').html(response.html);
-
-                    // Limpiar el input
-                    $('#nuevoComentarioReceta').val('');
-                } else {
-                    mostrarMensajeError('Error al agregar el comentario: ' + response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                alert('Error al procesar la solicitud');
-                console.error(error);
-            }
-        });
-    }
-
-    function eliminarComentario(comentarioId) {
-        // Obtener el ID de la receta
-        var recetaId = 1;
-
-        $.ajax({
-            url: '@Url.Action("EliminarComentarioReceta", "Recetas")',
-            type: 'POST',
-            data: {
-                comentarioId: comentarioId,
-                recetaId: recetaId
-            },
-            success: function (response) {
-                if (response.success) {
-                    // Actualizar la lista de comentarios
-                    $('#listaComentariosReceta').html(response.html);
-                } else {
-                    alert('Error al eliminar el comentario: ' + response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                mostrarMensajeError('Error al procesar la solicitud');
-                console.error(error);
-            }
-        });
-    }
-
-    function mostrarMensajeError(mensaje) {
-        var alertHtml = `
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                <strong>¡Ups!</strong>
-                <p class="mb-0 mt-2">${mensaje}</p>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-
-        $('#listaComentariosReceta').prepend(alertHtml);
-
-        setTimeout(function () {
-            $('.alert-danger').fadeOut('slow', function () {
-                $(this).remove();
-            });
-        }, 5000);
-    }
-
-    $(document).ready(function () {
-        $('#nuevoComentarioReceta').keypress(function (e) {
-            if (e.which === 13) { // Enter key
-                e.preventDefault();
-                agregarComentario();
-            }
-        });
-    });
-</script> 
+</script>

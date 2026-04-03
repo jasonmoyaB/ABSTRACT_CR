@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Abstract_CR.Models
 {
@@ -39,11 +39,17 @@ namespace Abstract_CR.Models
         {
             get
             {
+                if (Estado == "Activa" && FechaFin.HasValue && FechaFin.Value.Date < DateTime.Now.Date)
+                {
+                    return "Vencida";
+                }
+
                 return Estado switch
                 {
                     "Activa" => "Activa",
                     "Pausada" => "Pausada",
                     "Cancelada" => "Cancelada",
+                    "Vencida" => "Vencida",
                     _ => Estado
                 };
             }
@@ -54,17 +60,16 @@ namespace Abstract_CR.Models
         {
             get
             {
-                if (FechaFin.HasValue && Estado == "Activa")
+                if (FechaFin.HasValue && (Estado == "Activa" || EstadoFormateado == "Vencida"))
                 {
-                    var dias = (FechaFin.Value - DateTime.Now.Date).Days;
-                    return dias > 0 ? dias : 0;
+                    return (FechaFin.Value.Date - DateTime.Now.Date).Days;
                 }
                 return null;
             }
         }
 
         [Display(Name = "Vence Pronto")]
-        public bool VencePronto => DiasRestantes.HasValue && DiasRestantes.Value <= 7;
+        public bool VencePronto => DiasRestantes.HasValue && DiasRestantes.Value >= 0 && DiasRestantes.Value <= 7;
 
         // Navegación
         public virtual Usuario? Usuario { get; set; }

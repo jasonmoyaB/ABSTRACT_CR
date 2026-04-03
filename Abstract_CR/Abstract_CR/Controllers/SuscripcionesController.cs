@@ -38,7 +38,7 @@ namespace Abstract_CR.Controllers
             var totalUsuarios = usuarios.Count;
             var usuariosConSuscripcion = usuarios.Count(u => u.Suscripciones.Any());
             var usuariosSinSuscripcion = totalUsuarios - usuariosConSuscripcion;
-            var suscripcionesActivas = usuarios.Count(u => u.Suscripciones.Any(s => s.Estado == "Activa"));
+            var suscripcionesActivas = usuarios.Count(u => u.Suscripciones.Any(s => s.EstadoFormateado == "Activa"));
 
             ViewBag.TotalUsuarios = totalUsuarios;
             ViewBag.UsuariosConSuscripcion = usuariosConSuscripcion;

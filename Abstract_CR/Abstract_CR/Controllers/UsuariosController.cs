@@ -223,7 +223,7 @@ namespace Abstract_CR.Controllers
             }
         }
 
-        // POST: Usuarios/ExtenderSuscripcion - Extender suscripción por una semana (lunes a domingo)
+        // POST: Usuarios/ExtenderSuscripcion - Extender suscripción por 30 días exactos
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ExtenderSuscripcion(int usuarioId)
@@ -248,20 +248,11 @@ namespace Abstract_CR.Controllers
                     return Json(new { success = false, message = "Usuario no encontrado" });
                 }
 
-                // Función helper para calcular el próximo lunes desde una fecha
-                DateTime CalcularProximoLunes(DateTime desdeFecha)
-                {
-                    var diasHastaLunes = ((int)DayOfWeek.Monday - (int)desdeFecha.DayOfWeek + 7) % 7;
-                    if (diasHastaLunes == 0) diasHastaLunes = 7; // Si ya es lunes, tomar el próximo
-                    return desdeFecha.AddDays(diasHastaLunes);
-                }
-
                 // Buscar suscripción existente
                 var suscripcion = await _context.Suscripciones
                     .FirstOrDefaultAsync(s => s.UsuarioID == usuarioId);
 
-                DateTime proximoLunes;
-                DateTime domingoSiguiente;
+                DateTime nuevaFechaFin;
 
                 if (suscripcion != null && suscripcion.FechaFin.HasValue)
                 {
@@ -269,49 +260,45 @@ namespace Abstract_CR.Controllers
                     var fechaFinActual = suscripcion.FechaFin.Value.Date;
                     
                     // Si la fecha fin ya pasó, calcular desde hoy
-                    // Si no, calcular desde el día siguiente a la fecha fin
+                    // Si no, calcular sumando 30 días exactos a la fecha de término actual
                     var fechaBase = fechaFinActual < DateTime.Now.Date 
                         ? DateTime.Now.Date 
                         : fechaFinActual.AddDays(1);
                     
-                    // Calcular el próximo lunes desde la fecha base
-                    proximoLunes = CalcularProximoLunes(fechaBase);
-                    domingoSiguiente = proximoLunes.AddDays(6); // Domingo de esa semana
+                    // Extensión de 30 días exactos desde la fecha base
+                    nuevaFechaFin = fechaBase.AddDays(30);
 
                     // Actualizar la suscripción existente
-                    suscripcion.FechaFin = domingoSiguiente;
+                    suscripcion.FechaFin = nuevaFechaFin;
                     suscripcion.Estado = "Activa";
-                    suscripcion.ProximaFacturacion = domingoSiguiente;
+                    suscripcion.ProximaFacturacion = nuevaFechaFin;
                     
-                    // Si la fecha de inicio es anterior, mantenerla (no actualizar)
-                    // Solo actualizamos la fecha fin
-
-                    _logger.LogInformation($"Suscripción extendida: {proximoLunes:dd/MM/yyyy} - {domingoSiguiente:dd/MM/yyyy}");
+                    _logger.LogInformation($"Suscripción extendida 30 días hasta: {nuevaFechaFin:dd/MM/yyyy}");
                 }
                 else
                 {
-                    // Crear nueva suscripción desde el próximo lunes
-                    proximoLunes = CalcularProximoLunes(DateTime.Now.Date);
-                    domingoSiguiente = proximoLunes.AddDays(6); // Domingo de esa semana
+                    // Crear nueva suscripción por 30 días a partir de hoy
+                    var hoy = DateTime.Now.Date;
+                    nuevaFechaFin = hoy.AddDays(30);
 
                     suscripcion = new Suscripcion
                     {
                         UsuarioID = usuarioId,
                         Estado = "Activa",
-                        FechaInicio = proximoLunes,
-                        FechaFin = domingoSiguiente,
-                        UltimaFacturacion = DateTime.Now.Date,
-                        ProximaFacturacion = domingoSiguiente
+                        FechaInicio = hoy,
+                        FechaFin = nuevaFechaFin,
+                        UltimaFacturacion = hoy,
+                        ProximaFacturacion = nuevaFechaFin
                     };
 
                     _context.Suscripciones.Add(suscripcion);
-                    _logger.LogInformation($"Nueva suscripción creada: {proximoLunes:dd/MM/yyyy} - {domingoSiguiente:dd/MM/yyyy}");
+                    _logger.LogInformation($"Nueva suscripción creada 30 días hasta: {nuevaFechaFin:dd/MM/yyyy}");
                 }
 
                 await _context.SaveChangesAsync();
 
-                var mensaje = $"Suscripción extendida para {usuario.NombreCompleto} hasta el {suscripcion.FechaFin.Value:dd/MM/yyyy}";
-                _logger.LogInformation($"Admin extendió suscripción para usuario {usuario.NombreCompleto}");
+                var mensaje = $"Suscripción extendida para {usuario.NombreCompleto} por 30 días, finalizando el {suscripcion.FechaFin.Value:dd/MM/yyyy}";
+                _logger.LogInformation($"Admin extendió suscripción para usuario {usuario.NombreCompleto} por 30 días");
 
                 return Json(new { success = true, message = mensaje });
             }

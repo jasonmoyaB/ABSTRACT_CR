@@ -233,6 +233,10 @@ namespace Abstract_CR.Controllers
             _context.Entry(usuario).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
+            // Actualizar la sesión para reflejar dinámicamente en el Layout
+            HttpContext.Session.SetString("NombreUsuario", usuario.NombreCompleto);
+            HttpContext.Session.SetString("Email", usuario.CorreoElectronico);
+
             TempData["Mensaje"] = "Perfil actualizado correctamente";
 
             return RedirectToAction("PanelAdministracion", "Administracion");

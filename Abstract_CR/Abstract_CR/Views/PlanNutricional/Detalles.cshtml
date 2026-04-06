@@ -64,7 +64,7 @@
                class="btn position-absolute" 
                style="left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 12px; padding: 0.5rem 1rem;"
                title="Volver a Mis Planes">
-                <i class="fas fa-arrow-left me-2"></i> Volver
+                <i class="fas fa-arrow-left me-2"></i>Volver
             </a>
             <div class="d-flex align-items-center justify-content-center mb-3">
                 <div class="icon-circle">
@@ -80,12 +80,12 @@
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="modern-card bg-white">
-                    <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <div class="card-header-modern d-flex justify-content-between align-items-center flex-wrap">
                         <h4 class="mb-0 fw-bold text-dark">
                             <i class="fas fa-clipboard-list me-2"></i>
                             @Model.Nombre
                         </h4>
-                        <div class="btn-group" role="group">
+                        <div class="btn-group mt-2 mt-md-0" role="group">
                             @if (!string.IsNullOrEmpty(Model.DocumentoURL))
                             {
                                 <a href="@Model.DocumentoURL" target="_blank" class="btn btn-sm btn-outline-primary">
@@ -102,7 +102,7 @@
                         </div>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <div class="row">
                             <!-- Información General -->
                             <div class="col-md-8">
@@ -173,7 +173,8 @@
                                                 <div class="nutrition-card">
                                                     <i class="fas fa-fire text-danger fa-2x mb-2"></i>
                                                     <h6 class="mb-1 fw-bold">Calorías</h6>
-                                                    <strong class="text-dark">@Model.CaloriasDiarias kcal</strong>
+                                                    <strong class="text-dark">@Model.CaloriasDiarias</strong>
+                                                    <div class="text-muted small">kcal</div>
                                                 </div>
                                             </div>
                                         }
@@ -184,7 +185,8 @@
                                                 <div class="nutrition-card">
                                                     <i class="fas fa-dumbbell text-primary fa-2x mb-2"></i>
                                                     <h6 class="mb-1 fw-bold">Proteínas</h6>
-                                                    <strong class="text-dark">@Model.Proteinas g</strong>
+                                                    <strong class="text-dark">@Model.Proteinas</strong>
+                                                    <div class="text-muted small">g</div>
                                                 </div>
                                             </div>
                                         }
@@ -195,7 +197,8 @@
                                                 <div class="nutrition-card">
                                                     <i class="fas fa-bread-slice text-warning fa-2x mb-2"></i>
                                                     <h6 class="mb-1 fw-bold">Carbohidratos</h6>
-                                                    <strong class="text-dark">@Model.Carbohidratos g</strong>
+                                                    <strong class="text-dark">@Model.Carbohidratos</strong>
+                                                    <div class="text-muted small">g</div>
                                                 </div>
                                             </div>
                                         }
@@ -206,7 +209,8 @@
                                                 <div class="nutrition-card">
                                                     <i class="fas fa-seedling text-success fa-2x mb-2"></i>
                                                     <h6 class="mb-1 fw-bold">Grasas</h6>
-                                                    <strong class="text-dark">@Model.Grasas g</strong>
+                                                    <strong class="text-dark">@Model.Grasas</strong>
+                                                    <div class="text-muted small">g</div>
                                                 </div>
                                             </div>
                                         }
@@ -217,7 +221,8 @@
                                                 <div class="nutrition-card">
                                                     <i class="fas fa-leaf text-info fa-2x mb-2"></i>
                                                     <h6 class="mb-1 fw-bold">Fibra</h6>
-                                                    <strong class="text-dark">@Model.Fibra g</strong>
+                                                    <strong class="text-dark">@Model.Fibra</strong>
+                                                    <div class="text-muted small">g</div>
                                                 </div>
                                             </div>
                                         }
@@ -227,8 +232,8 @@
 
                             <!-- Panel Lateral -->
                             <div class="col-md-4">
-                                <div class="card bg-light">
-                                    <div class="card-header">
+                                <div class="card bg-light border-0 shadow-sm">
+                                    <div class="card-header bg-white border-bottom">
                                         <h6 class="mb-0">
                                             <i class="fas fa-calendar me-2"></i>
                                             Fechas Importantes
@@ -264,16 +269,16 @@
                                                     <div class="mt-1">
                                                         <span class="badge bg-danger">
                                                             <i class="fas fa-exclamation-triangle me-1"></i>
-                                                            Vencido
+                                                            Plan Vencido
                                                         </span>
                                                     </div>
                                                 }
                                                 else if (isExpiringSoon)
                                                 {
                                                     <div class="mt-1">
-                                                        <span class="badge bg-warning">
+                                                        <span class="badge bg-warning text-dark">
                                                             <i class="fas fa-clock me-1"></i>
-                                                            Vence en @daysRemaining días
+                                                            Vence en @daysRemaining día@(daysRemaining == 1 ? "" : "s")
                                                         </span>
                                                     </div>
                                                 }
@@ -282,7 +287,7 @@
                                                     <div class="mt-1">
                                                         <span class="badge bg-success">
                                                             <i class="fas fa-check me-1"></i>
-                                                            @daysRemaining días restantes
+                                                            @daysRemaining día@(daysRemaining == 1 ? "" : "s") restante@(daysRemaining == 1 ? "" : "s")
                                                         </span>
                                                     </div>
                                                 }
@@ -292,11 +297,11 @@
                                         @if (!string.IsNullOrEmpty(Model.DocumentoURL))
                                         {
                                             <hr>
-                                            <div class="mb-3">
-                                                <small class="text-muted d-block">Documento</small>
-                                                <a href="@Model.DocumentoURL" target="_blank" class="btn btn-outline-primary btn-sm">
+                                            <div class="mb-0">
+                                                <small class="text-muted d-block mb-2">Documento del Plan</small>
+                                                <a href="@Model.DocumentoURL" target="_blank" class="btn btn-outline-primary btn-sm w-100">
                                                     <i class="fas fa-file-download me-1"></i>
-                                                    Ver/Descargar
+                                                    Ver/Descargar PDF
                                                 </a>
                                             </div>
                                         }
@@ -304,8 +309,8 @@
                                 </div>
 
                                 <!-- Acciones -->
-                                <div class="card mt-3">
-                                    <div class="card-header">
+                                <div class="card mt-3 border-0 shadow-sm">
+                                    <div class="card-header bg-white border-bottom">
                                         <h6 class="mb-0">
                                             <i class="fas fa-cogs me-2"></i>
                                             Acciones
@@ -317,15 +322,15 @@
                                             {
                                                 <a href="@Model.DocumentoURL" target="_blank" class="btn btn-primary btn-sm">
                                                     <i class="fas fa-download me-2"></i>
-                                                    Descargar Plan
+                                                    Descargar Plan Completo
                                                 </a>
                                             }
 
-                                            <hr>
+                                            <hr class="my-2">
 
                                             <a href="@Url.Action("Delete", "PlanNutricional", new { id = Model.PlanID })"
                                                class="btn btn-outline-danger btn-sm"
-                                               onclick="return confirm('¿Estás seguro de que deseas eliminar este plan?')">
+                                               onclick="return confirm('¿Estás seguro de que deseas eliminar este plan nutricional?')">
                                                 <i class="fas fa-trash me-2"></i>
                                                 Eliminar Plan
                                             </a>
@@ -350,19 +355,21 @@
                     <div class="modern-card bg-white">
                         <div class="card-header-modern">
                             <h5 class="mb-0 fw-bold text-dark">
-                                <i class="fas fa-star-half-stroke me-2"></i> Evaluaciones del Plan
+                                <i class="fas fa-star-half-stroke me-2"></i>Evaluaciones del Plan
                             </h5>
                         </div>
                         <div class="card-body p-4">
                             @foreach (var evaluacion in evaluaciones)
                             {
-                                <div class="border rounded-3 p-4 mb-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
+                                <div class="border rounded-3 p-4 mb-3 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
+                                        <div class="mb-2 mb-md-0">
                                             <h6 class="mb-1 fw-bold">
                                                 @if (evaluacion.EsAdmin)
                                                 {
-                                                    <span class="badge bg-primary me-2">Chef</span>
+                                                    <span class="badge bg-primary me-2">
+                                                        <i class="fas fa-user-tie me-1"></i>Nutricionista
+                                                    </span>
                                                 }
                                                 @evaluacion.UsuarioNombre
                                             </h6>
@@ -382,7 +389,7 @@
                                                     {
                                                         <i class="fas fa-star"></i>
                                                     }
-                                                    @evaluacion.Calificacion / 5
+                                                    <span class="ms-1">@evaluacion.Calificacion/5</span>
                                                 </span>
                                             </div>
                                         }

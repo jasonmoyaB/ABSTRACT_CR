@@ -139,10 +139,11 @@
                                             <td class="text-center">
                                                 @if (suscripcion != null)
                                                 {
-                                                    <span class="badge @(suscripcion.Estado switch {
+                                                    <span class="badge @(suscripcion.EstadoFormateado switch {
                                                         "Activa" => "bg-success",
                                                         "Pausada" => "bg-warning",
                                                         "Cancelada" => "bg-danger",
+                                                        "Vencida" => "bg-danger",
                                                         _ => "bg-secondary"
                                                     })">
                                                         @suscripcion.EstadoFormateado
@@ -175,9 +176,18 @@
                                                     @if (suscripcion.DiasRestantes.HasValue)
                                                     {
                                                         <br />
-                                                        <small class="@(suscripcion.VencePronto ? "text-danger" : "text-muted")">
-                                                            @suscripcion.DiasRestantes días restantes
-                                                        </small>
+                                                        @if (suscripcion.DiasRestantes.Value < 0)
+                                                        {
+                                                            <small class="text-danger">
+                                                                Vencida hace @Math.Abs(suscripcion.DiasRestantes.Value) días
+                                                            </small>
+                                                        }
+                                                        else
+                                                        {
+                                                            <small class="@(suscripcion.VencePronto ? "text-danger" : "text-muted")">
+                                                                @suscripcion.DiasRestantes días restantes
+                                                            </small>
+                                                        }
                                                     }
                                                 }
                                                 else

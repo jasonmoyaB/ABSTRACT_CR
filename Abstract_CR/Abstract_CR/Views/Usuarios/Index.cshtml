@@ -140,8 +140,8 @@
                                                 
                                                 <!-- Botón Extender Suscripción -->
                                                 <button class="btn btn-sm btn-outline-success" 
-                                                        onclick="extenderSuscripcion(@usuario.UsuarioID)" 
-                                                        title="Extender suscripción una semana">
+                                                        onclick="extenderSuscripcion(@usuario.UsuarioID, '@usuario.Nombre @usuario.Apellido', this)" 
+                                                        title="Extender suscripción un mes">
                                                     <i class="fas fa-calendar-plus"></i> Extender
                                                 </button>
 
@@ -242,6 +242,8 @@
 </div>
 
 @section Scripts {
+    <!-- SweetAlert2 para Alertas Visuales -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Inicializar DataTable cuando el DOM y los scripts globales estén listos
         $(document).ready(function () {
@@ -412,46 +414,57 @@
             });
         }
 
-        function extenderSuscripcion(usuarioId) {
-            if (!confirm('¿Estás seguro de extender la suscripción de este usuario por una semana (lunes a domingo)?')) {
-                return;
-            }
+        function extenderSuscripcion(usuarioId, nombreUsuario, btnElement) {
+            Swal.fire({
+                title: '¿Extender suscripción?',
+                html: `Estás a punto de agregar <b>30 días exactos</b> al plan de <b>${nombreUsuario}</b>.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-check"></i> Sí, extender un mes',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Obtener el token anti-forgery
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-            // Obtener el token anti-forgery
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    // FormData para POST
+                    const formData = new FormData();
+                    formData.append('usuarioId', usuarioId);
+                    formData.append('__RequestVerificationToken', token);
 
-            // FormData para POST
-            const formData = new FormData();
-            formData.append('usuarioId', usuarioId);
-            formData.append('__RequestVerificationToken', token);
+                    // Deshabilitar el botón mientras se procesa
+                    const boton = btnElement;
+                    const textoOriginal = boton.innerHTML;
+                    boton.disabled = true;
+                    boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
 
-            // Deshabilitar el botón mientras se procesa
-            const boton = event.target.closest('button');
-            const textoOriginal = boton.innerHTML;
-            boton.disabled = true;
-            boton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-
-            fetch('@Url.Action("ExtenderSuscripcion", "Usuarios")', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        mostrarMensaje('success', data.message);
-                    } else {
-                        mostrarMensaje('error', data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en la petición:', error);
-                    mostrarMensaje('error', 'Error al extender la suscripción');
-                })
-                .finally(() => {
-                    // Rehabilitar el botón
-                    boton.disabled = false;
-                    boton.innerHTML = textoOriginal;
-                });
+                    fetch('@Url.Action("ExtenderSuscripcion", "Usuarios")', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                mostrarMensaje('success', data.message);
+                                Swal.fire('¡Éxito!', data.message, 'success');
+                            } else {
+                                mostrarMensaje('error', data.message);
+                                Swal.fire('Error', data.message, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error en la petición:', error);
+                            mostrarMensaje('error', 'Error al extender la suscripción');
+                        })
+                        .finally(() => {
+                            // Rehabilitar el botón
+                            boton.disabled = false;
+                            boton.innerHTML = textoOriginal;
+                        });
+                }
+            });
         }
 
         // ---- Cambiar Rol ----

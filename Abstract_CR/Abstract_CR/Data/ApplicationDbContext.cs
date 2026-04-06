@@ -106,6 +106,8 @@ namespace Abstract_CR.Data
                 entity.ToTable("ComentariosRecetas");
                 entity.HasKey(e => e.ComentarioID);
                 entity.Property(e => e.UsuarioID).IsRequired();
+                // RecetaID es identificador generico (puede ser RecetaID o MenuSemanalID)
+                // Sin HasOne/HasForeignKey para evitar restriccion de FK en BD
                 entity.Property(e => e.RecetaID).IsRequired();
                 entity.Property(e => e.ComentarioID).IsRequired();
                 entity.Property(e => e.FechaComentario).IsRequired();

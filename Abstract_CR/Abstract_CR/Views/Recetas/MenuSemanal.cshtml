@@ -33,7 +33,8 @@
                         <h5 class="card-title fw-bold mb-2">@dia</h5>
                         <p class="text-muted small mb-0" id="platillo-@dia">
                             @{
-                                var menuDia = (ViewBag.Menus as List<Abstract_CR.Models.MenuSemanalViewModel>)?.FirstOrDefault(m => m.DiaSemana == dia);
+                                string diaLimpioBusqueda = Abstract_CR.Helpers.MenuSemanalHelper.NormalizarDia(dia);
+                                var menuDia = (ViewBag.Menus as List<Abstract_CR.Models.MenuSemanalViewModel>)?.FirstOrDefault(m => m.DiaSemanaLimpio == diaLimpioBusqueda);
                             }
                             @if (menuDia != null)
                             {
@@ -63,6 +64,7 @@
             </div>
             <div class="modal-body p-0">
                 <form id="formMenuDia">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" id="menuSemanalId" name="MenuSemanalID" />
                     <input type="hidden" id="diaSemanaInput" name="DiaSemana" />
                     
@@ -292,6 +294,8 @@
             }
 
             const formData = new FormData();
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) { formData.append('__RequestVerificationToken', token); }
             const menuId = document.getElementById('menuSemanalId').value;
             if (menuId) {
                 formData.append('MenuSemanalID', menuId);

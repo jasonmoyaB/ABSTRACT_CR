@@ -15,33 +15,55 @@ namespace Abstract_CR.Helpers
             _context = context;
         }
 
+        // Método para normalizar strings (quitar acentos y espacios)
+        public static string NormalizarDia(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return string.Empty;
+            
+            var normalizado = texto.Trim().ToLower().Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder();
+
+            foreach (var c in normalizado)
+            {
+                var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
+        }
+
         // Función helper para calcular el lunes de la semana actual
         private DateTime CalcularLunesSemana(DateTime fecha)
         {
-            int diasHastaLunes = ((int)DayOfWeek.Monday - (int)fecha.DayOfWeek + 7) % 7;
-            if (diasHastaLunes == 0 && fecha.DayOfWeek != DayOfWeek.Monday)
-                diasHastaLunes = 7;
-            return fecha.AddDays(-diasHastaLunes).Date;
+            // El lunes de la semana actual es: fecha - (días desde el lunes)
+            // DayOfWeek: Sunday=0, Monday=1, Tuesday=2, Wednesday=3, Thursday=4, Friday=5, Saturday=6
+            int diff = (7 + (fecha.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return fecha.AddDays(-1 * diff).Date;
         }
 
         public MenuSemanal? ObtenerMenuPorDia(string diaSemana)
         {
-            // Obtener el menú de la semana actual para ese día
             var lunesSemanaActual = CalcularLunesSemana(DateTime.Today);
+            string diaBusqueda = NormalizarDia(diaSemana);
+            
             return _context.MenuSemanal
-                .Where(m => m.DiaSemana == diaSemana && m.SemanaDel == lunesSemanaActual)
-                .OrderByDescending(m => m.SemanaDel)
-                .FirstOrDefault();
+                .ToList()
+                .FirstOrDefault(m => NormalizarDia(m.DiaSemana) == diaBusqueda 
+                                && m.SemanaDel.Date == lunesSemanaActual.Date);
         }
 
         public List<MenuSemanal> ObtenerTodosLosMenus()
         {
             // Obtener los menús de la semana actual (lunes a domingo)
-            var lunesSemanaActual = CalcularLunesSemana(DateTime.Today);
-            var domingoSemanaActual = lunesSemanaActual.AddDays(6);
+            var lunesSemanaActual = CalcularLunesSemana(DateTime.Today).Date;
             
+            // Usando .ToList() para poder aplicar filtros de fecha más fácilmente si hay descalces de tiempo
             return _context.MenuSemanal
-                .Where(m => m.SemanaDel == lunesSemanaActual)
+                .AsEnumerable() // Traer a memoria para comparar sólo por .Date
+                .Where(m => m.SemanaDel.Date == lunesSemanaActual)
                 .OrderBy(m => m.DiaSemana)
                 .ToList();
         }
@@ -117,11 +139,12 @@ namespace Abstract_CR.Helpers
                 var lunesSemanaActual = CalcularLunesSemana(DateTime.Today);
 
                 // Buscar un menú existente para este día específico de la semana
-                // Esto permite tener un platillo diferente para cada día
+                string diaBusqueda = NormalizarDia(viewModel.DiaSemana);
                 var menuExistente = _context.MenuSemanal
+                    .ToList()
                     .FirstOrDefault(m => m.TipoMenuID == tipoMenuID 
-                        && m.SemanaDel == lunesSemanaActual 
-                        && m.DiaSemana == viewModel.DiaSemana);
+                        && m.SemanaDel.Date == lunesSemanaActual.Date 
+                        && NormalizarDia(m.DiaSemana) == diaBusqueda);
 
                 if (viewModel.MenuSemanalID.HasValue && viewModel.MenuSemanalID.Value > 0)
                 {
@@ -217,6 +240,7 @@ namespace Abstract_CR.Helpers
                 MenuSemanalID = menu.MenuSemanalID,
                 NombrePlatillo = menu.NombrePlatillo,
                 DiaSemana = menu.DiaSemana,
+                DiaSemanaLimpio = NormalizarDia(menu.DiaSemana),
                 TipChef = menu.TipChef,
                 RutaImagen = menu.RutaImagen,
                 Descripcion = menu.Descripcion,

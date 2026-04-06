@@ -25,12 +25,13 @@
             @for (int i = 0; i < diasSemana.Length; i++)
             {
                 var dia = diasSemana[i];
-                var menu = menus.FirstOrDefault(m => m.DiaSemana == dia);
+                string diaLimpio = Abstract_CR.Helpers.MenuSemanalHelper.NormalizarDia(dia);
+                var menu = menus.FirstOrDefault(m => m.DiaSemanaLimpio == diaLimpio);
                 var color = colores[i % colores.Length];
                 
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 border-0 shadow-sm menu-card">
-                        <div data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="@dia">
+                        <div data-bs-toggle="modal" data-bs-target="#detalleModal" data-dia="@dia" data-dialimpio="@diaLimpio">
                             <div class="card-header bg-@color text-white text-center">
                                 <h5 class="mb-0">@dia</h5>
                             </div>
@@ -156,6 +157,22 @@
                             </h6>
                             <p id="descripcionPlato" class="text-muted"></p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Comentarios -->
+                <div class="px-4 pb-3">
+                    <h6 class="text-muted fw-bold mb-2">
+                        <i class="fas fa-comments me-2 text-primary"></i>Comentarios
+                    </h6>
+                    <div id="listaComentariosReceta" class="mb-3" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Comentarios cargados dinámicamente -->
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="nuevoComentarioReceta" class="form-control" placeholder="Escribe un comentario..." />
+                        <button class="btn btn-primary" onclick="agregarComentario()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -396,7 +413,8 @@
             .ToList();
         
         <text>
-        platosData['@menu.DiaSemana'] = {
+        platosData['@menu.DiaSemanaLimpio'] = {
+            id: @Html.Raw(Json.Serialize(menu.MenuSemanalID ?? 0)),
             nombre: @Html.Raw(Json.Serialize(menu.NombrePlatillo ?? "Sin platillo asignado")),
             imagen: @Html.Raw(Json.Serialize(menu.RutaImagen ?? "/assets/img/fondoReceta.jpeg")),
             etiquetas: @Html.Raw(Json.Serialize(caracteristicasList)),
@@ -415,11 +433,14 @@
         detalleModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const dia = button.getAttribute('data-dia');
-            const plato = platosData[dia];
+            const diaLimpio = button.getAttribute('data-dialimpio');
+            const plato = platosData[diaLimpio];
 
             document.getElementById('diaSeleccionado').textContent = dia;
             
             if (plato) {
+                window.recetaIdActual = plato.id || 0;
+                cargarComentarios(window.recetaIdActual);
                 document.getElementById('nombrePlato').textContent = plato.nombre || 'Sin platillo asignado';
                 document.getElementById('imagenPlato').src = plato.imagen || '/assets/img/fondoReceta.jpeg';
 
@@ -528,6 +549,8 @@
                     document.getElementById('descripcionContainer').style.display = 'none';
                 }
             } else {
+                window.recetaIdActual = 0;
+                cargarComentarios(0);
                 document.getElementById('nombrePlato').textContent = 'Sin platillo asignado';
                 document.getElementById('imagenPlato').src = '/assets/img/fondoReceta.jpeg';
                 document.getElementById('etiquetasPlato').innerHTML = '<p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Sin características especificadas</p>';
@@ -548,5 +571,72 @@
     function toggleFavorito(dia) {
         console.log(`Plato de ${dia} marcado como favorito`);
         alert(`Plato del ${dia} agregado a favoritos`);
+    }
+
+    function cargarComentarios(recetaId) {
+        if (!recetaId || recetaId == 0) {
+            $('#listaComentariosReceta').html('<p class="text-muted text-center py-3"><i class="fas fa-comment-slash me-2"></i>Platillo no asignado</p>');
+            return;
+        }
+        $('#listaComentariosReceta').html('<div class="text-center py-3"><i class="fas fa-spinner fa-spin text-primary"></i></div>');
+        $.ajax({
+            url: '@Url.Action("ObtenerComentariosReceta", "Recetas")?recetaId=' + recetaId,
+            type: 'GET',
+            success: function(response) {
+                if(response.success) {
+                    $('#listaComentariosReceta').html(response.html);
+                } else {
+                    $('#listaComentariosReceta').html('<p class="text-danger text-center py-3">Error al cargar comentarios</p>');
+                }
+            },
+            error: function() {
+                $('#listaComentariosReceta').html('<p class="text-danger text-center py-3">Error al procesar la solicitud</p>');
+            }
+        });
+    }
+
+    function agregarComentario() {
+        var comentario = $('#nuevoComentarioReceta').val().trim();
+        if (!window.recetaIdActual || window.recetaIdActual == 0) {
+            alert('No se pueden agregar comentarios a un plato no asignado.');
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("AgregarComentarioReceta", "Recetas")',
+            type: 'POST',
+            data: { recetaId: window.recetaIdActual, comentario: comentario },
+            success: function (response) {
+                if (response.success) {
+                    $('#listaComentariosReceta').html(response.html);
+                    $('#nuevoComentarioReceta').val('');
+                } else {
+                    mostrarMensajeError('Error al agregar el comentario: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('Error al procesar la solicitud');
+                console.error(error);
+            }
+        });
+    }
+
+    function eliminarComentario(comentarioId) {
+        if (!window.recetaIdActual || window.recetaIdActual == 0) return;
+        $.ajax({
+            url: '@Url.Action("EliminarComentarioReceta", "Recetas")',
+            type: 'POST',
+            data: { comentarioId: comentarioId, recetaId: window.recetaIdActual },
+            success: function (response) {
+                if (response.success) {
+                    $('#listaComentariosReceta').html(response.html);
+                } else {
+                    alert('Error al eliminar el comentario: ' + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                mostrarMensajeError('Error al procesar la solicitud');
+                console.error(error);
+            }
+        });
     }
 </script>

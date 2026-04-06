@@ -50,13 +50,8 @@ namespace Abstract_CR.Controllers
 
         public IActionResult MenuSemanal()
         {
-            var comentarios = _cometarioRecetaHelper.ObtenerComentariosPorReceta(1);
-            ViewBag.ComentariosReceta = comentarios;
-            
-            // Cargar menús semanales
             var menus = _menuSemanalHelper.ObtenerTodosLosMenusViewModel();
             ViewBag.MenusSemanal = menus;
-            
             return View();
         }
     }

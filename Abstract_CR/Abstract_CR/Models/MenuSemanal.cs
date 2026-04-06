@@ -48,6 +48,7 @@ namespace Abstract_CR.Models
         public int? MenuSemanalID { get; set; }
         public string NombrePlatillo { get; set; } = string.Empty;
         public string DiaSemana { get; set; } = string.Empty;
+        public string DiaSemanaLimpio { get; set; } = string.Empty; // Sin acentos
         public List<string> Caracteristicas { get; set; } = new List<string>();
         public List<string> IngredientesPrincipales { get; set; } = new List<string>();
         public string? TipChef { get; set; }

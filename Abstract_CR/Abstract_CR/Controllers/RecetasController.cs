@@ -1,4 +1,4 @@
-﻿using Abstract_CR.Helpers;
+using Abstract_CR.Helpers;
 using Abstract_CR.Models;
 using Abstract_CR.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +55,22 @@ namespace Abstract_CR.Controllers
             return View();
         }
 
+        [HttpGet]
+        public ActionResult ObtenerComentariosReceta(int recetaId)
+        {
+            try
+            {
+                var comentarios = _cometarioRecetaHelper.ObtenerComentariosPorReceta(recetaId).ToList();
+                string html = RenderizarComentarios(comentarios);
+                return Json(new { success = true, html = html });
+            }
+            catch (Exception ex)
+            {
+                var errorMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = errorMsg });
+            }
+        }
+
         [HttpPost]
         public ActionResult AgregarComentarioReceta(int recetaId, string comentario)
         {
@@ -67,10 +83,10 @@ namespace Abstract_CR.Controllers
 
                 var guardado = _cometarioRecetaHelper.AgregarComentario(new ComentarioReceta
                 {
-                    RecetaID = 1,
+                    RecetaID = recetaId,
                     Comentario = comentario,
                     FechaComentario = DateTime.Now,
-                    UsuarioID = HttpContext.Session.GetInt32("UsuarioID").Value,
+                    UsuarioID = HttpContext.Session.GetInt32("UsuarioID") ?? 1,
                 });
 
                 if (!guardado)
@@ -78,7 +94,7 @@ namespace Abstract_CR.Controllers
                     return Json(new { success = false, message = "Ocurrió un error al guardar el comentario" });
                 }
 
-                List<ComentarioReceta> comentariosActualizados = _cometarioRecetaHelper.ObtenerComentariosPorReceta(1).ToList();
+                List<ComentarioReceta> comentariosActualizados = _cometarioRecetaHelper.ObtenerComentariosPorReceta(recetaId).ToList();
 
                 string html = RenderizarComentarios(comentariosActualizados);
 
@@ -86,7 +102,8 @@ namespace Abstract_CR.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                var errorMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = errorMsg });
             }
         }
 
@@ -97,7 +114,7 @@ namespace Abstract_CR.Controllers
             {
                 var eliminado = _cometarioRecetaHelper.EliminarComentario(comentarioId);
 
-                var comentariosActualizados = _cometarioRecetaHelper.ObtenerComentariosPorReceta(1).ToList();
+                var comentariosActualizados = _cometarioRecetaHelper.ObtenerComentariosPorReceta(recetaId).ToList();
 
                 string html = RenderizarComentarios(comentariosActualizados);
 

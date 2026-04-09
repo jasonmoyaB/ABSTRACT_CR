@@ -36,14 +36,26 @@
                 <div class="card-header bg-light">
                     <h5 class="mb-0"><i class="fas fa-users me-2"></i>Usuarios</h5>
                 </div>
+                <!-- BUSCADOR - AGREGAR AQUÍ -->
+                <div class="card-body pb-0">
+                    <div class="mb-3">
+                        <input type="text" 
+                               id="searchUsuario" 
+                               class="form-control form-control-sm" 
+                               placeholder="Buscar por nombre..."
+                               autocomplete="off">
+                    </div>
+                </div>
+                <!-- FIN BUSCADOR -->
                 <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
+                    <div class="list-group list-group-flush" id="listaUsuarios">
                         @if (Model.Usuarios.Any())
                         {
                             foreach (var usuario in Model.Usuarios)
                             {
                                 var activo = Model.UsuarioSeleccionado?.UsuarioID == usuario.UsuarioId ? "active" : "";
-                                <a class="list-group-item list-group-item-action @activo"
+                                <a class="list-group-item list-group-item-action @activo usuario-item"
+                                   data-nombre="@usuario.NombreCompleto.ToLower()"
                                    href="@Url.Action("Interaccion", "Administracion", new { usuarioId = usuario.UsuarioId })">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
@@ -289,4 +301,18 @@
 </div>
 
 <partial name="_ValidationScriptsPartial" />
+
+@section Scripts {
+    <script>
+        document.getElementById('searchUsuario').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const usuarios = document.querySelectorAll('.usuario-item');
+            
+            usuarios.forEach(function(usuario) {
+                const nombre = usuario.getAttribute('data-nombre');
+                usuario.style.display = nombre.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    </script>
+}
 

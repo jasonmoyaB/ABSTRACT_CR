@@ -34,6 +34,7 @@
         border-radius: 12px;
         padding: 0.75rem 1rem;
         transition: all 0.3s ease;
+        height: calc(2.5rem + 4px);
     }
     .form-control-modern:focus {
         border-color: #007FFF;
@@ -83,6 +84,38 @@
         padding: 1rem;
         border-radius: 8px;
         margin: 1rem 0;
+    }
+    
+    /* Estilos para los botones de ojito */
+    #togglePassword:focus,
+    #togglePassword:active,
+    #togglePassword:hover,
+    #toggleConfirmPassword:focus,
+    #toggleConfirmPassword:active,
+    #toggleConfirmPassword:hover {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    
+    .form-group-modern {
+        margin-bottom: 0;
+    }
+    
+    .form-group-modern label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group-modern small {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+        display: block;
     }
 </style>
 
@@ -146,66 +179,112 @@
                                 <div asp-validation-summary="All" class="alert alert-danger rounded-3 mb-4"></div>
                             }
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label asp-for="Nombre" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
-                                    <input asp-for="Nombre" class="form-control form-control-modern" placeholder="Nombre" />
-                                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                            <div class="row g-4">
+                                <!-- Fila 1: Nombre, Apellido, Email -->
+                                <div class="col-md-4">
+                                    <div class="form-group-modern">
+                                        <label asp-for="Nombre">
+                                            <i class="fas fa-user me-1"></i> Nombre
+                                        </label>
+                                        <input asp-for="Nombre" class="form-control form-control-modern" placeholder="Tu nombre" />
+                                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label asp-for="Apellido" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
-                                    <input asp-for="Apellido" class="form-control form-control-modern" placeholder="Apellido" />
-                                    <span asp-validation-for="Apellido" class="text-danger"></span>
+                                <div class="col-md-4">
+                                    <div class="form-group-modern">
+                                        <label asp-for="Apellido">
+                                            <i class="fas fa-user me-1"></i> Apellido
+                                        </label>
+                                        <input asp-for="Apellido" class="form-control form-control-modern" placeholder="Tu apellido" />
+                                        <span asp-validation-for="Apellido" class="text-danger small"></span>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label asp-for="CorreoElectronico" class="form-label fw-bold text-secondary small text-uppercase mb-2"></label>
-                                    <input asp-for="CorreoElectronico" class="form-control form-control-modern" type="email"
-                                           placeholder="Correo electrónico" />
-                                    <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
+                                <div class="col-md-4">
+                                    <div class="form-group-modern">
+                                        <label asp-for="CorreoElectronico">
+                                            <i class="fas fa-envelope me-1"></i> Correo Electrónico
+                                        </label>
+                                        <input asp-for="CorreoElectronico" class="form-control form-control-modern" type="email"
+                                               placeholder="correo@ejemplo.com" />
+                                        <span asp-validation-for="CorreoElectronico" class="text-danger small"></span>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label asp-for="ContrasenaHash" class="form-label fw-bold text-secondary small text-uppercase mb-2">
-                                        Nueva contraseña (opcional)
-                                    </label>
-                                    <input asp-for="ContrasenaHash" class="form-control form-control-modern" type="password"
-                                           placeholder="Dejar en blanco para mantener la actual" />
-                                    <span asp-validation-for="ContrasenaHash" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Solo completa este campo si deseas cambiar tu contraseña
-                                    </small>
+                                <!-- Fila 2: Nueva Contraseña, Confirmar, Teléfono -->
+                                <div class="col-md-4">
+                                    <div class="form-group-modern">
+                                        <label for="passwordInput">
+                                            <i class="fas fa-lock me-1"></i> Nueva Contraseña
+                                        </label>
+                                        <div class="position-relative">
+                                            <input type="password" 
+                                                   id="passwordInput"
+                                                   name="ContrasenaHash" 
+                                                   class="form-control form-control-modern" 
+                                                   placeholder="Dejar en blanco" />
+                                            <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" id="togglePassword" style="border: none; background: none; color: #6c757d; z-index: 10; outline: none; box-shadow: none; padding: 0.5rem;">
+                                                <i class="fas fa-eye" id="eyeIcon"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Solo si deseas cambiarla
+                                        </small>
+                                    </div>
                                 </div>
 
+                                <div class="col-md-4">
+                                    <div class="form-group-modern">
+                                        <label for="confirmPasswordInput">
+                                            <i class="fas fa-lock me-1"></i> Confirmar Contraseña
+                                        </label>
+                                        <div class="position-relative">
+                                            <input type="password" 
+                                                   id="confirmPasswordInput" 
+                                                   name="ConfirmPassword" 
+                                                   class="form-control form-control-modern" 
+                                                   placeholder="Repite la contraseña" />
+                                            <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" id="toggleConfirmPassword" style="border: none; background: none; color: #6c757d; z-index: 10; outline: none; box-shadow: none; padding: 0.5rem;">
+                                                <i class="fas fa-eye" id="eyeIconConfirm"></i>
+                                            </button>
+                                        </div>
+                                        <span id="passwordMatchMessage" class="text-danger small" style="display: none;">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            Las contraseñas no coinciden
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group-modern">
+                                        <label asp-for="Telefono">
+                                            <i class="fas fa-phone me-1"></i> Teléfono
+                                        </label>
+                                        <input asp-for="Telefono" class="form-control form-control-modern" type="tel"
+                                               placeholder="+506 8888-8888" />
+                                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                                        <small class="text-muted">Opcional</small>
+                                    </div>
+                                </div>
+
+                                <!-- Fila 3: Dirección (ancho completo) -->
                                 <div class="col-12">
-                                    <label asp-for="Direccion" class="form-label fw-bold text-secondary small text-uppercase mb-2">
-                                        <i class="fas fa-map-marker-alt me-1"></i> Dirección
-                                    </label>
-                                    <input asp-for="Direccion" class="form-control form-control-modern"
-                                           placeholder="Ej: San José, Cantón Central, Distrito Carmen, Av. 2, Calle 5, Casa #12" />
-                                    <span asp-validation-for="Direccion" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Indicá provincia, cantón, distrito y dirección exacta para entregas o correspondencia
-                                    </small>
+                                    <div class="form-group-modern">
+                                        <label asp-for="Direccion">
+                                            <i class="fas fa-map-marker-alt me-1"></i> Dirección Completa
+                                        </label>
+                                        <input asp-for="Direccion" class="form-control form-control-modern"
+                                               placeholder="Provincia, cantón, distrito y señas exactas" />
+                                        <span asp-validation-for="Direccion" class="text-danger small"></span>
+                                        <small class="text-muted">
+                                            Ej: San José, Carmen, Av. 2, Calle 5, Casa #12
+                                        </small>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label asp-for="Telefono" class="form-label fw-bold text-secondary small text-uppercase mb-2">
-                                        <i class="fas fa-phone me-1"></i> Teléfono
-                                    </label>
-                                    <input asp-for="Telefono" class="form-control form-control-modern" type="tel"
-                                           inputmode="tel" autocomplete="tel"
-                                           placeholder="Ej: +506 8888-8888" />
-                                    <span asp-validation-for="Telefono" class="text-danger"></span>
-                                    <small class="form-text text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Opcional. Incluí código de país si aplica.
-                                    </small>
-                                </div>
-
+                                <!-- Warning Box -->
                                 <div class="col-12">
                                     <div class="warning-box" id="warningBox" style="display: none;">
                                         <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
@@ -214,25 +293,28 @@
                                     </div>
                                 </div>
 
+                                <!-- Estado de Cuenta -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold text-secondary small text-uppercase mb-2">
-                                        <i class="fas fa-toggle-on me-2"></i>Estado de la cuenta
-                                    </label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch"
-                                               style="width: 3rem; height: 1.5rem;" />
-                                        <label class="form-check-label fw-semibold" for="activoSwitch" id="labelSwitch">
-                                            <span class="badge bg-success" id="estadoBadge">Activa</span>
+                                    <div class="form-group-modern">
+                                        <label>
+                                            <i class="fas fa-toggle-on me-1"></i> Estado de la Cuenta
                                         </label>
+                                        <div class="form-check form-switch mt-2">
+                                            <input asp-for="Activo" class="form-check-input" type="checkbox" id="activoSwitch"
+                                                   style="width: 3rem; height: 1.5rem;" />
+                                            <label class="form-check-label fw-semibold ms-2" for="activoSwitch">
+                                                <span class="badge bg-success" id="estadoBadge">Activa</span>
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Desactivar bloquea el acceso
+                                        </small>
                                     </div>
-                                    <small class="form-text text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Una cuenta inactiva no podrá iniciar sesión
-                                    </small>
                                 </div>
                             </div>
 
-                            <div class="text-center mt-4">
+                            <div class="text-center mt-5 pt-3 border-top">
                                 <button type="submit" class="btn btn-save me-3" id="btnGuardar">
                                     <i class="fas fa-save me-2"></i> Guardar Cambios
                                 </button>
@@ -313,7 +395,61 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        $(document).ready(function () {
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== OJITOS PARA CONTRASEÑAS ==========
+            
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('passwordInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (togglePassword && passwordInput && eyeIcon) {
+                togglePassword.addEventListener('focus', function() {
+                    this.style.outline = 'none';
+                    this.style.boxShadow = 'none';
+                });
+                
+                togglePassword.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    if (type === 'password') {
+                        eyeIcon.classList.remove('fa-eye-slash');
+                        eyeIcon.classList.add('fa-eye');
+                    } else {
+                        eyeIcon.classList.remove('fa-eye');
+                        eyeIcon.classList.add('fa-eye-slash');
+                    }
+                });
+            }
+
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+            const eyeIconConfirm = document.getElementById('eyeIconConfirm');
+            
+            if (toggleConfirmPassword && confirmPasswordInput && eyeIconConfirm) {
+                toggleConfirmPassword.addEventListener('focus', function() {
+                    this.style.outline = 'none';
+                    this.style.boxShadow = 'none';
+                });
+                
+                toggleConfirmPassword.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    confirmPasswordInput.setAttribute('type', type);
+                    
+                    if (type === 'password') {
+                        eyeIconConfirm.classList.remove('fa-eye-slash');
+                        eyeIconConfirm.classList.add('fa-eye');
+                    } else {
+                        eyeIconConfirm.classList.remove('fa-eye');
+                        eyeIconConfirm.classList.add('fa-eye-slash');
+                    }
+                });
+            }
+            
+            // ========== LÓGICA DE ACTIVACIÓN/DESACTIVACIÓN ==========
+            
             const activoSwitch = $('#activoSwitch');
             const warningBox = $('#warningBox');
             const estadoBadge = $('#estadoBadge');
@@ -325,7 +461,6 @@
             
             let permitirEnvio = false;
 
-            // Actualizar UI del switch
             function actualizarUISwitch(estaActivo) {
                 if (estaActivo) {
                     estadoBadge.removeClass('bg-danger').addClass('bg-success').text('Activa');
@@ -336,64 +471,55 @@
                 }
             }
 
-            // Inicializar UI
             actualizarUISwitch(activoSwitch.is(':checked'));
 
-            // Evento del switch
             activoSwitch.on('change', function () {
                 const nuevoEstado = $(this).is(':checked');
                 actualizarUISwitch(nuevoEstado);
 
-                // Si está cambiando de activo a inactivo, prevenir y mostrar modal
                 if (activoOriginal && !nuevoEstado) {
-                    // Prevenir el cambio inmediato
                     $(this).prop('checked', true);
                     actualizarUISwitch(true);
-                    
-                    // Mostrar modal de confirmación
                     modal.show();
                 }
             });
 
-            // Checkbox de confirmación
             checkboxConfirmar.on('change', function () {
                 btnConfirmar.prop('disabled', !$(this).is(':checked'));
             });
 
-            // Botón de confirmar desactivación
             btnConfirmar.on('click', function () {
-                // Permitir el cambio del switch
                 activoSwitch.prop('checked', false);
                 actualizarUISwitch(false);
-                
-                // Cerrar modal
                 modal.hide();
-                
-                // Permitir el envío del formulario
                 permitirEnvio = true;
-                
-                // Enviar formulario automáticamente
                 form.submit();
             });
 
-            // Resetear checkbox cuando se cierra el modal sin confirmar
             $('#modalConfirmacionDesactivar').on('hidden.bs.modal', function () {
                 checkboxConfirmar.prop('checked', false);
                 btnConfirmar.prop('disabled', true);
             });
 
-            // Interceptar el envío del formulario
+            // ========== VALIDACIÓN DE FORMULARIO ==========
+            
             form.on('submit', function (e) {
                 const estaActivoActualmente = activoSwitch.is(':checked');
+                const password = $('#passwordInput').val();
+                const confirmPassword = $('#confirmPasswordInput').val();
                 
-                // Si está intentando desactivar sin confirmación, prevenir
+                if (password && password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Las contraseñas no coinciden');
+                    return false;
+                }
+                
                 if (activoOriginal && !estaActivoActualmente && !permitirEnvio) {
                     e.preventDefault();
                     modal.show();
                     return false;
                 }
 
-                // Si está desactivando con confirmación, mostrar mensaje de cierre de sesión
                 if (!estaActivoActualmente && permitirEnvio) {
                     $('#btnGuardar')
                         .prop('disabled', true)
@@ -403,7 +529,21 @@
                 return true;
             });
 
-            // Auto-cerrar alertas
+            // Validación en tiempo real
+            $('#confirmPasswordInput').on('keyup', function() {
+                const password = $('#passwordInput').val();
+                const confirmPassword = $(this).val();
+                const message = $('#passwordMatchMessage');
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    message.slideDown();
+                    $(this).addClass('is-invalid');
+                } else {
+                    message.slideUp();
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
             setTimeout(function () {
                 $('.alert').fadeOut('slow');
             }, 5000);

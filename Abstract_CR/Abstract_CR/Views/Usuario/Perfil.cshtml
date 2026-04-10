@@ -56,16 +56,33 @@
         border-bottom: 2px solid #e9ecef;
     }
     .info-item {
-        padding: 1rem;
+        padding: 1.25rem;
         background: #f8f9fa;
         border-radius: 12px;
-        margin-bottom: 1rem;
         border-left: 4px solid #007FFF;
         transition: all 0.3s ease;
+        height: 100%;
+        min-height: 90px;
     }
     .info-item:hover {
         background: #e9ecef;
         transform: translateX(4px);
+    }
+    .info-item label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .info-item p {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #212529;
+        margin: 0;
+        line-height: 1.5;
     }
     .chat-message {
         border-radius: 18px;
@@ -226,7 +243,7 @@
                     <p class="mb-0 opacity-75">@Model.Usuario.CorreoElectronico</p>
                 </div>
             </div>
-            <div class="d-flex justify-content-center gap-3">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <span class="points-badge">
                     <i class="fas fa-star me-2"></i>@Model.Usuario.PuntosTotales puntos
                 </span>
@@ -310,70 +327,76 @@
                             </div>
 
                             <div class="card-body p-4">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
+                                <div class="row g-4">
+                                    <!-- Fila 1: Nombre Completo, Email, Teléfono -->
+                                    <div class="col-md-4">
                                         <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Nombre Completo</label>
-                                            <p class="mb-0 fw-semibold text-dark fs-6">@Model.Usuario.NombreCompleto</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Correo Electrónico</label>
-                                            <p class="mb-0 fw-semibold text-dark fs-6">@Model.Usuario.CorreoElectronico</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Fecha de Registro</label>
-                                            <p class="mb-0 fw-semibold text-dark fs-6">
-                                                @(Model.Usuario.FechaRegistro?.ToString("dd 'de' MMMM 'de' yyyy") ?? "No especificada")
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Estado</label>
-                                            <p class="mb-0">
-                                                @if (Model.Usuario.Activo)
-                                                {
-                                                    <span class="badge bg-success rounded-pill px-3 py-2">
-                                                        <i class="fas fa-check-circle me-1"></i>Activo
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-danger rounded-pill px-3 py-2">
-                                                        <i class="fas fa-times-circle me-1"></i>Inactivo
-                                                    </span>
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">
-                                                <i class="fas fa-map-marker-alt me-1"></i> Dirección
+                                            <label>
+                                                <i class="fas fa-user me-1"></i> Nombre Completo
                                             </label>
-                                            <p class="mb-0 fw-semibold text-dark fs-6">
-                                                @(string.IsNullOrWhiteSpace(Model.Usuario.Direccion)
-                                                    ? "No especificada"
-                                                    : Model.Usuario.Direccion)
-                                            </p>
+                                            <p>@Model.Usuario.NombreCompleto</p>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+
+                                    <div class="col-md-4">
                                         <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">
+                                            <label>
+                                                <i class="fas fa-envelope me-1"></i> Correo Electrónico
+                                            </label>
+                                            <p>@Model.Usuario.CorreoElectronico</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="info-item">
+                                            <label>
                                                 <i class="fas fa-phone me-1"></i> Teléfono
                                             </label>
-                                            <p class="mb-0 fw-semibold text-dark fs-6">
+                                            <p>
                                                 @(string.IsNullOrWhiteSpace(Model.Usuario.Telefono)
                                                     ? "No especificado"
                                                     : Model.Usuario.Telefono)
                                             </p>
                                         </div>
                                     </div>
+
+                                    <!-- Fila 2: Dirección (ancho completo) -->
+                                    <div class="col-12">
+                                        <div class="info-item">
+                                            <label>
+                                                <i class="fas fa-map-marker-alt me-1"></i> Dirección
+                                            </label>
+                                            <p>
+                                                @(string.IsNullOrWhiteSpace(Model.Usuario.Direccion)
+                                                    ? "No especificada"
+                                                    : Model.Usuario.Direccion)
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fila 3: Estado -->
+                                    <div class="col-md-6">
+                                        <div class="info-item" style="border-left-color: @(Model.Usuario.Activo ? "#28a745" : "#dc3545");">
+                                            <label>
+                                                <i class="fas fa-toggle-on me-1"></i> Estado de la Cuenta
+                                            </label>
+                                            <p>
+                                                @if (Model.Usuario.Activo)
+                                                {
+                                                    <span class="badge bg-success rounded-pill px-4 py-2 fs-6">
+                                                        <i class="fas fa-check-circle me-1"></i> Cuenta Activa
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger rounded-pill px-4 py-2 fs-6">
+                                                        <i class="fas fa-times-circle me-1"></i> Cuenta Inactiva
+                                                    </span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -426,7 +449,6 @@
                             <div class="card-footer bg-white border-top p-4">
                                 @if (!Model.Usuario.Activo)
                                 {
-                                    <!-- Mostrar mensaje cuando la cuenta está inactiva -->
                                     <div class="alert alert-warning rounded-3 mb-0" role="alert">
                                         <i class="fas fa-exclamation-triangle me-2"></i>
                                         <strong>Cuenta Inactiva:</strong> No puedes enviar mensajes porque tu cuenta está inactiva. Contacta a un administrador para reactivarla.
@@ -434,7 +456,6 @@
                                 }
                                 else
                                 {
-                                    <!-- Formulario solo visible si el usuario está activo -->
                                     <form asp-action="EnviarMensajeChef" method="post">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="UsuarioId" value="@Model.Usuario.UsuarioID" />
@@ -467,23 +488,6 @@
 
                             <div class="card-body p-4">
                                 <div class="row g-3">
-                                    @* <div class="col-12 col-md-6">
-                                        <a href="@Url.Action("Alergias", "Usuario")" class="action-btn d-block text-decoration-none text-dark">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="icon-circle me-3">
-                                                        <i class="fas fa-allergies"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold">Mis Alergias</div>
-                                                        <small class="text-muted">Gestiona tus alergias</small>
-                                                    </div>
-                                                </div>
-                                                <i class="fas fa-chevron-right text-muted"></i>
-                                            </div>
-                                        </a>
-                                    </div> *@
-
                                     <div class="col-12 col-md-6">
                                         <a href="@Url.Action("Restricciones", "Usuario")" class="action-btn d-block text-decoration-none text-dark">
                                             <div class="d-flex align-items-center justify-content-between">
@@ -500,23 +504,6 @@
                                             </div>
                                         </a>
                                     </div>
-
-                                   @*  <div class="col-12 col-md-6">
-                                        <a href="@Url.Action("Preferencias", "Usuario")" class="action-btn d-block text-decoration-none text-dark">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="icon-circle me-3">
-                                                        <i class="fas fa-heart"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold">Mis Preferencias</div>
-                                                        <small class="text-muted">Preferencias nutricionales</small>
-                                                    </div>
-                                                </div>
-                                                <i class="fas fa-chevron-right text-muted"></i>
-                                            </div>
-                                        </a>
-                                    </div> *@
 
                                     <div class="col-12 col-md-6">
                                         <a href="@Url.Action("Index", "PlanNutricional")" class="action-btn d-block text-decoration-none text-dark">
@@ -569,18 +556,22 @@
                                 <div class="row g-4 mb-4">
                                     <div class="col-md-6">
                                         <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Miembro desde</label>
-                                            <p class="mb-0 fw-semibold text-dark fs-6">
+                                            <label>
+                                                <i class="fas fa-calendar-check me-1"></i> Miembro desde
+                                            </label>
+                                            <p>
                                                 @(Model.Usuario.FechaRegistro?.ToString("dd 'de' MMMM 'de' yyyy") ?? "No especificada")
                                             </p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="info-item">
-                                            <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Puntos acumulados</label>
-                                            <p class="mb-0">
-                                                <span class="points-badge">
-                                                    <i class="fas fa-star me-2"></i>@Model.Usuario.PuntosTotales puntos
+                                        <div class="info-item" style="border-left-color: #FFD700;">
+                                            <label>
+                                                <i class="fas fa-star me-1"></i> Puntos Acumulados
+                                            </label>
+                                            <p>
+                                                <span class="points-badge fs-5">
+                                                    @Model.Usuario.PuntosTotales puntos
                                                 </span>
                                             </p>
                                         </div>
@@ -588,7 +579,9 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold text-secondary small text-uppercase mb-3">Últimas asignaciones</label>
+                                    <label class="form-label fw-bold text-secondary small text-uppercase mb-3">
+                                        <i class="fas fa-history me-2"></i>Últimas asignaciones
+                                    </label>
                                     @if (Model.HistorialPuntos.Any())
                                     {
                                         <div>
@@ -628,11 +621,11 @@
                                     <p class="text-muted small mb-3">
                                         Sube el comprobante de tu pago para que sea revisado por el administrador
                                     </p>
-                                    <div class="d-flex gap-2">
+                                    <div class="d-flex gap-2 flex-wrap">
                                         <a href="@Url.Action("SubirComprobante", "Usuario")" class="btn btn-comprobante-primary flex-fill">
                                             <i class="fas fa-upload me-2"></i>Subir Comprobante
                                         </a>
-                                        <a href="@Url.Action("VerComprobantes", "Usuario")" class="btn btn-comprobante-outline">
+                                        <a href="@Url.Action("VerComprobantes", "Usuario")" class="btn btn-comprobante-outline flex-fill">
                                             <i class="fas fa-list me-2"></i>Ver Mis Comprobantes
                                         </a>
                                     </div>

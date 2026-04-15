@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Http;
 
 namespace Abstract_CR.Services
 {
@@ -7,17 +8,57 @@ namespace Abstract_CR.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        public EmailService(
+            IConfiguration configuration,
+            ILogger<EmailService> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        /// <summary>
+        /// URL pública del sitio para enlaces en correos. En Azure, si AppSettings:BaseUrl sigue siendo localhost,
+        /// se usa el host de la petición actual (con ForwardedHeaders el esquema será https).
+        /// </summary>
+        private string GetPublicBaseUrl()
+        {
+            var configured = _configuration["AppSettings:BaseUrl"]?.TrimEnd('/');
+            var configuredIsLocal = string.IsNullOrEmpty(configured)
+                || configured.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+                || configured.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase);
+
+            var req = _httpContextAccessor.HttpContext?.Request;
+            if (req != null && configuredIsLocal)
+                return $"{req.Scheme}://{req.Host.Value}";
+
+            if (!string.IsNullOrEmpty(configured) && !configuredIsLocal)
+                return configured;
+
+            if (req != null)
+                return $"{req.Scheme}://{req.Host.Value}";
+
+            if (!string.IsNullOrEmpty(configured))
+                return configured;
+
+            _logger.LogWarning("No se pudo determinar la URL pública (AppSettings:BaseUrl y HttpContext vacíos).");
+            return string.Empty;
         }
 
         public async Task<bool> SendPasswordResetEmailAsync(string email, string resetToken, string userName)
         {
+            var baseUrl = GetPublicBaseUrl().TrimEnd('/');
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                _logger.LogError("No se puede enviar el correo de recuperación: falta la URL base del sitio.");
+                return false;
+            }
+
             var tokenEncoded = Uri.EscapeDataString(resetToken);
-            var resetUrl = $"{_configuration["AppSettings:BaseUrl"]}/PasswordReset/ResetPassword?token={tokenEncoded}";
+            var resetUrl = $"{baseUrl}/PasswordReset/ResetPassword?token={tokenEncoded}";
             
             var subject = "Recuperación de Contraseña - Abstract Healthy Food";
             var body = $@"

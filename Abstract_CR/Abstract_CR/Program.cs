@@ -2,10 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using Abstract_CR.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Abstract_CR.Helpers;
 using Abstract_CR.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+builder.Services.AddHttpContextAccessor();
 
 
 builder.Services.Configure<FormOptions>(options =>
@@ -48,6 +57,8 @@ builder.Services.AddHostedService<VencimientosNotifier>();
 builder.Services.AddScoped<Abstract_CR.Services.IReportePdfService, Abstract_CR.Services.ReportePdfService>();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // CÓDIGO TEMPORAL PARA PROBAR LA CONEXIÓN
 using (var scope = app.Services.CreateScope())
